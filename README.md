@@ -34,8 +34,8 @@ Node 22+, pnpm 10.
 - **Shopify holds the copy.** The sincere description is the product
   description; the ironic one is the metafield `sincerely.ironic_description`
   (storefront-readable). Both editable in admin.
-- **The catalogue is the fallback.** `src/lib/catalog.ts` lists the ten
-  garments with their typographic art and both readings. It seeded Shopify,
+- **The catalogue is the fallback.** `src/lib/catalog.ts` lists the line —
+  every garment with its typographic art and both readings. It seeded Shopify,
   it keys the drawn garments by handle, and it renders the whole site when the
   Storefront token is absent — with *Add to cart* replaced by a note.
 - **Cart** is Shopify's Storefront cart. Cart id in an httpOnly cookie, server
