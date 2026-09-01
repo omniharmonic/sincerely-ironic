@@ -62,9 +62,13 @@ export default async function ProductPage({ params }: PageProps<'/products/[hand
         <THtml s={product.description.sincere} i={product.description.ironic} className="prose mt-10" />
 
         <dl className="mono mt-12 grid gap-3 border-t border-line pt-5 normal-case leading-relaxed tracking-normal text-mute">
-          <div>
-            <T s={copy.fit.sincere} i={copy.fit.ironic} />
-          </div>
+          {/* A blanket has no fit and a cap has one size; the sizing note
+              only belongs on things you pick a size for. */}
+          {product.sizes.length > 1 ? (
+            <div>
+              <T s={copy.fit.sincere} i={copy.fit.ironic} />
+            </div>
+          ) : null}
           <div>
             <T s={copy.details.sincere} i={copy.details.ironic} />
           </div>
