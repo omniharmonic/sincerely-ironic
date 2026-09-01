@@ -10,8 +10,18 @@ import 'server-only';
 
 export const API_VERSION = '2026-07';
 
-const domain = process.env.SHOPIFY_STORE_DOMAIN;
-const token = process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN;
+const domain = process.env.SHOPIFY_STORE_DOMAIN?.trim();
+const raw = process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN;
+// Pasted values arrive with newlines and quotes more often than not.
+const token = raw?.trim().replace(/^["']|["']$/g, '');
+
+/** Shape of the token, never its value, for the build log. */
+export function describeToken(): string {
+  if (!raw) return 'absent';
+  const t = raw.trim();
+  const kind = /^shpat_|^shpss_|^shpca_/.test(t) ? 'private-or-admin' : /^[0-9a-f]{32}$/i.test(t) ? 'public-32hex' : 'unrecognised';
+  return `${kind}, length ${t.length}${raw !== t ? ', had whitespace' : ''}${/["']/.test(raw) ? ', had quotes' : ''}`;
+}
 
 export function isStorefrontConfigured(): boolean {
   return Boolean(domain && token);
@@ -54,7 +64,8 @@ export async function storefront<T>(
   });
 
   if (!res.ok) {
-    throw new StorefrontError(`Storefront API ${res.status}`);
+    const body = (await res.text().catch(() => '')).slice(0, 200);
+    throw new StorefrontError(`Storefront API ${res.status} (token: ${describeToken()}) ${body}`);
   }
 
   const json = (await res.json()) as { data?: T; errors?: unknown };
