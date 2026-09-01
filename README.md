@@ -21,7 +21,8 @@ pnpm dev                     # http://localhost:3000
 | `pnpm dev` | Dev server |
 | `pnpm build` | Production build (typechecks) |
 | `pnpm lint` | ESLint |
-| `pnpm print-files` | Render every catalogue print to a 300 DPI transparent PNG in `print-files/` |
+| `pnpm print-files` | Render every catalogue print, in every treatment, to a 300 DPI transparent PNG in `print-files/` |
+| `pnpm logo-files` | Write the logo to `public/brand/` as SVG and PNG |
 
 Node 22+, pnpm 10.
 
@@ -55,6 +56,14 @@ Node 22+, pnpm 10.
 | Any other sentence on the site | `src/lib/copy.ts` — every entry has `sincere` and `ironic` |
 | Colours, type axes, the slick | `src/app/globals.css` `:root` |
 | The hero's motion | `src/components/Hero.tsx` (`BASE`, `BREATH`, `PULL`) |
+
+## Type treatments
+
+Every design ships in up to three: **Wide** (Anybody, justified blocks),
+**Gothic** (Pirata One blackletter, lower case) and **Stack** (Anton,
+condensed). `src/lib/typeset.ts` sets all of them — see the note in
+`CLAUDE.md`. The product page previews each; `styles` on a catalogue entry
+decides which a design ships in, and the first is its default.
 
 ## Print files
 

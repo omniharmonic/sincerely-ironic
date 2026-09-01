@@ -34,7 +34,7 @@ function fromCatalog(item: CatalogItem): Product {
       sincere: paragraph(item.description.sincere),
       ironic: paragraph(item.description.ironic),
     },
-    art: { garment: item.garment, colourway: item.colourway, prints: item.prints },
+    art: { garment: item.garment, colourway: item.colourway, prints: item.prints, styles: item.styles },
     source: 'catalog',
   };
 }
@@ -66,7 +66,7 @@ function fromShopify(raw: RawProduct): Product | null {
       available: v.availableForSale,
     })),
     description: { sincere: raw.descriptionHtml || paragraph(item.description.sincere), ironic },
-    art: { garment: item.garment, colourway: item.colourway, prints: item.prints },
+    art: { garment: item.garment, colourway: item.colourway, prints: item.prints, styles: item.styles },
     source: 'shopify',
   };
 }

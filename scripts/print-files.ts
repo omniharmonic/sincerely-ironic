@@ -1,33 +1,38 @@
 /**
  * Print-file generator.
  *
- * Turns every print in `src/lib/catalog.ts` into a transparent PNG at 300 DPI,
- * sized to the placement's print area — the file a print-on-demand vendor
- * wants uploaded. The type is set in the same faces the site uses, so what is
- * printed and what is drawn on the product page cannot drift.
+ * Every print in `src/lib/catalog.ts`, in every type treatment it ships in,
+ * rendered to a transparent PNG at 300 DPI and sized to the placement's print
+ * area — the file a print-on-demand vendor wants uploaded.
  *
- *   pnpm print-files            # everything
- *   pnpm print-files two-wolves # handles containing "two-wolves"
+ * The layout comes from `src/lib/typeset.ts`, the same engine that draws the
+ * garment art on the site, so what a customer sees and what the printer
+ * receives cannot drift apart.
  *
- * Output: print-files/<handle>--<place>.png, plus a manifest.json listing
- * every file with its placement, pixel size and ink colour.
+ *   pnpm print-files                 # everything
+ *   pnpm print-files two-wolves      # handles containing "two-wolves"
+ *   pnpm print-files "" gothic       # every design, gothic only
  *
- * Rendering is done by the local Chrome in headless mode, so there is no
- * image dependency to install. Fonts come from Google Fonts at render time.
+ * Output: print-files/<handle>--<style>--<place>.png, plus a manifest.json
+ * listing every file with its placement, pixel size and ink colour.
+ *
+ * Rendering uses the local Chrome in headless mode, so there is no image
+ * dependency to install. Fonts come from Google Fonts at render time.
  */
 
 import { execFile } from 'node:child_process';
 import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
-import zlib from 'node:zlib';
 import path from 'node:path';
 import { promisify } from 'node:util';
+import zlib from 'node:zlib';
 
-import { catalog, type CatalogItem, type Print } from '../src/lib/catalog.ts';
+import { catalog, type CatalogItem, type Place } from '../src/lib/catalog.ts';
+import { STYLES, typeset, type StyleKey } from '../src/lib/typeset.ts';
 
 const run = promisify(execFile);
 
 const DPI = 300;
-const inches = (n: number) => Math.round(n * DPI);
+const px = (inches: number) => Math.round(inches * DPI);
 
 /**
  * Print areas in inches, by placement. Sized for Printify's DTG areas.
@@ -40,105 +45,80 @@ const inches = (n: number) => Math.round(n * DPI);
  * Printify runs a DPI check at product creation and rejects a bad file with
  * `400 code 8203`.
  */
-const AREAS: Record<Print['place'], { w: number; h: number; label: string }> = {
+const AREAS: Record<Place, { w: number; h: number; label: string }> = {
   // 15x18 is the current standard DTG area; 12x16 is the legacy one and
   // throws away a third of the canvas.
   front: { w: 15, h: 18, label: 'Front' },
   back: { w: 15, h: 18, label: 'Back' },
   chest: { w: 4, h: 4, label: 'Left chest' },
-  left: { w: 4, h: 4, label: 'Left' },
-  right: { w: 4, h: 4, label: 'Right' },
   sleeve: { w: 3.5, h: 14, label: 'Sleeve' },
+  leg: { w: 4, h: 12, label: 'Leg' },
+  left: { w: 3, h: 1.5, label: 'Left' },
+  right: { w: 3, h: 1.5, label: 'Right' },
 };
 
-/** Smaller areas for the garments that are not a shirt. */
-const AREA_OVERRIDES: Partial<Record<CatalogItem['garment'], Partial<Record<Print['place'], { w: number; h: number }>>>> = {
+const AREA_OVERRIDES: Partial<Record<CatalogItem['garment'], Partial<Record<Place, { w: number; h: number }>>>> = {
   // Embroidery: 4x2.5in is the maximum on a standard 6-panel front, and the
   // design may use at most six thread colours. Flat type is well inside that.
   cap: { front: { w: 4, h: 2.5 } },
-  // Unverified — tote areas vary by blueprint. Check before ordering.
+  bucket: { front: { w: 4, h: 2.5 } },
+  // Unverified — these vary by blueprint. Check before ordering.
   tote: { front: { w: 12, h: 14 }, back: { w: 12, h: 14 } },
-  sock: { left: { w: 3, h: 1.5 }, right: { w: 3, h: 1.5 } },
+  blanket: { front: { w: 50, h: 60 } },
 };
 
 /** A bone garment takes ink; an ink garment takes bone. */
 const INK = { bone: '#0D0D0D', ink: '#F3F3F0' } as const;
 
-const CHROME =
-  process.env.CHROME_PATH ?? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+const CHROME = process.env.CHROME_PATH ?? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 
 const OUT = path.resolve('print-files');
 
-function area(item: CatalogItem, place: Print['place']) {
-  const base = AREAS[place];
-  const override = AREA_OVERRIDES[item.garment]?.[place];
-  return { ...base, ...override };
+function area(item: CatalogItem, place: Place) {
+  return { ...AREAS[place], ...AREA_OVERRIDES[item.garment]?.[place] };
 }
 
+const escape = (t: string) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
 /**
- * The print, as a standalone page sized exactly to the print area. The type
- * scales to fill the width, matching how the site sets it: display prints in
- * Anybody, lowercase asides in Fraunces italic.
+ * The print as a standalone page: an SVG the exact pixel size of the print
+ * area, with the block set by the shared engine and centred in it.
  */
-function html(item: CatalogItem, print: Print, wPx: number, hPx: number): string {
-  const ink = INK[item.colourway];
-  const isText = print.face === 'text';
-  const family = isText ? 'Fraunces' : 'Anybody';
-  // The catalogue's scale is tuned for the on-screen art, where the panel is
-  // a different shape. Here the browser measures the real type and grows it
-  // until it fills the safe area; scale only ever trims from that maximum, so
-  // a print can never overrun its panel.
-  const trim = Math.min(1, print.scale ?? 1);
-  const boxW = Math.round(wPx * 0.9);
-  const boxH = Math.round(hPx * 0.86);
+function html(text: string, styleKey: StyleKey, fill: number, ink: string, w: number, h: number): string {
+  const style = STYLES[styleKey];
+  // Lay out in the panel's own pixel units, so the numbers are the file's.
+  const layout = typeset(text, styleKey, w, h, fill);
+  const top = (h - layout.height) / 2;
+  const href = `https://fonts.googleapis.com/css2?family=${style.googleFamily}&display=block`;
+
+  const lines = layout.lines
+    .map(
+      (line) =>
+        `<text x="${w / 2}" y="${(top + line.y).toFixed(2)}" text-anchor="middle"` +
+        (line.measure ? ` textLength="${line.measure.toFixed(2)}" lengthAdjust="spacingAndGlyphs"` : '') +
+        `>${escape(line.text)}</text>`,
+    )
+    .join('\n    ');
 
   return `<!doctype html>
 <meta charset="utf-8">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anybody:wdth,wght@75..125,800&family=Fraunces:ital,opsz,wght,SOFT,WONK@1,9..144,500,50,1&display=block" rel="stylesheet">
+<link href="${href}" rel="stylesheet">
 <style>
   html, body { margin: 0; padding: 0; background: transparent; }
-  body {
-    width: ${wPx}px; height: ${hPx}px;
-    display: flex; align-items: center; justify-content: center;
-    overflow: hidden;
-  }
-  .print {
-    width: ${boxW}px;
-    color: ${ink};
-    font-family: '${family}', sans-serif;
-    font-size: 100px;
-    line-height: 0.9;
-    text-align: center;
-    max-width: 94%;
-    ${isText
-      ? `font-style: italic; font-weight: 500; font-variation-settings: 'SOFT' 50, 'WONK' 1, 'opsz' 120; line-height: 1.08;`
-      : `font-weight: 800; font-variation-settings: 'wdth' 112; text-transform: ${print.text === print.text.toUpperCase() ? 'uppercase' : 'none'}; letter-spacing: -0.02em;`}
-    overflow-wrap: normal;
-    word-break: keep-all;
+  svg { display: block; }
+  text {
+    fill: ${ink};
+    font-family: '${style.googleFamily.split(':')[0].replace(/\+/g, ' ')}';
+    font-weight: ${style.weight};
+    font-size: ${layout.fontSize.toFixed(2)}px;
+    ${style.variation ? `font-variation-settings: ${style.variation};` : ''}
+    ${style.letterSpacing ? `letter-spacing: ${style.letterSpacing}em;` : ''}
   }
 </style>
-<div class="print">${print.text.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</div>
-<script>
-  (function () {
-    var el = document.querySelector('.print');
-    function fits(px) {
-      el.style.fontSize = px + 'px';
-      return el.scrollHeight <= ${boxH} && el.scrollWidth <= ${boxW} + 1;
-    }
-    function fit() {
-      var lo = 6, hi = ${boxH};
-      for (var i = 0; i < 34; i++) {
-        var mid = (lo + hi) / 2;
-        if (fits(mid)) lo = mid; else hi = mid;
-      }
-      el.style.fontSize = (lo * ${trim}).toFixed(2) + 'px';
-      document.documentElement.dataset.fitted = 'yes';
-    }
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
-    else window.addEventListener('load', fit);
-  })();
-</script>`;
+<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+    ${lines}
+</svg>`;
 }
 
 /**
@@ -158,12 +138,7 @@ async function stampDpi(file: string, dpi: number) {
   data.writeUInt8(1, 8); // unit: metre
 
   const type = Buffer.from('pHYs', 'ascii');
-  const chunk = Buffer.concat([
-    Buffer.alloc(4), // length, filled below
-    type,
-    data,
-    Buffer.alloc(4), // crc, filled below
-  ]);
+  const chunk = Buffer.concat([Buffer.alloc(4), type, data, Buffer.alloc(4)]);
   chunk.writeUInt32BE(data.length, 0);
   chunk.writeUInt32BE(zlib.crc32(Buffer.concat([type, data])), 8 + data.length);
 
@@ -171,7 +146,7 @@ async function stampDpi(file: string, dpi: number) {
   await writeFile(file, Buffer.concat([png.subarray(0, ihdrEnd), chunk, png.subarray(ihdrEnd)]));
 }
 
-async function render(file: string, out: string, w: number, h: number) {
+async function render(page: string, out: string, w: number, h: number) {
   await run(CHROME, [
     '--headless',
     '--disable-gpu',
@@ -181,19 +156,21 @@ async function render(file: string, out: string, w: number, h: number) {
     `--window-size=${w},${h}`,
     '--virtual-time-budget=6000',
     `--screenshot=${out}`,
-    `file://${file}`,
+    `file://${page}`,
   ]).catch((e: unknown) => {
-    // Chrome writes diagnostics to stderr and still exits non-zero on some
+    // Chrome writes diagnostics to stderr and can still exit non-zero on some
     // machines; the screenshot is what matters, so surface and carry on.
     console.warn(`  chrome: ${(e as Error).message.split('\n')[0]}`);
   });
 }
 
 async function main() {
-  const filter = process.argv[2];
-  const items = filter ? catalog.filter((c) => c.handle.includes(filter)) : catalog;
+  const handleFilter = process.argv[2] ?? '';
+  const styleFilter = process.argv[3] as StyleKey | undefined;
+
+  const items = handleFilter ? catalog.filter((c) => c.handle.includes(handleFilter)) : catalog;
   if (items.length === 0) {
-    console.error(`No catalogue handle matches "${filter}".`);
+    console.error(`No catalogue handle matches "${handleFilter}".`);
     process.exit(1);
   }
 
@@ -209,32 +186,44 @@ async function main() {
       console.log(`· ${item.handle} — no print`);
       continue;
     }
-    for (const print of item.prints) {
-      const { w, h, label } = area(item, print.place);
-      const wPx = inches(w);
-      const hPx = inches(h);
-      const name = `${item.handle}--${print.place}.png`;
-      const page = path.join(tmp, `${item.handle}-${print.place}.html`);
+    const styles = styleFilter ? item.styles.filter((s) => s === styleFilter) : item.styles;
 
-      await writeFile(page, html(item, print, wPx, hPx), 'utf8');
-      const outFile = path.join(OUT, name);
-      await render(page, outFile, wPx, hPx);
-      await stampDpi(outFile, DPI);
+    for (const styleKey of styles) {
+      for (const print of item.prints) {
+        // A placement can pin its own treatment — the gothic asides on backs.
+        // Render a pinned one once rather than per product style.
+        if (print.style && styleKey !== styles[0]) continue;
+        const effective = print.style ?? styleKey;
 
-      manifest.push({
-        file: name,
-        product: item.title,
-        handle: item.handle,
-        garment: item.garment,
-        placement: label,
-        text: print.text,
-        inches: `${w} × ${h}`,
-        pixels: `${wPx} × ${hPx}`,
-        dpi: DPI,
-        ink: INK[item.colourway],
-        garmentColour: item.colourway,
-      });
-      console.log(`✓ ${name}  ${wPx}×${hPx}  ${INK[item.colourway]}`);
+        const { w, h, label } = area(item, print.place);
+        const wPx = px(w);
+        const hPx = px(h);
+        const name = `${item.handle}--${styleKey}--${print.place}.png`;
+        const page = path.join(tmp, `${name}.html`);
+        const ink = INK[item.colourway];
+
+        await writeFile(page, html(print.text, effective, print.fill ?? 1, ink, wPx, hPx), 'utf8');
+        const outFile = path.join(OUT, name);
+        await render(page, outFile, wPx, hPx);
+        await stampDpi(outFile, DPI);
+
+        manifest.push({
+          file: name,
+          product: item.title,
+          handle: item.handle,
+          garment: item.garment,
+          style: styleKey,
+          typeface: STYLES[effective].label,
+          placement: label,
+          text: print.text,
+          inches: `${w} × ${h}`,
+          pixels: `${wPx} × ${hPx}`,
+          dpi: DPI,
+          ink,
+          garmentColour: item.colourway,
+        });
+        console.log(`✓ ${name}  ${wPx}×${hPx}`);
+      }
     }
   }
 

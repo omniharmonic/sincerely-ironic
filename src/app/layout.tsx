@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Anybody, Fraunces, IBM_Plex_Mono } from 'next/font/google';
+import { Anton, Anybody, Fraunces, IBM_Plex_Mono, Pirata_One } from 'next/font/google';
 import './globals.css';
 
 import { CartProvider } from '@/components/cart/CartProvider';
@@ -24,6 +24,22 @@ const fraunces = Fraunces({
   axes: ['SOFT', 'WONK', 'opsz'],
   style: ['normal', 'italic'],
   variable: '--font-fraunces',
+  display: 'swap',
+});
+
+// The two print faces. Blackletter is the register the ideas deck was drawn
+// in; Anton is the condensed stack the category runs on.
+const pirata = Pirata_One({
+  subsets: ['latin'],
+  weight: '400',
+  variable: '--font-pirata',
+  display: 'swap',
+});
+
+const anton = Anton({
+  subsets: ['latin'],
+  weight: '400',
+  variable: '--font-anton',
   display: 'swap',
 });
 
@@ -66,7 +82,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
       lang="en"
       data-universe="sincere"
       suppressHydrationWarning
-      className={`${anybody.variable} ${fraunces.variable} ${plex.variable}`}
+      className={`${anybody.variable} ${fraunces.variable} ${plex.variable} ${pirata.variable} ${anton.variable}`}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: NO_FLASH_SCRIPT }} />

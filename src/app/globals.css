@@ -57,6 +57,8 @@
   --font-display: var(--font-anybody), 'Arial Narrow', Impact, sans-serif;
   --font-text: var(--font-fraunces), Georgia, serif;
   --font-mono: var(--font-plex), ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-gothic: var(--font-pirata), serif;
+  --font-stack: var(--font-anton), 'Arial Narrow', sans-serif;
 }
 
 @property --hue {

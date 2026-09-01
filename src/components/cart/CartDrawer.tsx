@@ -89,7 +89,7 @@ export function CartDrawer() {
                           {line.product.image ? (
                             <Image src={line.product.image.url} alt={line.product.image.alt} fill sizes="72px" className="object-cover" />
                           ) : item ? (
-                            <GarmentArt garment={item.garment} colourway={item.colourway} prints={item.prints} />
+                            <GarmentArt garment={item.garment} colourway={item.colourway} prints={item.prints} style={item.styles[0]} />
                           ) : null}
                         </Link>
                         <div className="min-w-0">

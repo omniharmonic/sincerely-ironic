@@ -1,16 +1,36 @@
 /**
- * The line. Local source of truth for handle, garment, print and both
- * readings of the description; it seeds Shopify and it is the fallback when
- * the Storefront token is absent. When Shopify answers, Shopify wins for
- * title, price, variants and images. Art always comes from here.
+ * The line.
+ *
+ * A *design* is a slogan and the type treatments it ships in. A *product* is
+ * that design on a garment, so one design can run across a tee, a hoodie and
+ * a bucket hat without its copy being written three times.
+ *
+ * This file is the local source of truth for handles, art and both readings
+ * of the description; it seeds Shopify and it is the fallback when the
+ * Storefront token is absent. When Shopify answers, Shopify wins for title,
+ * price, variants and images. Art always comes from here.
  *
  * The second reading is the first one, a notch more earnest. That is the
  * whole device. Do not explain a print.
  */
 
-export type Garment = 'tee' | 'longsleeve' | 'hoodie' | 'crewneck' | 'cap' | 'sock' | 'tote';
+import { STYLE_KEYS, type StyleKey } from './typeset';
+
+export type Garment =
+  | 'tee'
+  | 'longsleeve'
+  | 'hoodie'
+  | 'crewneck'
+  | 'sweatpants'
+  | 'cap'
+  | 'bucket'
+  | 'tote'
+  | 'blanket'
+  | 'sock';
 
 export type Colourway = 'bone' | 'ink';
+
+export type Place = 'front' | 'back' | 'chest' | 'sleeve' | 'leg' | 'left' | 'right';
 
 export interface Both {
   sincere: string;
@@ -18,12 +38,12 @@ export interface Both {
 }
 
 export interface Print {
-  place: 'front' | 'back' | 'chest' | 'sleeve' | 'left' | 'right';
+  place: Place;
   text: string;
-  /** Relative size, 1 = the garment's default. */
-  scale?: number;
-  /** Display is Anybody, uppercase unless the text has lowercase. Text is Fraunces italic. */
-  face?: 'display' | 'text';
+  /** Overrides the product's style for this placement. Back asides run gothic. */
+  style?: StyleKey;
+  /** Fraction of the panel the block fills. 1 fills it. */
+  fill?: number;
 }
 
 export interface CatalogItem {
@@ -35,6 +55,8 @@ export interface CatalogItem {
   type: string;
   price: number;
   sizes: readonly string[];
+  /** Type treatments, in order. The first is the default. */
+  styles: readonly StyleKey[];
   prints: readonly Print[];
   description: Both;
 }
@@ -44,215 +66,314 @@ export const ONE_SIZE = ['One size'] as const;
 
 export const VENDOR = 'Sincerely Ironic';
 
-const TEE = 'Heavyweight cotton, 6.5 oz. Boxy cut. Printed front.';
-const TEE_FB = 'Heavyweight cotton, 6.5 oz. Boxy cut. Printed front and back.';
-const LS = '7 oz cotton. Dropped shoulder, ribbed cuffs. Printed front.';
-const HOODIE = '12 oz fleece, brushed inside. Double-lined hood, kangaroo pocket.';
-const CREW = '10 oz fleece. Raglan sleeve, ribbed hem and cuffs. Printed front.';
-const CAP = 'Six-panel unstructured cap. Embroidered. Brass buckle, one size.';
-const TOTE = 'Heavy canvas. Long handles. Printed one side.';
+/* ---------------------------------------------------------------- garments */
 
-const both = (base: string, more: string): Both => ({ sincere: base, ironic: `${base} ${more}` });
+interface GarmentSpec {
+  type: string;
+  price: number;
+  sizes: readonly string[];
+  /** Appended to a design slug to make the handle. */
+  suffix: string;
+  base: string;
+  /** The earnest clause the second reading adds. */
+  more: string;
+  carriesBack: boolean;
+}
 
-const tee = (
-  handle: string,
-  title: string,
-  colourway: Colourway,
-  prints: readonly Print[],
-  more: string,
-  base = prints.length > 1 ? TEE_FB : TEE,
-): CatalogItem => ({
-  handle,
-  title,
-  garment: 'tee',
-  colourway,
-  type: 'Tee',
-  price: 38,
-  sizes: APPAREL_SIZES,
-  prints,
-  description: both(base, more),
-});
-
-export const catalog: readonly CatalogItem[] = [
-  tee('transwoke-tee', 'Transwoke', 'bone', [{ place: 'front', text: 'TRANSWOKE', scale: 1.1 }], 'We hope you love it.'),
-  tee(
-    'nondualer-than-you-tee',
-    'Nondualer Than You',
-    'ink',
-    [{ place: 'front', text: 'NONDUALER THAN YOU', scale: 0.95 }],
-    'One of our favourites.',
-  ),
-  tee(
-    'two-wolves-tee',
-    'Inside Me There Are Two Wolves',
-    'bone',
-    [
-      { place: 'front', text: 'INSIDE ME THERE ARE TWO WOLVES.', scale: 0.8 },
-      { place: 'back', text: 'one of them is gay.', scale: 0.48, face: 'text' },
-    ],
-    'A classic.',
-  ),
-  tee(
-    'spiritually-bypass-tee',
-    'I Use Non-Duality to Spiritually Bypass',
-    'ink',
-    [{ place: 'front', text: 'I USE NON-DUALITY TO SPIRITUALLY BYPASS', scale: 0.72 }],
-    'Sits well.',
-  ),
-  tee(
-    'got-lore-tee',
-    'Got Lore?',
-    'ink',
-    [{ place: 'front', text: 'got lore?', scale: 1.15 }],
-    'Goes with everything.',
-  ),
-  tee(
-    'have-you-tried-suffering-tee',
-    'Have You Tried Suffering?',
-    'bone',
-    [{ place: 'front', text: 'HAVE YOU TRIED SUFFERING?', scale: 0.85 }],
-    'Holds up wash after wash.',
-  ),
-  tee(
-    'immanence-supremacist-tee',
-    'Immanence Supremacist',
-    'ink',
-    [{ place: 'front', text: 'IMMANENCE SUPREMACIST', scale: 0.9 }],
-    'Wears well.',
-  ),
-  tee(
-    'quietly-disrespectful-tee',
-    'Quietly Disrespectful',
-    'bone',
-    [{ place: 'chest', text: 'quietly disrespectful', scale: 0.34, face: 'text' }],
-    'Very soft.',
-    'Heavyweight cotton, 6.5 oz. Boxy cut. Small print, left chest.',
-  ),
-  tee(
-    'nonattachment-tee',
-    'Nonattachment Is for Wusses',
-    'ink',
-    [{ place: 'front', text: 'NONATTACHMENT IS FOR WUSSES', scale: 0.85 }],
-    'Keep it forever.',
-  ),
-  tee(
-    'bdsm-tee',
-    'BDSM',
-    'bone',
-    [
-      { place: 'front', text: 'BDSM', scale: 1.9 },
-      { place: 'back', text: 'Buddha · Dharma · Sangha · Mahayana', scale: 0.42, face: 'text' },
-    ],
-    'Good weight.',
-  ),
-  tee(
-    'living-prophecy-tee',
-    'Are You Even a Living Prophecy, Bro?',
-    'ink',
-    [{ place: 'front', text: 'ARE YOU EVEN A LIVING PROPHECY, BRO?', scale: 0.8 }],
-    'People will ask.',
-  ),
-  tee(
-    'embrace-paradox-tee',
-    'Do You Embrace Paradox or Naw, Brah?',
-    'bone',
-    [{ place: 'front', text: 'DO YOU EMBRACE PARADOX OR NAW, BRAH?', scale: 0.8 }],
-    'Both answers are fine.',
-  ),
-  tee(
-    'net-zero-trauma-tee',
-    'Net Zero Trauma',
-    'ink',
-    [
-      { place: 'front', text: 'NET ZERO TRAUMA', scale: 1 },
-      { place: 'back', text: 'ketamine mosquito nets', scale: 0.4, face: 'text' },
-    ],
-    'Breathable.',
-  ),
-  tee(
-    'bodhisattvas-finish-last-tee',
-    'Bodhisattvas Finish Last',
-    'bone',
-    [{ place: 'front', text: 'BODHISATTVAS FINISH LAST', scale: 0.85 }],
-    'Worth the wait.',
-  ),
-  tee(
-    'little-bit-enlightened-tee',
-    'I’m Just Gonna Get a Little Bit Enlightened, Stan',
-    'ink',
-    [{ place: 'front', text: 'I’M JUST GONNA GET A LITTLE BIT ENLIGHTENED, STAN', scale: 0.7 }],
-    'Just a little.',
-  ),
-  {
-    handle: 'transcended-and-included-longsleeve',
-    title: 'I’ve Already Transcended and Included Your Worldview',
-    garment: 'longsleeve',
-    colourway: 'bone',
+const GARMENTS: Record<Garment, GarmentSpec> = {
+  tee: {
+    type: 'Tee',
+    price: 38,
+    sizes: APPAREL_SIZES,
+    suffix: 'tee',
+    base: 'Heavyweight cotton. Boxy cut.',
+    more: 'We hope you love it.',
+    carriesBack: true,
+  },
+  longsleeve: {
     type: 'Longsleeve',
     price: 52,
     sizes: APPAREL_SIZES,
-    prints: [{ place: 'front', text: 'I’VE ALREADY TRANSCENDED AND INCLUDED YOUR WORLDVIEW', scale: 0.72 }],
-    description: both(LS, 'Runs a little long in the arm, which we like.'),
+    suffix: 'longsleeve',
+    base: 'Heavyweight cotton. Dropped shoulder, ribbed cuffs.',
+    more: 'Runs a little long in the arm, which we like.',
+    carriesBack: true,
   },
-  {
-    handle: 'transcontextual-crewneck',
-    title: 'Transcontextual',
-    garment: 'crewneck',
-    colourway: 'ink',
+  hoodie: {
+    type: 'Hoodie',
+    price: 88,
+    sizes: APPAREL_SIZES,
+    suffix: 'hoodie',
+    base: 'Heavy fleece, brushed inside. Double-lined hood, kangaroo pocket.',
+    more: 'Very warm.',
+    carriesBack: true,
+  },
+  crewneck: {
     type: 'Crewneck',
     price: 72,
     sizes: APPAREL_SIZES,
-    prints: [{ place: 'front', text: 'TRANSCONTEXTUAL', scale: 0.78 }],
-    description: both(CREW, 'Warm, but not too warm.'),
+    suffix: 'crewneck',
+    base: 'Heavy fleece. Ribbed hem and cuffs.',
+    more: 'Cosy.',
+    carriesBack: true,
   },
-  {
-    handle: 'vibemancer-hoodie',
-    title: 'Vibemancer',
-    garment: 'hoodie',
-    colourway: 'ink',
-    type: 'Hoodie',
-    price: 88,
+  sweatpants: {
+    type: 'Sweatpants',
+    price: 68,
     sizes: APPAREL_SIZES,
-    prints: [
-      { place: 'front', text: 'VIBEMANCER', scale: 0.95 },
-      { place: 'back', text: 'turquoise', scale: 0.5, face: 'text' },
-    ],
-    description: both(`${HOODIE} Printed front and back.`, 'Very warm.'),
+    suffix: 'sweatpants',
+    base: 'Heavy fleece. Elastic waist, drawcord, cuffed ankle. Printed on the leg.',
+    more: 'Wear them with the crewneck.',
+    carriesBack: false,
   },
-  {
-    handle: 'anthroposophical-af-hoodie',
-    title: 'Anthroposophical AF',
-    garment: 'hoodie',
-    colourway: 'bone',
-    type: 'Hoodie',
-    price: 88,
-    sizes: APPAREL_SIZES,
-    prints: [{ place: 'front', text: 'ANTHROPOSOPHICAL AF', scale: 0.8 }],
-    description: both(`${HOODIE} Printed front.`, 'Cosy.'),
-  },
-  {
-    handle: 'lore-rizz-cap',
-    title: 'Lore Rizz',
-    garment: 'cap',
-    colourway: 'bone',
+  cap: {
     type: 'Cap',
     price: 32,
     sizes: ONE_SIZE,
-    prints: [{ place: 'front', text: 'LORE RIZZ', scale: 1.3 }],
-    description: both(CAP, 'Fits most heads well.'),
+    suffix: 'cap',
+    base: 'Six-panel unstructured cap. Embroidered front. Brass buckle, one size.',
+    more: 'Fits most heads well.',
+    carriesBack: false,
   },
-  {
-    handle: 'indentured-space-holder-tote',
-    title: 'Indentured Space Holder',
-    garment: 'tote',
-    colourway: 'bone',
+  bucket: {
+    type: 'Bucket hat',
+    price: 36,
+    sizes: ONE_SIZE,
+    suffix: 'bucket',
+    base: 'Cotton twill bucket hat. Embroidered front, one size.',
+    more: 'Good in the sun.',
+    carriesBack: false,
+  },
+  tote: {
     type: 'Tote',
     price: 28,
     sizes: ONE_SIZE,
-    prints: [{ place: 'front', text: 'INDENTURED SPACE HOLDER', scale: 0.85 }],
-    description: both(TOTE, 'Holds a lot.'),
+    suffix: 'tote',
+    base: 'Heavy canvas. Long handles.',
+    more: 'Holds a lot.',
+    carriesBack: true,
   },
-] as const;
+  blanket: {
+    type: 'Blanket',
+    price: 78,
+    sizes: ONE_SIZE,
+    suffix: 'blanket',
+    base: 'Plush sherpa-backed blanket, 60 × 80in. Printed one side.',
+    more: 'Extremely soft.',
+    carriesBack: false,
+  },
+  sock: {
+    type: 'Socks',
+    price: 18,
+    sizes: ONE_SIZE,
+    suffix: 'socks',
+    base: 'Combed cotton, ribbed, mid-calf. One size.',
+    more: 'They go together.',
+    carriesBack: false,
+  },
+};
+
+/* ----------------------------------------------------------------- designs */
+
+interface Design {
+  slug: string;
+  title: string;
+  prints: readonly Print[];
+  /** Type treatments this design ships in. The first is the default. */
+  styles?: readonly StyleKey[];
+}
+
+const front = (text: string): Print[] => [{ place: 'front', text }];
+const frontBack = (text: string, aside: string): Print[] => [
+  { place: 'front', text },
+  { place: 'back', text: aside, style: 'gothic', fill: 0.44 },
+];
+
+/** Every design ships in all three treatments unless it says otherwise. */
+const ALL = STYLE_KEYS;
+/** The deck was drawn in blackletter, so those designs lead with it. */
+const GOTHIC_FIRST: StyleKey[] = ['gothic', 'wide', 'stack'];
+
+const DESIGNS = {
+  transwoke: { slug: 'transwoke', title: 'Transwoke', prints: front('Transwoke') },
+  nondualer: { slug: 'nondualer-than-you', title: 'Nondualer Than You', prints: front('Nondualer than you') },
+  wolves: {
+    slug: 'two-wolves',
+    title: 'Inside Me There Are Two Wolves',
+    prints: frontBack('Inside me there are two wolves', 'one of them is gay'),
+  },
+  bypass: {
+    slug: 'spiritually-bypass',
+    title: 'I Use Non-Duality to Spiritually Bypass',
+    prints: front('I use non-duality to spiritually bypass'),
+  },
+  lore: { slug: 'got-lore', title: 'Got Lore?', prints: front('Got lore?') },
+  suffering: {
+    slug: 'have-you-tried-suffering',
+    title: 'Have You Tried Suffering?',
+    prints: front('Have you tried suffering?'),
+  },
+  immanence: { slug: 'immanence-supremacist', title: 'Immanence Supremacist', prints: front('Immanence supremacist') },
+  quietly: {
+    slug: 'quietly-disrespectful',
+    title: 'Quietly Disrespectful',
+    prints: [{ place: 'chest', text: 'quietly disrespectful', style: 'gothic' }],
+    styles: ['gothic', 'wide'] as StyleKey[],
+  },
+  nonattachment: {
+    slug: 'nonattachment',
+    title: 'Nonattachment Is for Wusses',
+    prints: front('Nonattachment is for wusses'),
+  },
+  bdsm: { slug: 'bdsm', title: 'BDSM', prints: frontBack('BDSM', 'buddha · dharma · sangha · mahayana') },
+  prophecy: {
+    slug: 'living-prophecy',
+    title: 'Are You Even a Living Prophecy, Bro?',
+    prints: front('Are you even a living prophecy, bro?'),
+  },
+  paradox: {
+    slug: 'embrace-paradox',
+    title: 'Do You Embrace Paradox or Naw, Brah?',
+    prints: front('Do you embrace paradox or naw, brah?'),
+  },
+  netzero: { slug: 'net-zero-trauma', title: 'Net Zero Trauma', prints: frontBack('Net zero trauma', 'ketamine mosquito nets') },
+  bodhi: { slug: 'bodhisattvas-finish-last', title: 'Bodhisattvas Finish Last', prints: front('Bodhisattvas finish last') },
+  stan: {
+    slug: 'little-bit-enlightened',
+    title: 'I’m Just Gonna Get a Little Bit Enlightened, Stan',
+    prints: front('I’m just gonna get a little bit enlightened, Stan'),
+  },
+  transcended: {
+    slug: 'transcended-and-included',
+    title: 'I’ve Already Transcended and Included Your Worldview',
+    prints: front('I’ve already transcended and included your worldview'),
+  },
+  transcontextual: { slug: 'transcontextual', title: 'Transcontextual', prints: front('Transcontextual') },
+  vibemancer: { slug: 'vibemancer', title: 'Vibemancer', prints: frontBack('Vibemancer', 'turquoise') },
+  anthro: { slug: 'anthroposophical-af', title: 'Anthroposophical AF', prints: front('Anthroposophical AF') },
+  rizz: { slug: 'lore-rizz', title: 'Lore Rizz', prints: front('Lore rizz') },
+  spaceholder: { slug: 'indentured-space-holder', title: 'Indentured Space Holder', prints: front('Indentured space holder') },
+
+  /* ---- from the ideas deck, drawn in blackletter ---- */
+  enm: { slug: 'ethical-non-monogamy', title: 'Ethical Non-Monogamy', prints: front('Ethical non-monogamy'), styles: GOTHIC_FIRST },
+  buttmolly: { slug: 'butt-molly', title: 'Butt Molly', prints: front('Butt molly'), styles: GOTHIC_FIRST },
+  narcissist: { slug: 'spiritual-narcissist', title: 'Spiritual Narcissist', prints: front('Spiritual narcissist'), styles: GOTHIC_FIRST },
+  untriggerable: { slug: 'untriggerable', title: 'Untriggerable', prints: front('Untriggerable'), styles: GOTHIC_FIRST },
+  securely: { slug: 'securely-non-attached', title: 'Securely Non-Attached', prints: front('Securely non-attached'), styles: GOTHIC_FIRST },
+  influencer: { slug: 'spiritual-influencer', title: 'Spiritual Influencer', prints: front('Spiritual influencer'), styles: GOTHIC_FIRST },
+  manifested: { slug: 'i-manifested-this', title: 'I Manifested This', prints: front('I manifested this'), styles: GOTHIC_FIRST },
+  samadhi: { slug: 'binging-samadhi', title: 'Binging Samadhi', prints: front('Binging samadhi'), styles: GOTHIC_FIRST },
+  autism: { slug: 'autism', title: 'Autism', prints: front('AUTISM.') },
+  asshole: {
+    slug: 'having-the-experience',
+    title: 'I’m Having the Experience of You Being an Asshole',
+    prints: [
+      { place: 'front', text: 'I’m having the experience of you being an asshole' },
+      { place: 'back', text: 'I have a story that you suck', style: 'gothic', fill: 0.62 },
+    ],
+  },
+  raisedme: {
+    slug: 'wilber-hanzi-gebser',
+    title: 'Wilber, Hanzi and Gebser Raised Me',
+    prints: front('Wilber, Hanzi and Gebser raised me'),
+  },
+  slave: {
+    slug: 'made-in-china',
+    title: 'This Was Made by a Slave in China',
+    prints: front('This was made by a slave in China'),
+    styles: GOTHIC_FIRST,
+  },
+} satisfies Record<string, Design>;
+
+/* ---------------------------------------------------------------- products */
+
+function make(design: Design, garment: Garment, colourway: Colourway): CatalogItem {
+  const g = GARMENTS[garment];
+  const kept = g.carriesBack ? design.prints : design.prints.filter((p) => p.place !== 'back');
+  const printed = kept.length > 1 ? `${g.base} Printed front and back.` : `${g.base} Printed front.`;
+  const embroideredOrPlain = garment === 'cap' || garment === 'bucket' || garment === 'sock' || garment === 'sweatpants';
+  const base = embroideredOrPlain ? g.base : printed;
+
+  // Sweatpants carry the slogan down the leg rather than across a chest.
+  const prints: Print[] =
+    garment === 'sweatpants'
+      ? [{ place: 'leg', text: kept[0].text, style: kept[0].style }]
+      : [...kept];
+
+  return {
+    handle: `${design.slug}-${g.suffix}`,
+    title: design.title,
+    garment,
+    colourway,
+    type: g.type,
+    price: g.price,
+    sizes: g.sizes,
+    styles: design.styles ?? ALL,
+    prints,
+    description: { sincere: base, ironic: `${base} ${g.more}` },
+  };
+}
+
+const D = DESIGNS;
+
+export const catalog: readonly CatalogItem[] = [
+  /* tees — the spine of the line */
+  make(D.transwoke, 'tee', 'bone'),
+  make(D.nondualer, 'tee', 'ink'),
+  make(D.wolves, 'tee', 'bone'),
+  make(D.bypass, 'tee', 'ink'),
+  make(D.lore, 'tee', 'ink'),
+  make(D.suffering, 'tee', 'bone'),
+  make(D.immanence, 'tee', 'ink'),
+  make(D.quietly, 'tee', 'bone'),
+  make(D.nonattachment, 'tee', 'ink'),
+  make(D.bdsm, 'tee', 'bone'),
+  make(D.prophecy, 'tee', 'ink'),
+  make(D.paradox, 'tee', 'bone'),
+  make(D.netzero, 'tee', 'ink'),
+  make(D.bodhi, 'tee', 'bone'),
+  make(D.stan, 'tee', 'ink'),
+  make(D.enm, 'tee', 'bone'),
+  make(D.buttmolly, 'tee', 'ink'),
+  make(D.narcissist, 'tee', 'bone'),
+  make(D.untriggerable, 'tee', 'ink'),
+  make(D.securely, 'tee', 'bone'),
+  make(D.influencer, 'tee', 'ink'),
+  make(D.manifested, 'tee', 'bone'),
+  make(D.slave, 'tee', 'ink'),
+  make(D.samadhi, 'tee', 'bone'),
+  make(D.autism, 'tee', 'ink'),
+  make(D.asshole, 'tee', 'bone'),
+  make(D.raisedme, 'tee', 'ink'),
+
+  /* longsleeves */
+  make(D.transcended, 'longsleeve', 'bone'),
+  make(D.untriggerable, 'longsleeve', 'ink'),
+  make(D.manifested, 'longsleeve', 'bone'),
+
+  /* hoodies */
+  make(D.vibemancer, 'hoodie', 'ink'),
+  make(D.anthro, 'hoodie', 'bone'),
+  make(D.enm, 'hoodie', 'ink'),
+  make(D.narcissist, 'hoodie', 'bone'),
+
+  /* crewnecks, and the pants that match them */
+  make(D.transcontextual, 'crewneck', 'ink'),
+  make(D.influencer, 'crewneck', 'bone'),
+  make(D.securely, 'sweatpants', 'ink'),
+  make(D.influencer, 'sweatpants', 'bone'),
+
+  /* headwear */
+  make(D.rizz, 'cap', 'bone'),
+  make(D.manifested, 'cap', 'ink'),
+  make(D.untriggerable, 'bucket', 'bone'),
+  make(D.buttmolly, 'bucket', 'ink'),
+
+  /* the rest */
+  make(D.spaceholder, 'tote', 'bone'),
+  make(D.lore, 'tote', 'ink'),
+  make(D.autism, 'blanket', 'bone'),
+];
 
 export const catalogByHandle: Record<string, CatalogItem> = Object.fromEntries(
   catalog.map((item) => [item.handle, item]),

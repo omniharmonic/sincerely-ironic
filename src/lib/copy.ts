@@ -64,6 +64,10 @@ export const product = {
     ironic: 'Boxy fit. Between sizes, size down. You’ll be fine.',
   },
   back: { sincere: 'All items', ironic: 'All items' },
+  styleNote: {
+    sincere: 'Same words, three ways of saying them.',
+    ironic: 'Same words, three ways of saying them. Pick whichever is you.',
+  },
 } satisfies Record<string, Both>;
 
 export const cart = {

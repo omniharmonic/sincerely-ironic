@@ -1,13 +1,16 @@
-import type { Colourway, Garment, Print } from '@/lib/catalog';
+import type { Colourway, Garment, Place, Print } from '@/lib/catalog';
+import { typeset, type StyleKey } from '@/lib/typeset';
 
 /**
- * Typographic garment art. No photography exists yet, so every piece is
- * drawn: a silhouette and its print, set in the display face. When Shopify
- * has an image the card uses that instead; this is the fallback and the
- * house style.
+ * Typographic garment art.
  *
- * Coordinates live in a 400×500 box. Print areas are `foreignObject`s so the
- * text wraps and can use the variable font.
+ * No photography exists yet, so every piece is drawn: a silhouette and its
+ * print, set by the same engine that makes the files sent to the printer.
+ * The type is real SVG `<text>` with an explicit `textLength`, so each line is
+ * stretched to a measure rather than guessed at — the guessing is what used to
+ * push long words off the sides of the panel.
+ *
+ * Coordinates live in a 400×500 box.
  */
 
 export type Side = 'front' | 'back';
@@ -24,26 +27,23 @@ interface Area {
   y: number;
   w: number;
   h: number;
-  /** Base font size for scale 1. */
-  size: number;
   rotate?: number;
 }
 
-const SHAPES: Record<
-  Garment,
-  {
-    body: string;
-    extras?: { d: string; stroke?: boolean; width?: number }[];
-    areas: Partial<Record<Print['place'], Area>>;
-  }
-> = {
+interface Shape {
+  body: string;
+  extras?: { d: string; stroke?: boolean; width?: number }[];
+  areas: Partial<Record<Place, Area>>;
+}
+
+const SHAPES: Record<Garment, Shape> = {
   tee: {
     body: 'M120,95 L60,120 L30,220 L95,245 L95,470 L305,470 L305,245 L370,220 L340,120 L280,95 Q200,150 120,95 Z',
     extras: [{ d: 'M120,95 Q200,150 280,95 Q200,120 120,95 Z' }],
     areas: {
-      chest: { x: 118, y: 196, w: 96, h: 54, size: 17 },
-      front: { x: 105, y: 190, w: 190, h: 220, size: 40 },
-      back: { x: 105, y: 170, w: 190, h: 250, size: 44 },
+      front: { x: 108, y: 200, w: 184, h: 150 },
+      back: { x: 106, y: 185, w: 188, h: 180 },
+      chest: { x: 120, y: 198, w: 78, h: 42 },
     },
   },
   longsleeve: {
@@ -54,10 +54,10 @@ const SHAPES: Record<
       { d: 'M120,95 Q200,150 280,95 Q200,120 120,95 Z' },
     ],
     areas: {
-      chest: { x: 120, y: 196, w: 94, h: 54, size: 17 },
-      front: { x: 110, y: 190, w: 180, h: 200, size: 38 },
-      back: { x: 110, y: 170, w: 180, h: 240, size: 44 },
-      sleeve: { x: -40, y: 275, w: 190, h: 34, size: 20, rotate: -80 },
+      front: { x: 112, y: 200, w: 176, h: 145 },
+      back: { x: 110, y: 185, w: 180, h: 175 },
+      chest: { x: 122, y: 198, w: 76, h: 42 },
+      sleeve: { x: -34, y: 276, w: 184, h: 32, rotate: -80 },
     },
   },
   hoodie: {
@@ -69,9 +69,9 @@ const SHAPES: Record<
       { d: 'M135,355 L265,355 L280,440 L120,440 Z', stroke: true },
     ],
     areas: {
-      chest: { x: 120, y: 190, w: 94, h: 54, size: 17 },
-      front: { x: 110, y: 185, w: 180, h: 160, size: 34 },
-      back: { x: 105, y: 170, w: 190, h: 250, size: 46 },
+      front: { x: 112, y: 208, w: 176, h: 128 },
+      back: { x: 108, y: 190, w: 184, h: 176 },
+      chest: { x: 122, y: 206, w: 76, h: 40 },
     },
   },
   crewneck: {
@@ -83,9 +83,21 @@ const SHAPES: Record<
       { d: 'M95,445 L305,445', stroke: true },
     ],
     areas: {
-      chest: { x: 120, y: 192, w: 94, h: 54, size: 17 },
-      front: { x: 110, y: 185, w: 180, h: 200, size: 38 },
-      back: { x: 105, y: 165, w: 190, h: 250, size: 46 },
+      front: { x: 112, y: 200, w: 176, h: 148 },
+      back: { x: 110, y: 182, w: 180, h: 180 },
+      chest: { x: 122, y: 198, w: 76, h: 42 },
+    },
+  },
+  sweatpants: {
+    body: 'M118,92 L282,92 L296,470 L214,470 L200,300 L186,470 L104,470 Z',
+    extras: [
+      { d: 'M118,128 L282,128', stroke: true },
+      { d: 'M200,128 L200,170', stroke: true },
+      { d: 'M186,152 C192,164 208,164 214,152', stroke: true },
+    ],
+    areas: {
+      // Down the left leg, the way a track pant carries a wordmark.
+      leg: { x: 112, y: 316, w: 74, h: 126 },
     },
   },
   cap: {
@@ -96,56 +108,87 @@ const SHAPES: Record<
       { d: 'M140,290 C150,200 190,150 210,140', stroke: true },
     ],
     areas: {
-      front: { x: 110, y: 180, w: 180, h: 100, size: 22 },
+      front: { x: 112, y: 198, w: 176, h: 76 },
     },
   },
-  sock: {
-    body: 'M60,60 L60,320 Q60,372 112,372 L250,372 Q288,372 288,336 Q288,306 250,300 L150,290 L150,60 Z',
-    extras: [{ d: 'M60,60 L150,60 L150,110 L60,110 Z' }],
+  bucket: {
+    body: 'M126,296 C126,186 158,148 200,148 C242,148 274,186 274,296 Z',
+    extras: [
+      { d: 'M92,294 L308,294 C308,344 262,370 200,370 C138,370 92,344 92,294 Z' },
+      { d: 'M126,256 L274,256', stroke: true },
+    ],
     areas: {
-      left: { x: 62, y: 120, w: 86, h: 160, size: 30, rotate: 90 },
-      right: { x: 62, y: 120, w: 86, h: 160, size: 30, rotate: 90 },
+      front: { x: 140, y: 188, w: 120, h: 60 },
     },
   },
   tote: {
     body: 'M80,180 L320,180 L320,470 L80,470 Z',
     extras: [{ d: 'M130,180 C130,40 270,40 270,180', stroke: true, width: 10 }],
     areas: {
-      front: { x: 100, y: 230, w: 200, h: 200, size: 40 },
-      back: { x: 100, y: 230, w: 200, h: 200, size: 40 },
+      front: { x: 100, y: 232, w: 200, h: 176 },
+      back: { x: 100, y: 232, w: 200, h: 176 },
+    },
+  },
+  blanket: {
+    body: 'M52,120 L348,120 L348,436 L52,436 Z',
+    extras: [
+      { d: 'M52,120 L348,120 L348,150 L52,150 Z' },
+      { d: 'M68,136 L332,136', stroke: true },
+      // A turned-back corner, so it reads as a blanket rather than a poster.
+      { d: 'M348,436 L268,436 L348,368 Z' },
+    ],
+    areas: {
+      front: { x: 84, y: 194, w: 232, h: 180 },
+    },
+  },
+  sock: {
+    body: 'M60,60 L60,320 Q60,372 112,372 L250,372 Q288,372 288,336 Q288,306 250,300 L150,290 L150,60 Z',
+    extras: [{ d: 'M60,60 L150,60 L150,110 L60,110 Z' }],
+    areas: {
+      left: { x: 62, y: 126, w: 86, h: 150, rotate: 90 },
+      right: { x: 62, y: 126, w: 86, h: 150, rotate: 90 },
     },
   },
 };
 
-function isLower(text: string) {
-  return text !== text.toUpperCase();
-}
+function PrintBlock({
+  print,
+  area,
+  colour,
+  style,
+}: {
+  print: Print;
+  area: Area;
+  colour: string;
+  style: StyleKey;
+}) {
+  const layout = typeset(print.text, print.style ?? style, area.w, area.h, print.fill ?? 1);
+  const top = area.y + (area.h - layout.height) / 2;
+  const cx = area.x + area.w / 2;
+  const transform = area.rotate ? `rotate(${area.rotate} ${cx} ${area.y + area.h / 2})` : undefined;
 
-/* Average advance of Anybody at wdth 112, weight 800, uppercase — used to
-   shrink the type until the longest word fits on one line. */
-const ADVANCE = 0.68;
-const ADVANCE_TEXT = 0.5;
-
-function PrintBlock({ print, area, colour }: { print: Print; area: Area; colour: string }) {
-  const wanted = area.size * (print.scale ?? 1);
-  const longest = Math.max(...print.text.split(/\s+/).map((w) => w.length), 1);
-  const size = Math.min(wanted, (area.w * 0.96) / (longest * (print.face === 'text' ? ADVANCE_TEXT : ADVANCE)));
-  const transform = area.rotate ? `rotate(${area.rotate} ${area.x + area.w / 2} ${area.y + area.h / 2})` : undefined;
   return (
-    <foreignObject x={area.x} y={area.y} width={area.w} height={area.h} transform={transform}>
-      <div
-        // @ts-expect-error xmlns is required for foreignObject HTML in some engines
-        xmlns="http://www.w3.org/1999/xhtml"
-        className={[
-          'garment__print',
-          print.face === 'text' ? 'garment__print--text' : '',
-          isLower(print.text) ? 'garment__print--keep' : '',
-        ].join(' ')}
-        style={{ color: colour, fontSize: size }}
-      >
-        {print.text}
-      </div>
-    </foreignObject>
+    <g transform={transform} fill={colour}>
+      {layout.lines.map((line, i) => (
+        <text
+          key={i}
+          x={cx}
+          y={top + line.y}
+          textAnchor="middle"
+          textLength={line.measure}
+          lengthAdjust={line.measure ? 'spacingAndGlyphs' : undefined}
+          style={{
+            fontFamily: layout.style.family,
+            fontWeight: layout.style.weight,
+            fontSize: layout.fontSize,
+            fontVariationSettings: layout.style.variation,
+            letterSpacing: layout.style.letterSpacing ? `${layout.style.letterSpacing}em` : undefined,
+          }}
+        >
+          {line.text}
+        </text>
+      ))}
+    </g>
   );
 }
 
@@ -153,6 +196,7 @@ export function GarmentArt({
   garment,
   colourway,
   prints,
+  style,
   side = 'front',
   title,
   className = '',
@@ -160,6 +204,7 @@ export function GarmentArt({
   garment: Garment;
   colourway: Colourway;
   prints: readonly Print[];
+  style: StyleKey;
   side?: Side;
   title?: string;
   className?: string;
@@ -167,7 +212,7 @@ export function GarmentArt({
   const shape = SHAPES[garment];
   const fill = FILL[colourway];
 
-  // Socks show as a pair: the left sock and the right sock, side by side.
+  // Socks show as a pair: one says one thing, one says the other.
   if (garment === 'sock') {
     const left = prints.find((p) => p.place === 'left');
     const right = prints.find((p) => p.place === 'right');
@@ -181,17 +226,14 @@ export function GarmentArt({
             {shape.extras?.map((e, j) => (
               <path key={j} d={e.d} fill="none" stroke={fill.seam} strokeWidth={2} />
             ))}
-            {p ? <PrintBlock print={p} area={shape.areas[p.place]!} colour={fill.print} /> : null}
+            {p ? <PrintBlock print={p} area={shape.areas[p.place]!} colour={fill.print} style={style} /> : null}
           </g>
         ))}
       </svg>
     );
   }
 
-  const visible = prints.filter((p) => {
-    if (side === 'front') return p.place === 'front' || p.place === 'chest' || p.place === 'sleeve';
-    return p.place === 'back';
-  });
+  const visible = prints.filter((p) => (side === 'front' ? p.place !== 'back' : p.place === 'back'));
 
   return (
     <svg viewBox="0 0 400 500" className={`garment ${className}`} role="img" aria-label={title}>
@@ -207,7 +249,7 @@ export function GarmentArt({
       )}
       {visible.map((p) => {
         const area = shape.areas[p.place];
-        return area ? <PrintBlock key={p.place} print={p} area={area} colour={fill.print} /> : null;
+        return area ? <PrintBlock key={p.place} print={p} area={area} colour={fill.print} style={style} /> : null;
       })}
       <text
         x={200}

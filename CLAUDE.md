@@ -24,6 +24,19 @@ no-flash script in `src/lib/universe.ts` sets it before paint; the provider
 reads it with `useSyncExternalStore`. Do not add React state that duplicates
 it, and do not read `localStorage` for it anywhere else.
 
+**Type is set by one engine, `src/lib/typeset.ts`.** It breaks a slogan into
+lines (an exact DP that keeps the lines even, because a justified block is
+only a solid rectangle if they are), sizes it to the panel, and returns a
+measure per line. The garment art and the print files both call it, so what a
+customer sees and what the printer receives cannot drift. Lines are rendered
+as SVG `<text>` with `textLength`, so type is stretched to the measure rather
+than guessed at — guessing is what used to clip long words off the panel. Do
+not reintroduce an estimated-advance sizing path.
+
+**A design is not a product.** `src/lib/catalog.ts` holds designs (a slogan
+and the treatments it ships in) and builds products from `design × garment`.
+Adding a slogan is one entry in `DESIGNS` plus one `make(...)` line.
+
 **The catalogue is upstream of Shopify for art, downstream for copy.**
 `src/lib/catalog.ts` keys the drawn garments by handle and is the fallback
 when the Storefront token is missing. A Shopify product with no catalogue

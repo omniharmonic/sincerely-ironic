@@ -1,4 +1,5 @@
 import type { Both, Colourway, Garment, Print } from '@/lib/catalog';
+import type { StyleKey } from '@/lib/typeset';
 
 export interface Money {
   amount: number;
@@ -35,6 +36,8 @@ export interface Product {
     garment: Garment;
     colourway: Colourway;
     prints: readonly Print[];
+    /** Type treatments this design ships in. The first is the default. */
+    styles: readonly StyleKey[];
   };
   source: 'shopify' | 'catalog';
 }

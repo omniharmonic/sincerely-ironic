@@ -22,7 +22,13 @@ export function ProductCard({ product, priority = false }: { product: Product; p
             className="object-cover"
           />
         ) : (
-          <GarmentArt garment={product.art.garment} colourway={product.art.colourway} prints={product.art.prints} title={product.title} />
+          <GarmentArt
+            garment={product.art.garment}
+            colourway={product.art.colourway}
+            prints={product.art.prints}
+            style={product.art.styles[0]}
+            title={product.title}
+          />
         )}
         {!product.available ? <span className="mono absolute left-3 top-3 border border-line bg-bg px-2 py-1">Sold out</span> : null}
       </div>
