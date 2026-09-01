@@ -91,12 +91,12 @@ export const about = {
    * Written copy, verbatim. Both readings are identical here on purpose: the
    * device adds a notch of earnestness to the store's own voice, and this
    * page is not the store talking — it is the statement, and it says what it
-   * says in either universe. `care` and `sizing` do the same.
+   * says in either universe. `care` does the same.
    */
   paragraphs: [
     {
-      sincere: 'We do not make clothes. We imagine them and the elves (slaves) of late stage modernity bring them to your door.',
-      ironic: 'We do not make clothes. We imagine them and the elves (slaves) of late stage modernity bring them to your door.',
+      sincere: 'We do not make clothes. We imagine them.',
+      ironic: 'We do not make clothes. We imagine them.',
     },
     {
       sincere:
@@ -127,10 +127,6 @@ export const about = {
     { q: 'Are we all going to die?', a: { sincere: 'Yes.', ironic: 'Yes.' } },
     { q: 'What is your return policy?', a: { sincere: 'No.', ironic: 'No.' } },
   ] satisfies { q: string; a: Both }[],
-  sizing: {
-    sincere: 'Boxy fit. Between sizes, size down. Caps and totes are one size.',
-    ironic: 'Boxy fit. Between sizes, size down. Caps and totes are one size.',
-  },
 } as const;
 
 /**
