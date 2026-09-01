@@ -26,8 +26,9 @@ export function ProductCard({ product, priority = false }: { product: Product; p
         )}
         {!product.available ? <span className="mono absolute left-3 top-3 border border-line bg-bg px-2 py-1">Sold out</span> : null}
       </div>
-      <div className="mt-4 flex items-start justify-between gap-4">
-        <h3 className="display card__name">{product.title}</h3>
+      <div className="mt-4 flex items-start justify-between gap-3">
+        {/* min-w-0 so a long title wraps instead of shoving the price off the card. */}
+        <h3 className="display card__name min-w-0 break-words">{product.title}</h3>
         <span className="mono mt-2 shrink-0 tabular-nums">{money(product.price.amount, product.price.currency)}</span>
       </div>
       <p className="mono mt-2 text-mute">{product.type}</p>

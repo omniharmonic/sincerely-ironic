@@ -25,6 +25,9 @@
   /* The slick. Four stops and a hue that never stops turning. */
   --slick: linear-gradient(100deg, #ff2e9e 0%, #ffb52e 30%, #1fcfee 62%, #7c3aed 84%, #ff2e9e 100%);
 
+  /* Overlapping marks go dense on paper and glow on ink. */
+  --seg-blend: multiply;
+
   --ticker-h: 30px;
   --header-h: 64px;
   --gutter: clamp(18px, 4vw, 56px);
@@ -38,6 +41,7 @@
   --line: rgba(243, 243, 240, 0.18);
   --panel: rgba(243, 243, 240, 0.05);
   --accent: #ff3d9a;
+  --seg-blend: screen;
   --wonk: 1;
   --soft: 100;
 }
@@ -543,6 +547,88 @@ body {
   .wordmark__ironic {
     transition: none;
   }
+}
+
+/* The lockup, the nav and the switch have to share a phone's width. */
+@media (max-width: 560px) {
+  .header {
+    gap: 10px;
+  }
+  .wordmark {
+    font-size: 15px;
+  }
+  .nav {
+    min-width: 0;
+    gap: 14px;
+  }
+}
+
+/* ---------- hero ---------- */
+
+.hero {
+  position: relative;
+  /* Keeps the segments blending with each other, not with the page. */
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  /* The body draws past its box; clip at the hero so it can never widen
+     the page. */
+  overflow: hidden;
+  /* A definite height, so the stage can hand the drawing a box to fit rather
+     than growing to the SVG's own aspect ratio and pushing the copy under
+     the fold. */
+  height: min(84svh, 880px);
+  min-height: 460px;
+  padding-bottom: clamp(16px, 2.4vw, 30px);
+}
+
+.hero__stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+
+.serpent {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  /* The body is allowed to run off the edges of its box. */
+  overflow: visible;
+}
+
+.serpent__seg {
+  mix-blend-mode: var(--seg-blend);
+  will-change: transform;
+}
+
+/* The head stays solid so it reads as the mark rather than as more body. */
+.serpent__seg--head {
+  mix-blend-mode: normal;
+}
+
+.hero__feet {
+  margin: 0 var(--gutter);
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  color: var(--mute);
+}
+
+.hero__cta {
+  color: var(--fg);
+  text-decoration: none;
+  padding-bottom: 4px;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s;
+}
+.hero__cta:hover,
+.hero__cta:focus-visible {
+  border-bottom-color: currentColor;
 }
 
 /* ---------- the mark ---------- */

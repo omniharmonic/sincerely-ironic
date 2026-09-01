@@ -29,8 +29,15 @@ it, and do not read `localStorage` for it anywhere else.
 when the Storefront token is missing. A Shopify product with no catalogue
 entry is filtered out on purpose. Handles must match exactly.
 
-**Hero motion must be bounded.** `Hero.tsx` derives the width axis from
-scroll velocity and a `sin()` of time — never an accumulator. (Lesson carried
+**The hero is the serpent.** `src/components/SerpentHero.tsx` repeats one face
+from the mark along a lemniscate, mirrored to face its direction of travel,
+filled with six hue-rotated slicks, blended (`--seg-blend`: multiply on paper,
+screen on ink) so overlaps mix. Transforms are written per frame straight to
+the DOM, never through React state. Hero copy stays two small lines in the
+corners — the page is graphic-first and names nothing.
+
+**Hero motion must be bounded.** `SerpentHero.tsx` derives every position
+from `sin`/`cos` of (scroll, elapsed) — never an accumulator. (Lesson carried
 over from sixthwall.productions: unbounded idle motion unwinds on first
 interaction.)
 

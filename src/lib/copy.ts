@@ -23,16 +23,14 @@ export const nav = {
 } as const;
 
 export const hero = {
-  statement: {
-    sincere: 'THANK YOU FOR YOUR SUPPORT.',
-    ironic: 'THANK YOU SO MUCH FOR YOUR SUPPORT.',
-  },
-  sub: {
-    sincere: 'Apparel. Small runs, printed and shipped from Colorado.',
-    ironic: 'Apparel. Small runs, printed and shipped from Colorado, with love.',
-  },
-  cta: { sincere: 'Shop', ironic: 'Shop' },
-} satisfies Record<string, Both>;
+  /** The OG image has room for a sentence; the page does not. */
+  statement: 'Thank you for your support.',
+  caption: {
+    sincere: 'Thank you for your support.',
+    ironic: 'Thank you so much for your support.',
+  } satisfies Both,
+  cta: 'Shop',
+} as const;
 
 /** Care instructions, set large. */
 export const care: readonly Both[] = [

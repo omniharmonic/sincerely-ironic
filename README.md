@@ -59,7 +59,7 @@ Node 22+, pnpm 10.
 
 | Var | What |
 | --- | --- |
-| `SHOPIFY_STORE_DOMAIN` | `fkpeqz-bp.myshopify.com` |
+| `SHOPIFY_STORE_DOMAIN` | `sincerely-ironic-apparel.myshopify.com` |
 | `SHOPIFY_STOREFRONT_ACCESS_TOKEN` | Public Storefront API token from the Headless channel |
 
 ## Adding a product

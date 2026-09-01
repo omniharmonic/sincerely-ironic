@@ -3,7 +3,7 @@ import { ImageResponse } from 'next/og';
 import { LOGO_PATHS } from '@/components/Logo';
 import { hero, site } from '@/lib/copy';
 
-export const alt = `${site.name} — ${hero.statement.sincere}`;
+export const alt = `${site.name} — ${hero.statement}`;
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -43,7 +43,7 @@ export default function OpenGraphImage() {
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
           <div style={{ display: 'flex', fontSize: 84, fontWeight: 900, letterSpacing: -4, lineHeight: 0.95, textTransform: 'uppercase' }}>
-            {hero.statement.sincere}
+            {hero.statement}
           </div>
           <div style={{ display: 'flex', fontSize: 22, letterSpacing: 4, textTransform: 'uppercase', opacity: 0.6 }}>
             {site.name} · sincerelyironic.com
