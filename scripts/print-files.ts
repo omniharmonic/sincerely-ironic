@@ -52,16 +52,19 @@ const AREAS: Record<Place, { w: number; h: number; label: string }> = {
   back: { w: 15, h: 18, label: 'Back' },
   chest: { w: 4, h: 4, label: 'Left chest' },
   sleeve: { w: 3.5, h: 14, label: 'Sleeve' },
-  leg: { w: 4, h: 12, label: 'Leg' },
+  // A leg hit is a wordmark near the thigh, not a banner down the whole
+  // panel. Printify's own leg area is 4x16in; the artwork wants far less.
+  leg: { w: 4, h: 5, label: 'Leg' },
   left: { w: 3, h: 1.5, label: 'Left' },
   right: { w: 3, h: 1.5, label: 'Right' },
 };
 
 const AREA_OVERRIDES: Partial<Record<CatalogItem['garment'], Partial<Record<Place, { w: number; h: number }>>>> = {
-  // Embroidery: 4x2.5in is the maximum on a standard 6-panel front, and the
-  // design may use at most six thread colours. Flat type is well inside that.
-  cap: { front: { w: 4, h: 2.5 } },
-  bucket: { front: { w: 4, h: 2.5 } },
+  // Embroidery maxima, per blueprint: a 6-panel cap front is 4x2.25in
+  // (1200x675) and a bucket-hat front is 5.5x2in (1650x600). At most six
+  // thread colours, auto-matched from the file — flat type is well inside.
+  cap: { front: { w: 4, h: 2.25 } },
+  bucket: { front: { w: 5.5, h: 2 } },
   // Unverified — these vary by blueprint. Check before ordering.
   tote: { front: { w: 12, h: 14 }, back: { w: 12, h: 14 } },
   blanket: { front: { w: 50, h: 60 } },
