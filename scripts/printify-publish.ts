@@ -28,14 +28,27 @@ import { api, SHOP_ID } from './printify.ts';
 const LEDGER = path.resolve('scripts/printify-products.json');
 const LINKS = path.resolve('scripts/shopify-links.json');
 
-/** What Printify should push. Everything: the mockups are the whole point. */
+/**
+ * What Printify should push.
+ *
+ * Only the things Printify is the authority on. The flags mean "update this
+ * field", and the copy is ours: title and description come from the
+ * catalogue, and letting Printify rewrite them on every republish undoes the
+ * reconcile.
+ *
+ * It is not enough on its own. Printify also resets `vendor` to "Printify"
+ * and `productType` to the blueprint's own category — "Sweatshirt", "Bags",
+ * "All Over Prints" — and those are not behind any flag. So a republish
+ * ALWAYS needs the Shopify reconcile run after it, or the shop's filter row
+ * grows categories the catalogue never had.
+ */
 const WHAT = {
-  title: true,
-  description: true,
+  title: false,
+  description: false,
   images: true,
   variants: true,
-  tags: true,
-  keyFeatures: true,
+  tags: false,
+  keyFeatures: false,
   shipping_template: true,
 };
 

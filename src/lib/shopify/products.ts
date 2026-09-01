@@ -61,7 +61,7 @@ function fromShopify(raw: RawProduct): Product | null {
   // alternates bone and ink down the rail.
   const colourOf = (v: RawProduct['variants']['nodes'][number]) =>
     v.selectedOptions.find((o) => /colou?r/i.test(o.name))?.value ?? '';
-  const wantBlack = item.colourway === 'ink';
+  const wantBlack = (item.lead ?? item.colourway) === 'ink';
   const wanted = new Set(
     raw.variants.nodes
       .filter((v) => v.image?.url && /black/i.test(colourOf(v)) === wantBlack)

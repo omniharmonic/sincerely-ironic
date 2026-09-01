@@ -211,6 +211,17 @@ export class Chrome {
     return Buffer.from(shot.data, 'base64');
   }
 
+  /** Capture whatever is on screen now, without navigating. `shoot` reloads,
+   *  which throws away any scrolling or clicking done first. */
+  async snap(width: number, height: number): Promise<Buffer> {
+    const shot = (await this.send(
+      'Page.captureScreenshot',
+      { format: 'png', captureBeyondViewport: false, clip: { x: 0, y: 0, width, height, scale: 1 } },
+      this.session,
+    )) as { data: string };
+    return Buffer.from(shot.data, 'base64');
+  }
+
   /** Plant a cookie, for reproducing a state the browser would arrive in on
    *  its own — a cart id issued by a store that no longer has it. */
   async setCookie(name: string, value: string, url: string): Promise<void> {

@@ -82,6 +82,14 @@ order on any of them would have taken money and reached nobody. Build in
 Printify, publish from Printify, then reconcile the Shopify side (handle,
 vendor, `productType`, the ironic metafield, the Headless channel).
 
+**A republish undoes the reconcile.** Printify resets `vendor` to "Printify"
+and `productType` to the blueprint's own category on every publish, and
+neither is behind a publish flag. Always re-run the Shopify reconcile after
+publishing, or the shop's filter row sprouts "Sweatshirt", "Bags" and "All
+Over Prints". Mockups are also regenerated *asynchronously* after an artwork
+change, and publish ships whatever renders exist at that instant — so update,
+wait, then publish, or the store gets the previous design's photographs.
+
 **A Shopify handle is mutable.** `ProductInput.handle` is settable on
 `productUpdate`, with `redirectNewHandle` to leave a redirect behind. An
 earlier comment here claimed the opposite, and that false belief was the only

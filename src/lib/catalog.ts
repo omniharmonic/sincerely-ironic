@@ -73,6 +73,10 @@ export interface CatalogItem {
   styles: readonly StyleKey[];
   /** Overrides the blank's default [natural, black] colour pair. */
   colours?: readonly [string, string];
+  /** Which colourway to photograph first, when it differs from the one the
+   *  art was drawn in. Showing a garment is a merchandising choice and has
+   *  nothing to do with which ink the print uses. */
+  lead?: Colourway;
   prints: readonly Print[];
   description: Both;
 }
@@ -587,8 +591,11 @@ export const catalog: readonly CatalogItem[] = [
   /* crewnecks, and the pants that match them */
   // The house sweatshirt, on white and black rather than the line's ivory:
   // a logo piece should sit on a plain ground.
-  { ...make(D.mark, 'crewneck', 'bone'), colours: ['White', 'Black'] as const },
-  { ...make(D.markRainbow, 'crewneck', 'bone'), colours: ['White', 'Black'] as const },
+  // Led on black. A white sweatshirt is photographed on a white ground, so
+  // the card was a white rectangle with a small mark in the middle and read
+  // as an image that had failed to load.
+  { ...make(D.mark, 'crewneck', 'bone'), colours: ['White', 'Black'] as const, lead: 'ink' as const },
+  { ...make(D.markRainbow, 'crewneck', 'bone'), colours: ['White', 'Black'] as const, lead: 'ink' as const },
   make(D.transcontextual, 'crewneck', 'ink'),
   make(D.influencer, 'crewneck', 'bone'),
   make(D.securely, 'sweatpants', 'ink'),
