@@ -686,9 +686,16 @@ body {
   overflow: hidden;
   /* A definite height, so the stage can hand the drawing a box to fit rather
      than growing to the SVG's own aspect ratio and pushing the copy under
-     the fold. */
-  height: min(84svh, 880px);
-  min-height: 460px;
+     the fold.
+     
+     Not a flat percentage. At a constant 84svh the hero took the same share
+     of every window, so with the header on top it filled 94% of a short one
+     and the shop below was invisible however small you made the browser —
+     the page looked like it had stopped responding to the window. Taking a
+     fixed amount off instead makes the share grow with the screen: about
+     two thirds of a short window, four fifths of a tall one, and capped so
+     it cannot run away on a large display. */
+  height: clamp(300px, calc(95svh - 160px), 880px);
   padding-bottom: clamp(16px, 2.4vw, 30px);
 }
 
