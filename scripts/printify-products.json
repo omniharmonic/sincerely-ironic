@@ -696,13 +696,13 @@
       "id": "6a96b4e1c0e6a99c800f2d6b",
       "blueprint": 468,
       "provider": 10,
-      "style": "wide"
+      "style": "slab"
     },
     "robe": {
       "id": "6a96b4e030fd2f583d00cd00",
       "blueprint": 923,
       "provider": 14,
-      "style": "gothic"
+      "style": "slab"
     }
   }
 }

@@ -13,7 +13,7 @@
  * words off the sides.
  */
 
-export type StyleKey = 'wide' | 'gothic' | 'stack';
+export type StyleKey = 'wide' | 'gothic' | 'stack' | 'slab';
 
 export interface TypeStyle {
   key: StyleKey;
@@ -106,6 +106,39 @@ export const STYLES: Record<StyleKey, TypeStyle> = {
     cap: 0.73,
     pad: { top: 0.03, bottom: 0.06 },
     descender: 0.22,
+  },
+  /**
+   * Rubik Mono One, set naturally rather than justified.
+   *
+   * These metrics are not guessed: two designs built by hand in Printify's
+   * own editor report their text bounds, and "DRUGS" comes back 821.4 x 144
+   * at 200px — 0.82em per character and a 0.72 cap. The kimono's two lines
+   * measure 342 tall, which fixes the line height at 0.99. Reproducing that
+   * face here is what lets those designs exist outside the editor that made
+   * them, which is the only way they reach another store.
+   */
+  slab: {
+    key: 'slab',
+    label: 'Mono',
+    note: 'Set in Rubik Mono One.',
+    family: "'Rubik Mono One', ui-monospace, monospace",
+    googleFamily: 'Rubik+Mono+One',
+    weight: 400,
+    case: 'none',
+    // Never justified: the originals centre their lines at natural width, and
+    // stretching "Sex" to the width of "Party" would be a different design.
+    justify: false,
+    lineHeight: 0.99,
+    // A shade over the measured 0.82, and a measure just inside the box.
+    // Nothing justifies here, so there is no `textLength` clamping a line to
+    // the panel — an advance even slightly under the truth puts ink over the
+    // edge. The boxes below are widened by the same 3% so the printed size is
+    // unchanged.
+    advance: 0.83,
+    fill: 0.97,
+    cap: 0.72,
+    pad: { top: 0.05, bottom: 0.08 },
+    descender: 0.3,
   },
 };
 

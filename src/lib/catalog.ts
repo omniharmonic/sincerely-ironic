@@ -490,10 +490,11 @@ export const printifyMade: readonly CatalogItem[] = [
     type: 'Robe',
     price: 59,
     sizes: ['XS', 'S', 'M', 'L', 'XL', '2XL'],
-    styles: ['gothic'],
-    // The kimono's back panel is 3484 x 5545px of all-over print; the
-    // wordmark sits high on it rather than filling it.
-    prints: [{ place: 'front', text: 'Sincerely Ironic', box: { w: 0.52, h: 0.12, top: 0.1, x: 0.5 } }],
+    styles: ['slab'],
+    // Rebuilt from the design made in Printify's editor, which reported its
+    // own text, face and geometry: two centred lines on the back panel, at
+    // 0.5264 of its width with the block's middle at y 0.2641.
+    prints: [{ place: 'front', text: 'Sex Party', style: 'slab', box: { w: 0.5427, h: 0.22, top: 0.182, x: 0.5 } }],
     description: {
       sincere: 'Mid-length robe. Bell sleeves, belted. Light polyester, all-over print.',
       ironic: 'Mid-length robe. Bell sleeves, belted. Light polyester, all-over print. For after.',
@@ -503,14 +504,14 @@ export const printifyMade: readonly CatalogItem[] = [
     handle: 'fanny-pack',
     title: 'Fanny Pack',
     garment: 'fannypack',
-    colourway: 'ink',
+    // Black type on the bag, as drawn.
+    colourway: 'bone',
     type: 'Fanny pack',
     price: 40,
     sizes: ONE_SIZE,
-    styles: ['wide'],
-    // A fanny pack front is 2323 x 846px — wide and shallow, so the wordmark
-    // takes most of it and sits centred.
-    prints: [{ place: 'front', text: 'Sincerely Ironic', box: { w: 0.74, h: 0.62, x: 0.5, center: true } }],
+    styles: ['slab'],
+    // Likewise: one centred line at 0.4346 of the panel width.
+    prints: [{ place: 'front', text: 'DRUGS', style: 'slab', box: { w: 0.4481, h: 0.62, x: 0.5, center: true } }],
     description: {
       sincere: 'Fanny pack. Adjustable strap, zip closure.',
       ironic: 'Fanny pack. Adjustable strap, zip closure. Holds the essentials.',
