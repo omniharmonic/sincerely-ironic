@@ -117,8 +117,14 @@ function isLower(text: string) {
   return text !== text.toUpperCase();
 }
 
+/* Average advance of Anybody at wdth 112, weight 800, uppercase — used to
+   shrink the type until the longest word fits on one line. */
+const ADVANCE = 0.68;
+
 function PrintBlock({ print, area, colour }: { print: Print; area: Area; colour: string }) {
-  const size = area.size * (print.scale ?? 1);
+  const wanted = area.size * (print.scale ?? 1);
+  const longest = Math.max(...print.text.split(/\s+/).map((w) => w.length), 1);
+  const size = Math.min(wanted, (area.w * 0.96) / (longest * ADVANCE));
   const transform = area.rotate ? `rotate(${area.rotate} ${area.x + area.w / 2} ${area.y + area.h / 2})` : undefined;
   return (
     <foreignObject x={area.x} y={area.y} width={area.w} height={area.h} transform={transform}>

@@ -486,7 +486,8 @@ body {
   text-transform: uppercase;
   line-height: 0.9;
   letter-spacing: -0.02em;
-  overflow-wrap: anywhere;
+  overflow-wrap: normal;
+  word-break: keep-all;
 }
 .garment__print--lower {
   text-transform: none;
