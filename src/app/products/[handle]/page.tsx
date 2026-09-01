@@ -57,14 +57,20 @@ export default async function ProductPage({ params }: PageProps<'/products/[hand
         </h1>
         <p className="mono mt-5 text-[14px] tabular-nums">{money(product.price.amount, product.price.currency)}</p>
 
-        <ProductForm sizes={product.sizes} available={product.available} purchasable={product.source === 'shopify'} />
+        <ProductForm
+          handle={product.handle}
+          options={product.options}
+          variants={product.variants}
+          available={product.available}
+          purchasable={product.source === 'shopify'}
+        />
 
         <THtml s={product.description.sincere} i={product.description.ironic} className="prose mt-10" />
 
         <dl className="mono mt-12 grid gap-3 border-t border-line pt-5 normal-case leading-relaxed tracking-normal text-mute">
           {/* A blanket has no fit and a cap has one size; the sizing note
               only belongs on things you pick a size for. */}
-          {product.sizes.length > 1 ? (
+          {(product.options.find((o) => o.name === 'Size')?.values.length ?? 0) > 1 ? (
             <div>
               <T s={copy.fit.sincere} i={copy.fit.ironic} />
             </div>

@@ -30,7 +30,8 @@
  * like a runaway process.
  */
 
-import { mkdir, rm, writeFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
+import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import zlib from 'node:zlib';
 
@@ -38,7 +39,7 @@ import { Chrome } from './chrome.ts';
 
 import { catalog, type CatalogItem, type Place, type Print } from '../src/lib/catalog.ts';
 import { EMBLEMS } from '../src/lib/emblems.ts';
-import { splitPanel, STYLES, typeset, type StyleKey } from '../src/lib/typeset.ts';
+import { resolvePrint, STYLES, type Placed, type StyleKey } from '../src/lib/typeset.ts';
 
 const DPI = 300;
 const px = (inches: number) => Math.round(inches * DPI);
@@ -57,16 +58,19 @@ const px = (inches: number) => Math.round(inches * DPI);
 const AREAS: Record<Place, { w: number; h: number; label: string }> = {
   // 15x17, because that is what the blank actually is. Comfort Colors 1717 at
   // provider 99 tops out at 4494x5097 px — an aspect of 0.88, not the 0.83 of
-  // the 15x18 that was assumed here. Files cut to the wrong aspect still
-  // print, but every design had to scale to ~0.95 to fit inside the panel
-  // instead of filling it. (12x16 is the legacy area; do not go back to it.)
+  // the 15x18 that was assumed here. (12x16 is the legacy area; do not go
+  // back to it.)
+  //
+  // These are the PHYSICAL panels the printer can reach. Where the artwork
+  // sits inside one is a `PrintBox`, not an area — a left-chest hit is a
+  // small box high on the front panel, not a 4x4in panel of its own. That
+  // distinction is why prints used to land at the navel: a full-panel file
+  // centred in a 17-inch area has its middle at the navel by construction.
   front: { w: 15, h: 17, label: 'Front' },
   back: { w: 15, h: 17, label: 'Back' },
-  chest: { w: 4, h: 4, label: 'Left chest' },
+  chest: { w: 15, h: 17, label: 'Left chest' },
   sleeve: { w: 3.5, h: 14, label: 'Sleeve' },
-  // A leg hit is a wordmark near the thigh, not a banner down the whole
-  // panel. Printify's own leg area is 4x16in; the artwork wants far less.
-  leg: { w: 4, h: 5, label: 'Leg' },
+  leg: { w: 4, h: 16, label: 'Leg' },
   left: { w: 3, h: 1.5, label: 'Left' },
   right: { w: 3, h: 1.5, label: 'Right' },
 };
@@ -77,6 +81,11 @@ const AREA_OVERRIDES: Partial<Record<CatalogItem['garment'], Partial<Record<Plac
   // thread colours, auto-matched from the file — flat type is well inside.
   cap: { front: { w: 4, h: 2.25 } },
   bucket: { front: { w: 5.5, h: 2 } },
+  // From the blueprint: a fanny pack front is 2323x846px and a kimono back
+  // is 3484x5545px. Nothing like a tee panel, so nothing about the tee's
+  // numbers applies.
+  fannypack: { front: { w: 2323 / 300, h: 846 / 300 } },
+  robe: { front: { w: 3484 / 300, h: 5545 / 300 } },
   // Unverified — these vary by blueprint. Check before ordering.
   tote: { front: { w: 12, h: 14 }, back: { w: 12, h: 14 } },
   blanket: { front: { w: 50, h: 60 } },
@@ -86,6 +95,36 @@ const AREA_OVERRIDES: Partial<Record<CatalogItem['garment'], Partial<Record<Plac
 const INK = { bone: '#0D0D0D', ink: '#F3F3F0' } as const;
 
 const OUT = path.resolve('print-files');
+const BRAND = path.resolve('public/brand');
+
+/**
+ * A ready-made brand asset, used where the artwork is the mark rather than a
+ * slogan. These are vector with their webfonts already embedded, so they can
+ * be dropped straight into the render page and scaled to any print size.
+ */
+const assetCache = new Map<string, { svg: string; aspect: number }>();
+
+async function loadAsset(name: string, ink: string) {
+  const tone = ink === INK.bone ? 'black' : 'white';
+  const file = `${name.replace('{tone}', tone)}.svg`;
+  const hit = assetCache.get(file);
+  if (hit) return hit;
+  const svg = await readFile(path.join(BRAND, file), 'utf8');
+  const vb = /viewBox="0 0 ([\d.]+) ([\d.]+)"/.exec(svg);
+  if (!vb) throw new Error(`${file} has no viewBox to size it by`);
+  const entry = { svg, aspect: Number(vb[1]) / Number(vb[2]) };
+  assetCache.set(file, entry);
+  return entry;
+}
+
+/**
+ * Content fingerprint. The upload ledger is keyed by file name, and file
+ * names do not change when the artwork inside them does — so a redesign
+ * silently re-used whatever had been uploaded under that name the first
+ * time. The hash is what makes "already uploaded" mean "already uploaded
+ * THIS".
+ */
+const sha = (buf: Buffer) => createHash('sha256').update(buf).digest('hex').slice(0, 16);
 
 function area(item: CatalogItem, place: Place) {
   return { ...AREAS[place], ...AREA_OVERRIDES[item.garment]?.[place] };
@@ -110,36 +149,70 @@ function emblemSvg(which: keyof typeof EMBLEMS, x: number, y: number, size: numb
 }
 
 /**
- * The print as a standalone page: an SVG the exact pixel size of the print
- * area, with the emblem and the block laid out by the shared engine.
+ * The print as a standalone page: an SVG cut to the artwork, not to the
+ * panel. The layout — box, block, aside, emblem — comes from `resolvePrint`,
+ * the same call the vendor placement is derived from, so the file and the
+ * position it is printed at can never disagree.
  */
-function html(print: Print, styleKey: StyleKey, ink: string, w: number, h: number): string {
-  const style = STYLES[styleKey];
-  const split = splitPanel(Boolean(print.emblem), Boolean(print.text), w, h);
-
-  let fontSize = 0;
-  const body: string[] = [];
-
-  if (print.emblem && split.emblem) {
-    body.push(emblemSvg(print.emblem, split.emblem.x, split.emblem.y, split.emblem.size, ink));
+function html(placed: Placed, print: Print, ink: string, asset?: string): string {
+  if (asset) {
+    // Scale the vector to the canvas by rewriting its own width and height;
+    // the viewBox does the rest.
+    // A brand asset is measured tight to its own ink, so drawn at the full
+    // canvas it sits exactly on the edge and can lose a subpixel to the
+    // capture. Inset it and centre it; the canvas is what gets positioned on
+    // the garment, so the margin costs nothing but safety.
+    const inset = 0.985;
+    const w = placed.width * inset;
+    const h = placed.height * inset;
+    const sized = asset.replace(
+      /^(<svg[^>]*?)\swidth="[^"]*"\sheight="[^"]*"/,
+      `$1 width="${w.toFixed(2)}" height="${h.toFixed(2)}"`,
+    );
+    return `<!doctype html><meta charset="utf-8">
+<style>
+  html,body{margin:0;padding:0;background:transparent}
+  .f{width:${placed.width.toFixed(2)}px;height:${placed.height.toFixed(2)}px;display:flex;align-items:center;justify-content:center}
+  svg{display:block}
+</style>
+<div class="f">${sized}</div>`;
   }
 
-  if (print.text && split.text) {
-    const box = split.text;
-    // Lay out in the panel's own pixel units, so the numbers are the file's.
-    const layout = typeset(print.text, styleKey, box.w, box.h, print.fill ?? 1);
-    fontSize = layout.fontSize;
-    const top = box.y + (box.h - layout.height) / 2;
-    for (const line of layout.lines) {
+  const main = placed.block?.main.style;
+  const aside = placed.block?.aside?.style;
+  const body: string[] = [];
+
+  if (print.emblem && placed.emblem) {
+    const e = placed.emblem;
+    body.push(emblemSvg(print.emblem, e.x, e.y, e.w, ink));
+  }
+
+  const block = placed.block;
+  if (block) {
+    const cx = placed.width / 2;
+    for (const line of block.main.lines) {
+      const y = placed.blockTop + block.mainTop + line.y;
       body.push(
-        `<text x="${(box.x + box.w / 2).toFixed(2)}" y="${(top + line.y).toFixed(2)}" text-anchor="middle"` +
+        `<text class="m" x="${cx.toFixed(2)}" y="${y.toFixed(2)}" text-anchor="middle"` +
           (line.measure ? ` textLength="${line.measure.toFixed(2)}" lengthAdjust="spacingAndGlyphs"` : '') +
           `>${escape(line.text)}</text>`,
       );
     }
+    if (block.aside) {
+      const y = placed.blockTop + block.asideTop + block.aside.lines[0].y;
+      body.push(`<text class="a" x="${cx.toFixed(2)}" y="${y.toFixed(2)}" text-anchor="middle">${escape(block.aside.lines[0].text)}</text>`);
+    }
   }
 
-  const href = `https://fonts.googleapis.com/css2?family=${style.googleFamily}&display=block`;
+  const families = [...new Set([main?.googleFamily, aside?.googleFamily].filter(Boolean))] as string[];
+  const href = `https://fonts.googleapis.com/css2?${families.map((f) => `family=${f}`).join('&')}&display=block`;
+  const face = (st: typeof main) =>
+    st
+      ? `font-family: '${st.googleFamily.split(':')[0].replace(/\+/g, ' ')}';
+    font-weight: ${st.weight};
+    ${st.variation ? `font-variation-settings: ${st.variation};` : ''}
+    ${st.letterSpacing ? `letter-spacing: ${st.letterSpacing}em;` : ''}`
+      : '';
 
   return `<!doctype html>
 <meta charset="utf-8">
@@ -148,16 +221,11 @@ function html(print: Print, styleKey: StyleKey, ink: string, w: number, h: numbe
 <style>
   html, body { margin: 0; padding: 0; background: transparent; }
   svg { display: block; }
-  text {
-    fill: ${ink};
-    font-family: '${style.googleFamily.split(':')[0].replace(/\+/g, ' ')}';
-    font-weight: ${style.weight};
-    font-size: ${fontSize.toFixed(2)}px;
-    ${style.variation ? `font-variation-settings: ${style.variation};` : ''}
-    ${style.letterSpacing ? `letter-spacing: ${style.letterSpacing}em;` : ''}
-  }
+  text { fill: ${ink}; }
+  .m { ${face(main)} font-size: ${(block?.main.fontSize ?? 0).toFixed(2)}px; }
+  .a { ${face(aside)} font-size: ${(block?.aside?.fontSize ?? 0).toFixed(2)}px; }
 </style>
-<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+<svg xmlns="http://www.w3.org/2000/svg" width="${Math.round(placed.width)}" height="${Math.round(placed.height)}" viewBox="0 0 ${placed.width.toFixed(2)} ${placed.height.toFixed(2)}">
     ${body.join('\n    ')}
 </svg>`;
 }
@@ -233,26 +301,46 @@ async function main() {
           const effective = print.style ?? styleKey;
 
           const { w, h, label } = area(item, print.place);
-          const wPx = px(w);
-          const hPx = px(h);
+          const ink = INK[item.colourway];
+          const art = print.asset ? await loadAsset(print.asset, ink) : undefined;
+          // Lay out in the panel's own pixel units, so the numbers coming
+          // back are the file's and the vendor fractions are exact.
+          const placed = resolvePrint(
+            {
+              place: print.place,
+              text: art ? undefined : print.text,
+              style: effective,
+              fill: print.fill,
+              box: print.box,
+              aside: art ? undefined : print.aside,
+              emblemAspect: art ? art.aspect : print.emblem ? 1 : undefined,
+            },
+            px(w),
+            px(h),
+          );
+          const wPx = Math.round(placed.width);
+          const hPx = Math.round(placed.height);
           const name = `${item.handle}--${styleKey}--${print.place}.png`;
           const page = path.join(tmp, `${name}.html`);
-          const ink = INK[item.colourway];
 
-          await writeFile(page, html(print, effective, ink, wPx, hPx), 'utf8');
+          await writeFile(page, html(placed, print, ink, art?.svg), 'utf8');
           const shot = await chrome.shoot(page, wPx, hPx);
-          await writeFile(path.join(OUT, name), stampDpi(shot, DPI));
+          const png = stampDpi(shot, DPI);
+          await writeFile(path.join(OUT, name), png);
 
           if (bothInks) {
             // The same block in the ink the other colourway needs.
             const altInk = ink === INK.bone ? INK.ink : INK.bone;
+            const altArt = print.asset ? await loadAsset(print.asset, altInk) : undefined;
             const altName = name.replace(/\.png$/, '--alt.png');
             const altPage = path.join(tmp, `${altName}.html`);
-            await writeFile(altPage, html(print, effective, altInk, wPx, hPx), 'utf8');
+            await writeFile(altPage, html(placed, print, altInk, altArt?.svg), 'utf8');
             const altShot = await chrome.shoot(altPage, wPx, hPx);
-            await writeFile(path.join(OUT, altName), stampDpi(altShot, DPI));
+            const altPng = stampDpi(altShot, DPI);
+            await writeFile(path.join(OUT, altName), altPng);
             manifest.push({
               file: altName,
+              sha: sha(altPng),
               product: item.title,
               handle: item.handle,
               garment: item.garment,
@@ -261,8 +349,10 @@ async function main() {
               placement: label,
               text: print.text ?? '',
               emblem: print.emblem ?? null,
-              inches: `${w} × ${h}`,
+              panelInches: `${w} × ${h}`,
               pixels: `${wPx} × ${hPx}`,
+              box: placed.box,
+              vendor: placed.vendor,
               dpi: DPI,
               ink: altInk,
               garmentColour: item.colourway === 'bone' ? 'ink' : 'bone',
@@ -272,6 +362,7 @@ async function main() {
 
           manifest.push({
             file: name,
+            sha: sha(png),
             product: item.title,
             handle: item.handle,
             garment: item.garment,
@@ -280,8 +371,10 @@ async function main() {
             placement: label,
             text: print.text ?? '',
             emblem: print.emblem ?? null,
-            inches: `${w} × ${h}`,
+            panelInches: `${w} × ${h}`,
             pixels: `${wPx} × ${hPx}`,
+            box: placed.box,
+            vendor: placed.vendor,
             dpi: DPI,
             ink,
             garmentColour: item.colourway,

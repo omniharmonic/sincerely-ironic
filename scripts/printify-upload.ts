@@ -13,6 +13,7 @@
 import { readdir, readFile, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 
 import { api } from './printify.ts';
 
@@ -24,13 +25,15 @@ const MAP = path.resolve('scripts/printify-uploads.json');
  * so the placeholder files the generator makes for them are meaningless.
  * Uploading them would just be clutter in the user's library.
  */
-const NOT_OURS = new Set(['yard-sign', 'fanny-pack']);
+const NOT_OURS = new Set(['yard-sign']);
 
 export interface Uploaded {
   id: string;
   width: number;
   height: number;
   previewUrl: string;
+  /** Fingerprint of the bytes actually uploaded under this name. */
+  sha?: string;
 }
 
 export type UploadMap = Record<string, Uploaded>;
@@ -47,6 +50,7 @@ async function saveMap(map: UploadMap) {
 interface ManifestRow {
   file: string;
   handle: string;
+  sha: string;
 }
 
 async function main() {
@@ -63,12 +67,18 @@ async function main() {
     .filter((r) => !NOT_OURS.has(r.handle))
     .filter((r) => (filter ? r.file.includes(filter) : true))
     .filter((r) => onDisk.has(r.file))
-    .filter((r) => !map[r.file]);
+    // Re-upload when the bytes under a name have changed. Matching on the
+    // name alone is what let a redesign ship with the old artwork still
+    // attached to every product.
+    .filter((r) => map[r.file]?.sha !== r.sha);
 
   const skipped = manifest.filter((r) => NOT_OURS.has(r.handle)).length;
+  const changed = queue.filter((r) => map[r.file]).length;
   console.log(
     `${manifest.length} in manifest · ${Object.keys(map).length} already uploaded · ` +
-      `${skipped} skipped (art not ours) · ${queue.length} to upload\n`,
+      `${skipped} skipped (art not ours) · ${queue.length} to upload` +
+      (changed ? ` (${changed} changed since last time)` : '') +
+      '\n',
   );
   if (queue.length === 0) {
     console.log('Nothing to do.');
@@ -91,6 +101,7 @@ async function main() {
         width: res.width,
         height: res.height,
         previewUrl: res.preview_url,
+        sha: row.sha,
       };
       done += 1;
       console.log(`✓ ${row.file}  ${res.width}×${res.height}  ${res.id}`);
@@ -111,7 +122,12 @@ async function main() {
 
 // Only upload when run directly. Other scripts import this module for
 // `loadMap`, and that must not kick off a run as a side effect.
-if (import.meta.url === `file://${process.argv[1]}`) {
+//
+// Compare real file URLs. Concatenating "file://" onto argv[1] compares an
+// encoded URL with a raw path, and this project's own directory contains
+// spaces and parentheses — so the guard was never true and `pnpm
+// printify-upload` had been quietly doing nothing at all.
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   main().catch((e) => {
     console.error(e);
     process.exit(1);

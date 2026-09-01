@@ -5,9 +5,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect } from 'react';
 
-import { GarmentArt } from '@/components/GarmentArt';
+import { ArtFallback } from '@/components/ArtFallback';
 import { T } from '@/components/universe/T';
-import { catalogByHandle } from '@/lib/catalog';
 import { cart as copy, product as productCopy } from '@/lib/copy';
 import { useCart } from './CartProvider';
 
@@ -81,41 +80,40 @@ export function CartDrawer() {
                 </p>
               ) : (
                 <ul className="flex flex-col gap-6">
-                  {lines.map((line) => {
-                    const item = catalogByHandle[line.product.handle];
-                    return (
-                      <li key={line.id} className="grid grid-cols-[72px_1fr_auto] gap-4">
-                        <Link href={`/products/${line.product.handle}`} onClick={() => setOpen(false)} className="relative aspect-[4/5] overflow-hidden border border-line bg-panel">
-                          {line.product.image ? (
-                            <Image src={line.product.image.url} alt={line.product.image.alt} fill sizes="72px" className="object-cover" />
-                          ) : item ? (
-                            <GarmentArt garment={item.garment} colourway={item.colourway} prints={item.prints} style={item.styles[0]} />
-                          ) : null}
+                  {lines.map((line) => (
+                    <li key={line.id} className="grid grid-cols-[72px_1fr_auto] gap-4">
+                      <Link href={`/products/${line.product.handle}`} onClick={() => setOpen(false)} className="relative aspect-[4/5] overflow-hidden border border-line bg-panel">
+                        {line.product.image ? (
+                          /* Contain, like everywhere else a mockup is shown:
+                             a square photograph cropped to 4:5 loses its ends. */
+                          <Image src={line.product.image.url} alt={line.product.image.alt} fill sizes="72px" className="object-contain p-[6%]" />
+                        ) : (
+                          <ArtFallback title={line.product.title} />
+                        )}
+                      </Link>
+                      <div className="min-w-0">
+                        <Link href={`/products/${line.product.handle}`} onClick={() => setOpen(false)} className="display block text-[18px] leading-none" style={{ ['--wdth' as string]: 110 }}>
+                          {line.product.title}
                         </Link>
-                        <div className="min-w-0">
-                          <Link href={`/products/${line.product.handle}`} onClick={() => setOpen(false)} className="display block text-[18px] leading-none" style={{ ['--wdth' as string]: 110 }}>
-                            {line.product.title}
-                          </Link>
-                          <p className="mono mt-2 text-mute">{line.size}</p>
-                          <div className="mono mt-3 inline-flex items-center border border-line">
-                            <button type="button" className="h-8 w-8 cursor-pointer hover:bg-panel" onClick={() => update(line.id, line.quantity - 1)} aria-label="One fewer" disabled={pending}>
-                              −
-                            </button>
-                            <span className="w-8 text-center tabular-nums">{line.quantity}</span>
-                            <button type="button" className="h-8 w-8 cursor-pointer hover:bg-panel" onClick={() => update(line.id, line.quantity + 1)} aria-label="One more" disabled={pending}>
-                              +
-                            </button>
-                          </div>
-                        </div>
-                        <div className="flex flex-col items-end justify-between">
-                          <span className="mono tabular-nums">{money(line.total.amount, line.total.currency)}</span>
-                          <button type="button" className="mono cursor-pointer text-mute hover:text-fg hover:underline underline-offset-4" onClick={() => remove(line.id)} disabled={pending}>
-                            <T s={copy.remove.sincere} i={copy.remove.ironic} />
+                        <p className="mono mt-2 text-mute">{line.size}</p>
+                        <div className="mono mt-3 inline-flex items-center border border-line">
+                          <button type="button" className="h-8 w-8 cursor-pointer hover:bg-panel" onClick={() => update(line.id, line.quantity - 1)} aria-label="One fewer" disabled={pending}>
+                            −
+                          </button>
+                          <span className="w-8 text-center tabular-nums">{line.quantity}</span>
+                          <button type="button" className="h-8 w-8 cursor-pointer hover:bg-panel" onClick={() => update(line.id, line.quantity + 1)} aria-label="One more" disabled={pending}>
+                            +
                           </button>
                         </div>
-                      </li>
-                    );
-                  })}
+                      </div>
+                      <div className="flex flex-col items-end justify-between">
+                        <span className="mono tabular-nums">{money(line.total.amount, line.total.currency)}</span>
+                        <button type="button" className="mono cursor-pointer text-mute hover:text-fg hover:underline underline-offset-4" onClick={() => remove(line.id)} disabled={pending}>
+                          <T s={copy.remove.sincere} i={copy.remove.ironic} />
+                        </button>
+                      </div>
+                    </li>
+                  ))}
                 </ul>
               )}
             </div>

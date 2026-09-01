@@ -48,9 +48,25 @@ interface MutationPayload {
   userErrors: { field?: string[]; message: string }[];
 }
 
+/**
+ * The cart the cookie points at is gone.
+ *
+ * Carts do not live forever: Shopify drops one once it has been checked out
+ * or left long enough, and every id is scoped to the store that issued it, so
+ * moving stores invalidates all of them at once. The cookie lasts thirty days
+ * either way. Without this, a customer holding a dead id could never add
+ * anything again — the failure repeats on every click and nothing clears it.
+ */
+class CartGone extends Error {}
+
+const looksGone = (e: { field?: string[]; message: string }) =>
+  e.field?.includes('cartId') === true || /does not exist|invalid.*cart|cart.*not found/i.test(e.message);
+
 function unwrap(payload: MutationPayload, what: string): Cart {
   if (payload.userErrors.length) {
-    throw new Error(`${what}: ${payload.userErrors.map((e) => e.message).join('; ')}`);
+    const message = payload.userErrors.map((e) => e.message).join('; ');
+    if (payload.userErrors.some(looksGone)) throw new CartGone(message);
+    throw new Error(`${what}: ${message}`);
   }
   if (!payload.cart) throw new Error(`${what}: no cart returned`);
   return normalise(payload.cart);
@@ -58,6 +74,10 @@ function unwrap(payload: MutationPayload, what: string): Cart {
 
 async function readCartId(): Promise<string | undefined> {
   return (await cookies()).get(COOKIE)?.value;
+}
+
+async function clearCartId() {
+  (await cookies()).delete(COOKIE);
 }
 
 async function writeCartId(id: string) {
@@ -92,25 +112,35 @@ export async function addToCart(variantId: string, quantity = 1): Promise<CartRe
   if (!isStorefrontConfigured()) {
     return { ok: false, error: 'The register is not open in this universe yet.' };
   }
+  const lines = [{ merchandiseId: variantId, quantity }];
+
+  const start = async (): Promise<Cart> => {
+    const data = await storefront<{ cartCreate: MutationPayload }>(CART_CREATE, {
+      variables: { lines },
+      cache: 'no-store',
+    });
+    const fresh = unwrap(data.cartCreate, 'Create cart');
+    await writeCartId(fresh.id);
+    return fresh;
+  };
+
   try {
     const id = await readCartId();
-    const lines = [{ merchandiseId: variantId, quantity }];
-    let cart: Cart;
-    if (id) {
+    if (!id) return { ok: true, cart: await start() };
+
+    try {
       const data = await storefront<{ cartLinesAdd: MutationPayload }>(CART_LINES_ADD, {
         variables: { cartId: id, lines },
         cache: 'no-store',
       });
-      cart = unwrap(data.cartLinesAdd, 'Add to cart');
-    } else {
-      const data = await storefront<{ cartCreate: MutationPayload }>(CART_CREATE, {
-        variables: { lines },
-        cache: 'no-store',
-      });
-      cart = unwrap(data.cartCreate, 'Create cart');
-      await writeCartId(cart.id);
+      return { ok: true, cart: unwrap(data.cartLinesAdd, 'Add to cart') };
+    } catch (err) {
+      // A dead id is not the customer's problem: drop it and open a new cart
+      // with the thing they were trying to buy already in it.
+      if (!(err instanceof CartGone)) throw err;
+      await clearCartId();
+      return { ok: true, cart: await start() };
     }
-    return { ok: true, cart };
   } catch (err) {
     return { ok: false, error: err instanceof Error ? err.message : 'Could not add to cart' };
   }
@@ -127,6 +157,10 @@ export async function updateLine(lineId: string, quantity: number): Promise<Cart
     });
     return { ok: true, cart: unwrap(data.cartLinesUpdate, 'Update cart') };
   } catch (err) {
+    if (err instanceof CartGone) {
+      await clearCartId();
+      return { ok: true, cart: null };
+    }
     return { ok: false, error: err instanceof Error ? err.message : 'Could not update the cart' };
   }
 }
@@ -141,6 +175,10 @@ export async function removeLine(lineId: string): Promise<CartResult> {
     });
     return { ok: true, cart: unwrap(data.cartLinesRemove, 'Remove from cart') };
   } catch (err) {
+    if (err instanceof CartGone) {
+      await clearCartId();
+      return { ok: true, cart: null };
+    }
     return { ok: false, error: err instanceof Error ? err.message : 'Could not remove from cart' };
   }
 }

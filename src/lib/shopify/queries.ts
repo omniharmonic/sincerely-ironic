@@ -9,15 +9,19 @@ export const PRODUCT_FRAGMENT = /* GraphQL */ `
     tags
     availableForSale
     featuredImage { url altText width height }
-    images(first: 6) { nodes { url altText width height } }
+    # Every mockup, not the first handful. Printify ships a front, a back and
+    # several context shots per product; a limit of 6 dropped the tail silently.
+    images(first: 20) { nodes { url altText width height } }
     priceRange { minVariantPrice { amount currencyCode } }
-    variants(first: 20) {
+    options { name optionValues { name } }
+    variants(first: 50) {
       nodes {
         id
         title
         availableForSale
         price { amount currencyCode }
         selectedOptions { name value }
+        image { url }
       }
     }
     ironic: metafield(namespace: "sincerely", key: "ironic_description") { value }

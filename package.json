@@ -11,7 +11,11 @@
     "logo-files": "node --experimental-strip-types scripts/logo-files.ts",
     "printify-upload": "node --experimental-strip-types scripts/printify-upload.ts",
     "printify-products": "node --experimental-strip-types scripts/printify-products.ts",
-    "printify-mockups": "node --experimental-strip-types scripts/printify-mockups.ts"
+    "printify-mockups": "node --experimental-strip-types scripts/printify-mockups.ts",
+    "placement-proof": "node --experimental-strip-types scripts/placement-proof.ts",
+    "check-prints": "node --experimental-strip-types scripts/check-prints.ts",
+    "printify-publish": "node --experimental-strip-types scripts/printify-publish.ts",
+    "shopify-reconcile": "node --experimental-strip-types scripts/shopify-reconcile.ts"
   },
   "dependencies": {
     "motion": "13.1.1",

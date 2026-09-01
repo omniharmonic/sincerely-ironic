@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2219.08 348.00" width="2219" height="348">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2219.08 298.00" width="2219" height="298">
   <defs>
     <linearGradient id="slick" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0.000" stop-color="#FF2E9E"/>
@@ -6,6 +6,7 @@
       <stop offset="0.667" stop-color="#1FCFEE"/>
       <stop offset="1.000" stop-color="#7C3AED"/>
     </linearGradient>
+    
     <linearGradient id="glass" x1="0" y1="0" x2="0.4" y2="1">
       <stop offset="0" stop-color="#ffffff" stop-opacity="0.82"/>
       <stop offset="0.5" stop-color="#ffffff" stop-opacity="0.5"/>
@@ -30,6 +31,6 @@
   <text class="i" x="0.00" y="0.00">IRONIC</text>
   <text class="i" x="0.00" y="0.00">IRONIC</text>
   <text class="i" x="0.00" y="0.00">IRONIC</text>
-  <text class="s" x="388.08" y="224.00">Sincerely</text>
-  <text class="i" x="1313.80" y="204.00">IRONIC</text>
+  <text class="s" x="388.08" y="194.00">Sincerely</text>
+  <text class="i" x="1313.80" y="194.00">IRONIC</text>
 </svg>

@@ -439,30 +439,25 @@ body {
     border-color 0.3s,
     background-color 0.55s;
 }
-.card__art img,
-.card__art svg {
+.card__art img {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
 }
-/* The drawn art is authored to this frame, so it fills it. */
-.card__art svg {
-  object-fit: cover;
-  transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-/* A photograph is not. Mockups arrive at whatever aspect the vendor chose —
-   Printify's are square — and cropping one to 4:5 cut the ends off the yard
-   sign's own words. Fit it inside the frame instead: never cropped, never
-   stretched, just letterboxed against the panel. */
+/* Mockups arrive at whatever aspect the vendor chose — Printify's are square —
+   and cropping one to 4:5 cut the ends off the yard sign's own words. Fit it
+   inside the frame instead: never cropped, never stretched, just letterboxed
+   against the panel. */
 .card__art img {
   object-fit: contain;
   padding: 5%;
+  transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .card:hover .card__art {
   border-color: var(--fg);
 }
-.card:hover .card__art svg {
+.card:hover .card__art img {
   transform: scale(1.04);
 }
 .card:hover {
@@ -470,6 +465,76 @@ body {
 }
 .card__name {
   font-size: clamp(22px, 2.2vw, 30px);
+}
+
+/* ---------- no photograph yet ---------- */
+
+/* A product Shopify has no image for. Deliberately not art: the drawn garments
+   were pulled from every customer-facing surface so that what the site shows
+   is the mockup of the thing the printer makes. Just the name, quietly. */
+.art-fallback {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12%;
+  background: var(--panel);
+}
+.art-fallback__title {
+  --wdth: 100;
+  font-size: 13px;
+  line-height: 1.15;
+  text-align: center;
+  color: var(--mute);
+  overflow-wrap: anywhere;
+}
+
+/* ---------- image thumbnails ---------- */
+
+/* The thumbnail is its own label: a row of numbers made the customer click to
+   find out what they were picking. */
+.thumb {
+  position: relative;
+  width: 64px;
+  aspect-ratio: 4 / 5;
+  flex: none;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  overflow: hidden;
+  opacity: 0.62;
+  cursor: pointer;
+  transition:
+    border-color 0.2s,
+    opacity 0.2s;
+}
+.thumb:hover,
+.thumb[aria-pressed='true'] {
+  border-color: var(--fg);
+  opacity: 1;
+}
+
+/* ---------- the zoom ---------- */
+
+/* Hover to look closer. The transform is written by the component on pointer
+   move; all this does is say how it should feel and make sure it is the image
+   that moves and not the frame. */
+.lens {
+  transform-origin: 50% 50%;
+  transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
+  will-change: transform;
+}
+@media (hover: none) {
+  /* No hover, no zoom: on a touch screen the transform would only ever be
+     left switched on by a stray tap. */
+  .lens {
+    transition: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lens {
+    transition: none;
+  }
 }
 
 /* ---------- garment art ---------- */
@@ -521,6 +586,14 @@ body {
 .prose p + p {
   margin-top: 1em;
 }
+/* The opening statement, set larger than what follows. Scoped under `.prose`
+   deliberately: `.prose p` already sets a font-size, and a utility class on
+   the element loses to it on specificity — the size simply would not apply. */
+.prose .prose__lead {
+  font-size: clamp(21px, 2.3vw, 30px);
+  line-height: 1.3;
+  max-width: 26ch;
+}
 
 /* ---------- drawer ---------- */
 
@@ -558,7 +631,7 @@ body {
     animation: none !important;
   }
   .display,
-  .card__art svg,
+  .card__art img,
   .wordmark__ironic {
     transition: none;
   }

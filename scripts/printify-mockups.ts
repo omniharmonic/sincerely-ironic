@@ -26,12 +26,21 @@ const LEDGER = path.resolve('scripts/printify-products.json');
 const OUT = path.resolve('scripts/printify-mockups.json');
 const MUTATIONS = path.resolve('scripts/printify-mockups-mutations.txt');
 
-/** How many mockups to put on a listing. Enough to turn, not a gallery. */
-const KEEP = 3;
+/** How many mockups to put on a listing. The site shows photography and
+ *  nothing else now, so a listing wants every angle Printify rendered, not a
+ *  chosen few — capped only to keep one product from flooding the gallery. */
+const KEEP = 8;
 
-interface Ledger {
-  [handle: string]: { id: string; blueprint: number; provider: number; style: string };
+interface Entry {
+  id: string;
+  blueprint: number;
+  provider: number;
+  style: string;
 }
+
+/** Keyed by shop first: a Printify shop is one sales-channel connection, and
+ *  the same handle exists in each shop as a different product. */
+type Ledger = Record<string, Record<string, Entry>>;
 
 interface Image {
   src: string;
@@ -56,8 +65,14 @@ async function main() {
 
   if (!existsSync(LEDGER)) throw new Error('no product ledger — run pnpm printify-products --create first');
   const ledger = JSON.parse(await readFile(LEDGER, 'utf8')) as Ledger;
+  const forShop = ledger[SHOP_ID] ?? {};
+  if (Object.keys(forShop).length === 0) {
+    throw new Error(
+      `the ledger holds nothing for shop ${SHOP_ID} — it knows about ${Object.keys(ledger).join(', ') || 'no shops'}`,
+    );
+  }
 
-  const handles = Object.keys(ledger).filter((h) => (filter ? h.includes(filter) : true));
+  const handles = Object.keys(forShop).filter((h) => (filter ? h.includes(filter) : true));
   const plan: Plan = {};
   const problems: string[] = [];
 
@@ -68,7 +83,7 @@ async function main() {
       continue;
     }
 
-    const product = await api<Product>('GET', `/shops/${SHOP_ID}/products/${ledger[handle].id}.json`);
+    const product = await api<Product>('GET', `/shops/${SHOP_ID}/products/${forShop[handle].id}.json`);
 
     // Which variants wear the colour this design was drawn on. Everything that
     // is not Black is the natural colourway, whatever the blank calls it —

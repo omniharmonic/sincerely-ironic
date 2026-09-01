@@ -10,7 +10,19 @@
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 
-export const SHOP_ID = '12124343';
+/**
+ * The Printify shop that was connected to the first (dev) Shopify store.
+ *
+ * A Printify "shop" is one sales-channel connection, so connecting a second
+ * Shopify store creates a second shop with a different id — the products
+ * built under this one do not follow it across. It stays here as the default
+ * and as the key the existing product ledger is filed under; point
+ * `PRINTIFY_SHOP_ID` at the new shop once the real store is connected.
+ */
+export const LEGACY_SHOP_ID = '12124343';
+
+export const SHOP_ID = process.env.PRINTIFY_SHOP_ID?.trim() || LEGACY_SHOP_ID;
+
 const BASE = 'https://api.printify.com/v1';
 
 let token: string | null = null;

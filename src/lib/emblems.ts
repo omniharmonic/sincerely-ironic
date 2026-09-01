@@ -92,14 +92,21 @@ const VETERAN: Emblem = {
   shapes: [
     { circle: { cx: 50, cy: 50, r: 47 }, stroke: 3.2 },
     { circle: { cx: 50, cy: 50, r: 41 }, stroke: 1.2 },
-    { points: star(50, 30, 12, 5) },
-    { d: chevron(50, 46, 15, 7, 4.4) },
-    { d: chevron(50, 56, 15, 7, 4.4) },
-    { d: chevron(50, 66, 15, 7, 4.4) },
+    { points: star(50, 29, 12, 5) },
+    // Narrower and shorter than they were, and lifted as a stack. At the old
+    // size the bottom chevron ran out to x=35..65, where the laurel arc
+    // (r=33 about 50,52) passes through y~81 with leaves reaching back to
+    // y~70 — so chevron and wreath fused into one blob at the foot of the
+    // patch. Three rows of 11.5 half-width ending at y=70 clear it.
+    { d: chevron(50, 45, 11.5, 5.5, 3.6) },
+    { d: chevron(50, 53, 11.5, 5.5, 3.6) },
+    { d: chevron(50, 61, 11.5, 5.5, 3.6) },
     // In SVG, 90 degrees is straight down. Each branch starts near the foot
-    // of the wreath and sweeps up its own side.
-    ...laurel(50, 52, 33, 100, 186, 7, 11, 3.4).map((d) => ({ d })),
-    ...laurel(50, 52, 33, 80, -6, 7, 11, 3.4).map((d) => ({ d })),
+    // of the wreath and sweeps up its own side. They start 40 degrees apart,
+    // not 20: at radius 33 a 20-degree gap is 11.5 units, and the leaves are
+    // 11 long, so the two branches met in a blob at the bottom of the patch.
+    ...laurel(50, 52, 33, 110, 190, 7, 11, 3.4).map((d) => ({ d })),
+    ...laurel(50, 52, 33, 70, -10, 7, 11, 3.4).map((d) => ({ d })),
   ],
 };
 

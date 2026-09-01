@@ -38,16 +38,20 @@ Solid means both figures at full strength, with no 58% second figure.
 | `lockup-badge-black.svg` | — | Compact badge — mark in colour over the stacked name, black type |
 | `lockup-badge-white.png` | 2000×2028 | Compact badge — mark in colour over the stacked name, white type |
 | `lockup-badge-white.svg` | — | Compact badge — mark in colour over the stacked name, white type |
-| `lockup-row-black.png` | 2000×314 | Mark + wordmark, row, black |
+| `lockup-row-black.png` | 2000×269 | Mark + wordmark, row, black |
 | `lockup-row-black.svg` | — | Mark + wordmark, row, black |
-| `lockup-row-slick-black.png` | 2000×314 | Mark in colour, name beside it, black type |
+| `lockup-row-rainbow.png` | 2000×269 | Mark and name both on the slick, side by side |
+| `lockup-row-rainbow.svg` | — | Mark and name both on the slick, side by side |
+| `lockup-row-slick-black.png` | 2000×269 | Mark in colour, name beside it, black type |
 | `lockup-row-slick-black.svg` | — | Mark in colour, name beside it, black type |
-| `lockup-row-slick-white.png` | 2000×314 | Mark in colour, name beside it, white type |
+| `lockup-row-slick-white.png` | 2000×269 | Mark in colour, name beside it, white type |
 | `lockup-row-slick-white.svg` | — | Mark in colour, name beside it, white type |
-| `lockup-row-white.png` | 2000×314 | Mark + wordmark, row, white |
+| `lockup-row-white.png` | 2000×269 | Mark + wordmark, row, white |
 | `lockup-row-white.svg` | — | Mark + wordmark, row, white |
 | `lockup-stack-black.png` | 2000×1705 | Mark + wordmark, stack, black |
 | `lockup-stack-black.svg` | — | Mark + wordmark, stack, black |
+| `lockup-stack-rainbow.png` | 2000×1705 | Mark and name both on the slick |
+| `lockup-stack-rainbow.svg` | — | Mark and name both on the slick |
 | `lockup-stack-slick-black.png` | 2000×1705 | Mark in colour, name under it, black type |
 | `lockup-stack-slick-black.svg` | — | Mark in colour, name under it, black type |
 | `lockup-stack-slick-white.png` | 2000×1705 | Mark in colour, name under it, white type |

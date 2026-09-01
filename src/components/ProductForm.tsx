@@ -5,54 +5,101 @@ import { useState } from 'react';
 import { useCart } from '@/components/cart/CartProvider';
 import { T } from '@/components/universe/T';
 import { product as copy } from '@/lib/copy';
-import type { Size } from '@/lib/shopify/types';
+import { setColour } from '@/lib/product/colour';
+import type { Option, Variant } from '@/lib/shopify/types';
 
 /**
- * `purchasable` is true only when the product actually came from Shopify —
- * a configured-but-rejected token must not produce a button that fails.
+ * Pick a variant, one axis at a time.
+ *
+ * A Printify blueprint fixes its options at Colour and Size, so a garment has
+ * ten variants across two axes. Rendering one chip per variant showed
+ * "S S M M L L XL XL 2XL 2XL" — every size twice, with no way to say which
+ * colour was meant, and whichever chip was clicked decided the colour
+ * silently. The selection has to be pinned on every axis the store defines.
+ *
+ * `purchasable` is true only when the product actually came from Shopify — a
+ * configured-but-rejected token must not produce a button that fails.
  */
-export function ProductForm({ sizes, available, purchasable }: { sizes: Size[]; available: boolean; purchasable: boolean }) {
+export function ProductForm({
+  handle,
+  options,
+  variants,
+  available,
+  purchasable,
+}: {
+  handle: string;
+  options: Option[];
+  variants: Variant[];
+  available: boolean;
+  purchasable: boolean;
+}) {
   const { add, pending } = useCart();
-  const firstAvailable = sizes.find((s) => s.available) ?? sizes[0];
-  const [selected, setSelected] = useState<Size | undefined>(sizes.length === 1 ? firstAvailable : undefined);
+
+  // An axis with one value is not a choice; settle it rather than ask.
+  const settled = Object.fromEntries(
+    options.filter((o) => o.values.length === 1).map((o) => [o.name, o.values[0]]),
+  );
+  const [chosen, setChosen] = useState<Record<string, string>>(settled);
   const [justAdded, setJustAdded] = useState(false);
 
-  const canBuy = purchasable && available && selected?.available;
+  const complete = options.every((o) => chosen[o.name]);
+  const variant = complete
+    ? variants.find((v) => options.every((o) => v.options[o.name] === chosen[o.name]))
+    : undefined;
+
+  /** Is this value reachable, given what else is chosen? */
+  const reachable = (name: string, value: string) =>
+    variants.some(
+      (v) =>
+        v.available &&
+        v.options[name] === value &&
+        Object.entries(chosen).every(([k, val]) => k === name || v.options[k] === val),
+    );
+
+  const canBuy = purchasable && available && variant?.available;
 
   return (
     <form
       className="mt-8"
       onSubmit={(e) => {
         e.preventDefault();
-        if (!selected || !canBuy) return;
-        add(selected.id);
+        if (!variant || !canBuy) return;
+        add(variant.id);
         setJustAdded(true);
         setTimeout(() => setJustAdded(false), 1800);
       }}
     >
-      <fieldset>
-        <legend className="mono mb-3 text-mute">
-          <T s={copy.size.sincere} i={copy.size.ironic} />
-          {selected ? <span className="ml-2 text-fg">{selected.label}</span> : null}
-        </legend>
-        <div className="flex flex-wrap gap-2">
-          {sizes.map((s) => (
-            <button
-              key={s.id}
-              type="button"
-              className="chip"
-              aria-pressed={selected?.id === s.id}
-              disabled={!s.available}
-              onClick={() => setSelected(s)}
-            >
-              {s.label}
-            </button>
-          ))}
-        </div>
-      </fieldset>
+      {options
+        .filter((o) => o.values.length > 1)
+        .map((o) => (
+          <fieldset key={o.name} className="mt-6 first:mt-0">
+            <legend className="mono mb-3 text-mute">
+              {o.name}
+              {chosen[o.name] ? <span className="ml-2 text-fg">{chosen[o.name]}</span> : null}
+            </legend>
+            <div className="flex flex-wrap gap-2">
+              {o.values.map((value) => (
+                <button
+                  key={value}
+                  type="button"
+                  className="chip"
+                  aria-pressed={chosen[o.name] === value}
+                  disabled={!reachable(o.name, value)}
+                  onClick={() => {
+                    setChosen((c) => ({ ...c, [o.name]: value }));
+                    // Move the gallery to this colour's own photograph.
+                    if (/colou?r/i.test(o.name)) setColour(handle, value);
+                  }}
+                >
+                  {value}
+                </button>
+              ))}
+            </div>
+          </fieldset>
+        ))}
 
       {purchasable ? (
-        <button type="submit" className="btn mt-6 w-full sm:w-auto sm:min-w-[240px]" disabled={!selected || !canBuy || pending}>
+        <button type="submit" className="btn mt-6 w-full sm:w-auto sm:min-w-[240px]" disabled={!canBuy || pending}>
           {!available ? (
             <T s={copy.soldOut.sincere} i={copy.soldOut.ironic} />
           ) : pending ? (
@@ -68,7 +115,7 @@ export function ProductForm({ sizes, available, purchasable }: { sizes: Size[]; 
           <T s={copy.unavailable.sincere} i={copy.unavailable.ironic} />
         </p>
       )}
-      {!selected && purchasable && available ? (
+      {!variant && purchasable && available ? (
         <p className="mono mt-3 text-mute">
           <T s={copy.pick.sincere} i={copy.pick.ironic} />
         </p>

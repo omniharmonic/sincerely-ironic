@@ -33,14 +33,71 @@ as SVG `<text>` with `textLength`, so type is stretched to the measure rather
 than guessed at — guessing is what used to clip long words off the panel. Do
 not reintroduce an estimated-advance sizing path.
 
+**Placement is a `PrintBox`, not a side effect.** `resolvePrint()` in
+`typeset.ts` turns a print into a tight canvas plus the `x`/`y`/`scale` the
+vendor needs, and everything downstream derives from that one call. Before it
+existed, every file was rendered at the full size of the print area and handed
+over as "centre it, scale to fit" — so a slogan landed at the middle of a
+17-inch panel, which on a body is the navel. A box names `w`, `h`, `top` and
+`x` as fractions of the panel. **`h` is load-bearing**: without a height cap
+the engine always prefers more lines, because more lines mean a shorter
+longest line, which lets the type set bigger — so a slogan builds a tower down
+the belly instead of a block across the chest.
+
+Garment boxes (`GARMENTS[g].boxes`) beat design boxes, because the garment
+knows its own panel — a cap front is 4 × 2.25in and a tee front is 15 × 17in.
+`rebox()` is the escape hatch for one product that wants otherwise. **Hats
+were deliberately left out of the placement redesign**; their boxes reproduce
+the old fill-the-panel-and-centre behaviour, and only the Culture War Veteran
+cap is re-boxed.
+
+**Print files are cut tight to the ink**, so a wrong font metric shears a
+glyph instead of hiding in slack. `pnpm check-prints` measures the real alpha
+bounds of every PNG and fails on anything touching an edge. Run it after any
+change to type, padding or boxes — it has already caught a lost comma and a
+lost blackletter descender.
+
 **A design is not a product.** `src/lib/catalog.ts` holds designs (a slogan
 and the treatments it ships in) and builds products from `design × garment`.
 Adding a slogan is one entry in `DESIGNS` plus one `make(...)` line.
+
+**One treatment per design, and the site offers no choice of face.** The
+product page used to show Wide / Gothic / Stack chips; they only redrew a
+local SVG. The cart carries a size variant and nothing else, and Printify only
+ever built `styles[0]` — so choosing "Gothic" shipped a "Wide" shirt. A
+blueprint fixes its variant options at colour and size, so a treatment cannot
+be a variant; a second one has to be a second product. Do not put the chips
+back without building the products behind them.
 
 **The catalogue is upstream of Shopify for art, downstream for copy.**
 `src/lib/catalog.ts` keys the drawn garments by handle and is the fallback
 when the Storefront token is missing. A Shopify product with no catalogue
 entry is filtered out on purpose. Handles must match exactly.
+
+**Printify creates the Shopify listing. Never seed one by hand.** A listing
+Printify created is bound to a Printify product and routes an order to a
+printer; one we created through the Admin API is a picture of a product. The
+old store had 61 live listings of which 58 had no Printify link at all — an
+order on any of them would have taken money and reached nobody. Build in
+Printify, publish from Printify, then reconcile the Shopify side (handle,
+vendor, `productType`, the ironic metafield, the Headless channel).
+
+**A Shopify handle is mutable.** `ProductInput.handle` is settable on
+`productUpdate`, with `redirectNewHandle` to leave a redirect behind. An
+earlier comment here claimed the opposite, and that false belief was the only
+argument for seeding listings ourselves. It is what lets Printify own creation
+while we still choose the URLs.
+
+**Uploads are keyed by content hash, not file name.** Artwork changes without
+its name changing, and `scripts/printify-uploads.json` used to match on name
+alone — so a redesign would silently keep every old image attached. The
+manifest carries a `sha` per file and the uploader re-uploads when it moves.
+
+**Updating a Printify product is not creating one.** A create names only the
+variants being sold; an update is rejected unless `print_areas.*.variant_ids`
+covers *every* variant on the product (437 on a Comfort Colors tee, of which
+ten are enabled). `coverEveryVariant()` spreads the artwork across the full
+list — black garments take the light file, everything else the dark one.
 
 **The hero is the serpent.** `src/components/SerpentHero.tsx` repeats one face
 from the mark along a lemniscate, mirrored to face its direction of travel,

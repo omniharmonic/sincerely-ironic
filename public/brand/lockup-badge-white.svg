@@ -6,6 +6,7 @@
       <stop offset="0.667" stop-color="#1FCFEE"/>
       <stop offset="1.000" stop-color="#7C3AED"/>
     </linearGradient>
+    
     <linearGradient id="glass" x1="0" y1="0" x2="0.4" y2="1">
       <stop offset="0" stop-color="#ffffff" stop-opacity="0.82"/>
       <stop offset="0.5" stop-color="#ffffff" stop-opacity="0.5"/>

@@ -42,6 +42,15 @@ export interface TypeStyle {
   cap: number;
   variation?: string;
   letterSpacing?: number;
+  /** Slack above the first cap and below the last baseline, in em, for a
+   *  line with nothing below the baseline. A block used to be centred in a
+   *  big canvas, so overshoot cost nothing; now the canvas is cut tight, and
+   *  anything the metrics under-report gets sheared off. */
+  pad: { top: number; bottom: number };
+  /** Bottom slack when the last line does carry a descender. Uppercase faces
+   *  still need this: a comma descends, and "…OR NAW, BRAH?" lost its comma
+   *  to the bottom edge of the file. */
+  descender: number;
 }
 
 export const STYLES: Record<StyleKey, TypeStyle> = {
@@ -60,6 +69,8 @@ export const STYLES: Record<StyleKey, TypeStyle> = {
     cap: 0.74,
     variation: "'wdth' 112",
     letterSpacing: -0.02,
+    pad: { top: 0.03, bottom: 0.06 },
+    descender: 0.22,
   },
   gothic: {
     key: 'gothic',
@@ -74,6 +85,11 @@ export const STYLES: Record<StyleKey, TypeStyle> = {
     advance: 0.46,
     fill: 0.88,
     cap: 0.72,
+    // Lower-case blackletter: real ascenders, deep descenders, and a floor
+    // well above zero because the face puts decorative strokes below the
+    // baseline on letters no descender list would name.
+    pad: { top: 0.1, bottom: 0.18 },
+    descender: 0.34,
   },
   stack: {
     key: 'stack',
@@ -88,6 +104,8 @@ export const STYLES: Record<StyleKey, TypeStyle> = {
     advance: 0.42,
     fill: 0.96,
     cap: 0.73,
+    pad: { top: 0.03, bottom: 0.06 },
+    descender: 0.22,
   },
 };
 
@@ -256,4 +274,236 @@ export function splitPanel(hasEmblem: boolean, hasText: boolean, w: number, h: n
     return { emblem: { x: (w - size) / 2, y: (h - size) / 2, size } };
   }
   return { text: { x: 0, y: 0, w, h } };
+}
+
+/* --------------------------------------------------------------- placement */
+
+/**
+ * Where a print sits inside its print area, in fractions of that area.
+ *
+ * This is the number that was missing. Before, every file was rendered at the
+ * full size of the print area and handed to the vendor as "centre it, scale
+ * to fit" — so a slogan landed wherever the centre of a 17-inch panel happens
+ * to fall on a body, which is the navel. Naming the box makes the placement a
+ * decision instead of a side effect, and both renderers read the same one.
+ */
+export interface PrintBox {
+  /** Block width, as a fraction of the area's width. */
+  w: number;
+  /** Greatest block height, as a fraction of the area's height.
+   *  Load-bearing. Without it the engine always prefers more lines — more
+   *  lines mean a shorter longest line, which lets the type set bigger and
+   *  score higher — so a slogan builds a tall tower down the belly instead of
+   *  a block across the chest. Capping the height is what chooses three even
+   *  lines over four ragged ones. */
+  h: number;
+  /** Block top, as a fraction of the area's height. */
+  top: number;
+  /** Centre of the block across the area. */
+  x: number;
+  /** Space between an emblem and the wordmark under it, as a share of the
+   *  box width. */
+  gap?: number;
+  /** Centre the artwork in the panel and ignore `top`. This is what a print
+   *  did before boxes existed — fill the panel, centre it — and it is still
+   *  right for a small fixed panel like a cap front, where the artwork has
+   *  nowhere to move to. */
+  center?: boolean;
+  /** An emblem's share of the box width, when one sits above a wordmark.
+   *  A cap panel is nearly three times wider than it is tall, so a lockup
+   *  built for a chest fills it top to bottom and then cannot be moved at
+   *  all; shrinking the emblem is what buys the headroom. */
+  emblem?: number;
+}
+
+/** A quieter second line, set under the main block in its own treatment. */
+export interface Aside {
+  text: string;
+  style?: StyleKey;
+  /** Size relative to the main block's type. */
+  scale?: number;
+}
+
+export interface Block {
+  main: Layout;
+  aside?: Layout;
+  /** Baseline offset of the main block from the top of the canvas. */
+  mainTop: number;
+  /** Baseline offset of the aside block from the top of the canvas. */
+  asideTop: number;
+  /** The canvas, cut tight to the ink, in the units `width` was given in. */
+  width: number;
+  height: number;
+}
+
+/** Glyphs that drop below the baseline, in any of the three faces. */
+const BELOW_BASELINE = /[,;gjpqy()[\]{}@_âˆ«]/;
+
+/** How much room the last line of a block needs beneath its baseline. */
+const dropOf = (line: string, style: TypeStyle) =>
+  BELOW_BASELINE.test(line) ? style.descender : style.pad.bottom;
+
+/** Space between a block and its aside, as a fraction of the main type size. */
+const ASIDE_GAP = 0.62;
+/** How much smaller an aside sets than the block it hangs under. */
+const ASIDE_SCALE = 0.34;
+
+/**
+ * Lay a print out as one tight block: a slogan, optionally with a quieter
+ * line beneath it.
+ *
+ * The canvas comes back cut to the ink plus each face's own padding, so the
+ * file a vendor receives has no dead margin to guess about — its size *is*
+ * the artwork's size, and the placement maths downstream is exact.
+ */
+export function layoutBlock(
+  text: string,
+  styleKey: StyleKey,
+  width: number,
+  height: number,
+  fill = 1,
+  aside?: Aside,
+): Block {
+  const main = typeset(text, styleKey, width, height, fill);
+  const style = main.style;
+
+  const mainTop = main.fontSize * style.pad.top;
+  let total = mainTop + main.height;
+  let asideTop = 0;
+  let asideLayout: Layout | undefined;
+
+  if (aside) {
+    const as = STYLES[aside.style ?? 'gothic'];
+    const cased = casing(aside.text.trim(), as);
+    // Set as one line, deliberately. Run through `typeset` it would discover
+    // that breaking in two lets the type set larger and score better — which
+    // is right for a slogan and wrong for an aside, whose whole job is to be
+    // quieter than the thing above it.
+    let size = main.fontSize * (aside.scale ?? ASIDE_SCALE);
+    const natural = emWidth(cased, as) * size;
+    if (natural > width) size *= width / natural;
+
+    asideLayout = {
+      style: as,
+      fontSize: size,
+      height: size * as.cap,
+      lines: [{ text: cased, y: size * as.cap }],
+    };
+    asideTop = total + main.fontSize * ASIDE_GAP + size * as.pad.top;
+    total = asideTop + asideLayout.height + size * dropOf(cased, as);
+  } else {
+    total += main.fontSize * dropOf(main.lines[main.lines.length - 1].text, style);
+  }
+
+  return { main, aside: asideLayout, mainTop, asideTop, width, height: total };
+}
+
+/**
+ * The default box for a placement.
+ *
+ * Front prints hang from a constant drop rather than centring, because that
+ * is how a garment graphic actually works: the top of the artwork sits a
+ * fixed distance below the collar and a longer slogan grows downward. The
+ * width steps with the length of the line, so a single word reads as a mark
+ * and a four-line block still reads as a block — the wide ones are allowed to
+ * be bigger, but they start from the same place.
+ */
+export function defaultBox(place: string, text?: string): PrintBox {
+  if (place === 'chest') return { w: 0.28, h: 0.1, top: 0.185, x: 0.31 };
+  if (place === 'leg') return { w: 0.62, h: 0.22, top: 0.16, x: 0.5 };
+  if (place === 'sleeve') return { w: 0.85, h: 0.5, top: 0.2, x: 0.5 };
+  if (place === 'left' || place === 'right') return { w: 0.9, h: 0.7, top: 0.1, x: 0.5 };
+
+  // Longer slogans earn a wider box and a taller one, but they all hang from
+  // the same drop, so the tops line up across the whole rail.
+  const n = (text ?? '').trim().length;
+  const [w, h] =
+    n <= 10 ? [0.46, 0.14] : n <= 20 ? [0.56, 0.2] : n <= 34 ? [0.66, 0.3] : [0.76, 0.36];
+  return { w, h, top: place === 'back' ? 0.1 : 0.12, x: 0.5 };
+}
+
+/**
+ * A print, described without reference to the catalogue, so the engine stays
+ * below it in the import graph.
+ */
+export interface PrintSpec {
+  place: string;
+  text?: string;
+  style: StyleKey;
+  fill?: number;
+  box?: Partial<PrintBox>;
+  aside?: Aside;
+  /** Width ÷ height of the emblem, if there is one. */
+  emblemAspect?: number;
+}
+
+export interface Placed {
+  box: PrintBox;
+  /** The file, cut tight, in the units the print area was given in. */
+  width: number;
+  height: number;
+  emblem?: { x: number; y: number; w: number; h: number };
+  block?: Block;
+  /** Where the type block starts inside the canvas. */
+  blockTop: number;
+  /** What the vendor needs: fractions of the print area. */
+  vendor: { x: number; y: number; scale: number };
+}
+
+/** An emblem's share of the canvas width when it sits above a wordmark. */
+const EMBLEM_SHARE = 0.62;
+
+/**
+ * Resolve a print into a tight canvas and a position on the garment.
+ *
+ * Everything downstream — the drawn art, the PNG that goes to the printer,
+ * and the x/y/scale handed to the vendor — is derived from this one call, so
+ * a change of mind about placement moves all three together or none of them.
+ */
+export function resolvePrint(spec: PrintSpec, areaW: number, areaH: number): Placed {
+  const box: PrintBox = { ...defaultBox(spec.place, spec.text), ...spec.box };
+  const width = areaW * box.w;
+
+  let emblem: Placed['emblem'];
+  let block: Block | undefined;
+  let blockTop = 0;
+  let height = 0;
+
+  const aspect = spec.emblemAspect;
+  if (aspect) {
+    const w = spec.text ? width * (box.emblem ?? EMBLEM_SHARE) : width;
+    const h = w / aspect;
+    emblem = { x: (width - w) / 2, y: 0, w, h };
+    height = h;
+    if (spec.text) blockTop = h + width * (box.gap ?? 0.06);
+  }
+
+  if (spec.text) {
+    block = layoutBlock(spec.text, spec.style, width, areaH * box.h, spec.fill ?? 1, spec.aside);
+    height = blockTop + block.height;
+  }
+
+  // The vendor scales the file to a fraction of the panel's WIDTH and then
+  // centres it, so the height that matters is the scaled one. Deriving `y`
+  // from the unscaled canvas put anything the vendor had to shrink — the cap
+  // lockup — clean off the panel.
+  const ratio = height / width;
+  let scale = box.w;
+  const room = areaH * (1 - box.top);
+  if (scale * areaW * ratio > room) scale = room / (areaW * ratio);
+  const drawnH = scale * areaW * ratio;
+
+  return {
+    box,
+    width,
+    height,
+    emblem,
+    block,
+    blockTop,
+    vendor: {
+      x: box.x,
+      y: box.center ? 0.5 : (box.top * areaH + drawnH / 2) / areaH,
+      scale,
+    },
+  };
 }

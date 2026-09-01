@@ -13,11 +13,18 @@ export interface ProductImage {
   height?: number;
 }
 
-export interface Size {
+export interface Variant {
   /** Variant GID. Prefixed `catalog:` when the storefront is not live. */
   id: string;
-  label: string;
+  /** Every option this variant is chosen by, e.g. { Color: 'Ivory', Size: 'L' }. */
+  options: Record<string, string>;
   available: boolean;
+}
+
+/** One axis of choice, in the order the store defines it. */
+export interface Option {
+  name: string;
+  values: string[];
 }
 
 /** What the pages render. Shopify or catalogue, the shape is the same. */
@@ -30,7 +37,10 @@ export interface Product {
   available: boolean;
   price: Money;
   images: ProductImage[];
-  sizes: Size[];
+  options: Option[];
+  variants: Variant[];
+  /** Colour name → the vendor's front-facing shot of that colour. */
+  colourImages: Record<string, string>;
   description: Both;
   art: {
     garment: Garment;
@@ -80,6 +90,7 @@ export interface RawImage {
 
 export interface RawProduct {
   id: string;
+  options?: { name: string; optionValues?: { name: string }[] }[];
   handle: string;
   title: string;
   descriptionHtml: string;
@@ -97,6 +108,7 @@ export interface RawProduct {
       availableForSale: boolean;
       price: RawMoney;
       selectedOptions: { name: string; value: string }[];
+      image?: { url: string } | null;
     }[];
   };
   ironic: { value: string } | null;

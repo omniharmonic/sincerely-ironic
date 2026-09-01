@@ -396,7 +396,12 @@ const EM = 200;
  * files have one canonical setting.
  */
 const WORDMARK_CSS = `
-  .wm { display: inline-flex; align-items: center; gap: 0.28em; white-space: nowrap; line-height: 1; }
+  /* Baseline, not centre. The two faces are different sizes with different
+     metrics, so centring them lines up their boxes and not their type — the
+     name visibly steps between "Sincerely" and "IRONIC". The mark has no
+     baseline of its own, so it is the one thing that centres. */
+  .wm { display: inline-flex; align-items: baseline; gap: 0.28em; white-space: nowrap; line-height: 1; }
+  .wm > svg { align-self: center; }
   .wm--stack { flex-direction: column; align-items: center; gap: 0.06em; }
   .s {
     font-family: 'Fraunces'; font-style: italic; font-weight: 500;
@@ -476,8 +481,20 @@ ${text}
 `;
 }
 
-/** Mark plus wordmark as vector, again from measured geometry. */
-function lockupSvg(m: Measured, faces: string, colour: string, markBox: { x: number; y: number; s: number }): string {
+/**
+ * Mark plus wordmark as vector, again from measured geometry.
+ *
+ * With `sweep`, `colour` is expected to be `url(#slicktype)` and the gradient
+ * is defined across the whole lockup in user space, so one rainbow runs
+ * through the mark and the name together rather than restarting per element.
+ */
+function lockupSvg(
+  m: Measured,
+  faces: string,
+  colour: string,
+  markBox: { x: number; y: number; s: number },
+  sweep = false,
+): string {
   const text = m.parts
     .filter((p) => p.id !== 'mark')
     .map((p) => {
@@ -486,8 +503,13 @@ function lockupSvg(m: Measured, faces: string, colour: string, markBox: { x: num
       return `  <text class="${cls}" x="${p.x.toFixed(2)}" y="${p.baseline.toFixed(2)}">${label}</text>`;
     })
     .join('\n');
+  const grad = sweep
+    ? `<linearGradient id="slicktype" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="${m.w.toFixed(2)}" y2="${m.h.toFixed(2)}">
+${SLICK.map((c, i) => `      <stop offset="${(i / (SLICK.length - 1)).toFixed(3)}" stop-color="${c}"/>`).join('\n')}
+    </linearGradient>`
+    : '';
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${m.w.toFixed(2)} ${m.h.toFixed(2)}" width="${m.w.toFixed(0)}" height="${m.h.toFixed(0)}">
-  <defs><style>
+  <defs>${grad}<style>
 ${faces}
     text { fill: ${colour}; font-size: ${EM}px; }
     .s { font-family: 'Fraunces'; font-style: italic; font-weight: 500; font-variation-settings: 'SOFT' 50, 'WONK' 1, 'opsz' 20; font-size: ${EM * 1.05}px; letter-spacing: -0.01em; }
@@ -525,8 +547,19 @@ function tileInline(height: number, id: string): string {
   </svg>`;
 }
 
-/** A lockup that keeps the mark in full colour, with the name beside or under it. */
-function lockupSlickSvg(m: Measured, faces: string, colour: string, mk: { x: number; y: number; w: number; h: number }): string {
+/**
+ * A lockup that keeps the mark in full colour, with the name beside or under
+ * it. With `rainbowType`, the name runs on the slick as well, and the sweep
+ * is in user space so it crosses the whole lockup once instead of restarting
+ * inside each word — one file that reads on a black garment and a white one.
+ */
+function lockupSlickSvg(
+  m: Measured,
+  faces: string,
+  colour: string,
+  mk: { x: number; y: number; w: number; h: number },
+  rainbowType = false,
+): string {
   const text = m.parts
     .filter((p) => p.id !== 'mark')
     .map((p) => {
@@ -536,14 +569,21 @@ function lockupSlickSvg(m: Measured, faces: string, colour: string, mk: { x: num
     })
     .join('\n');
   const r = Math.min(mk.w, mk.h) * 0.06;
+  const sweep = rainbowType
+    ? `<linearGradient id="slicktype" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="${m.w.toFixed(2)}" y2="${m.h.toFixed(2)}">
+${SLICK.map((c, i) => `      <stop offset="${(i / (SLICK.length - 1)).toFixed(3)}" stop-color="${c}"/>`).join('\n')}
+    </linearGradient>`
+    : '';
+  const typeFill = rainbowType ? 'url(#slicktype)' : colour;
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${m.w.toFixed(2)} ${m.h.toFixed(2)}" width="${m.w.toFixed(0)}" height="${m.h.toFixed(0)}">
   <defs>
     ${slickDef()}
+    ${sweep}
     ${GLASS}
     <clipPath id="tile"><rect x="${mk.x.toFixed(2)}" y="${mk.y.toFixed(2)}" width="${mk.w.toFixed(2)}" height="${mk.h.toFixed(2)}" rx="${r.toFixed(2)}"/></clipPath>
     <style>
 ${faces}
-    text { fill: ${colour}; font-size: ${EM}px; }
+    text { fill: ${typeFill}; font-size: ${EM}px; }
     .s { font-family: 'Fraunces'; font-style: italic; font-weight: 500; font-variation-settings: 'SOFT' 50, 'WONK' 1, 'opsz' 20; font-size: ${EM * 1.05}px; letter-spacing: -0.01em; }
     .i { font-family: 'Anybody'; font-weight: 800; font-variation-settings: 'wdth' 125; letter-spacing: -0.01em; }
     </style>
@@ -663,6 +703,38 @@ async function main() {
     ['lockup-stack-slick', 'wm wm--stack', 'stack', EM * 1.6, 'Mark in colour, name under it'],
     ['lockup-badge', 'wm wm--stack', 'badge', EM * 2.1, 'Compact badge — mark in colour over the stacked name'],
   ];
+
+  // The garment lockups. `rainbow` is one file for both colourways: mark and
+  // name both on the slick, so it needs no light and dark counterpart.
+  const rainbow: [string, string, string, number, string][] = [
+    ['lockup-row-rainbow', 'wm', 'row', EM * 1.35, 'Mark and name both on the slick, side by side'],
+    ['lockup-stack-rainbow', 'wm wm--stack', 'stack', EM * 1.6, 'Mark and name both on the slick'],
+  ];
+  for (const [base, cls, , markH, note] of rainbow) {
+    // The figures themselves in colour, not white glass on a coloured tile.
+    // The tile version reads on a dark page and washes out to nothing on a
+    // white garment, and this file has to work on both.
+    const body = `<div id="root"><div class="${cls}">${markInline(INK, markH)}${word('s', 'Sincerely', 'sincerely')}${word('i', 'Ironic', 'ironic')}</div></div>`;
+    await browser.open(page(body, faces, INK, '#mark{display:block}'), 5000, 2200);
+    const m = await browser.evaluate<Measured>(MEASURE);
+    const mk = m.parts.find((p) => p.id === 'mark');
+    if (mk) {
+      const markup = lockupSvg(m, faces, 'url(#slicktype)', { x: mk.x, y: mk.y, s: mk.w / MARK_W }, true);
+      await svg(`${base}.svg`, markup, note);
+      // Capture the SVG we just wrote, not the HTML page it was measured
+      // from: the page paints the name in flat ink and only the SVG carries
+      // the gradient, so shooting the page gave a PNG that disagreed with
+      // its own vector.
+      await browser.open(
+        `<!doctype html><meta charset="utf-8"><style>html,body{margin:0;background:transparent}svg{display:block}</style>${markup}`,
+        Math.ceil(m.w),
+        Math.ceil(m.h),
+      );
+      await browser.capture(path.join(OUT, `${base}.png`), { x: 0, y: 0, width: m.w, height: m.h, scale: 2000 / m.w });
+      written.push({ file: `${base}.png`, size: `2000×${Math.round((2000 * m.h) / m.w)}`, note });
+      console.log(`✓ ${base}`);
+    }
+  }
 
   for (const [base, cls, kind, markH, note] of slickLockups) {
     for (const [tone, colour] of [['black', INK], ['white', '#FFFFFF']] as const) {

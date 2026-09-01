@@ -1,89 +1,124 @@
 # Going live
 
-*Why the current Shopify store cannot sell, and what to do instead. Researched
-2026-09-01 against Shopify's own docs; every load-bearing claim is cited.*
+*How this store actually starts taking orders. Revised 2026-09-01, after an
+audit found that the listings we had could not be fulfilled at all.*
 
 ---
 
-## The short version
+## The finding that reorganised this document
 
-`sincerely-ironic-apparel.myshopify.com` is a Partner **development store**. It
-can never take real money, and it cannot be upgraded. Shopify says so without
-qualification: *"Dev stores can't be converted to production stores."*
+`sincerely-ironic-apparel.myshopify.com` had 61 live, active, published
+products. **58 of them could not have been fulfilled.**
+
+We had built both halves of the shop separately: Shopify listings seeded
+directly from `src/lib/catalog.ts` through the Admin API, and Printify
+products built from the same catalogue. Nothing joined them. Printify records
+the Shopify product it is bound to in a product's `external` field, and only
+**3 of 61** Printify products had one — the three that were made in Printify
+by hand. The other 58 had no `external` key at all.
+
+An order on any of those 58 would have taken the customer's money and reached
+no printer.
+
+This was not a bug in the sense of a mistake in a line of code. It followed
+from a deliberate choice recorded in `scripts/printify-products.ts`: create
+products unpublished, because publishing would make Printify create its *own*
+Shopify listing beside the one we had already seeded. That reasoning was
+sound about duplicates and wrong about fulfilment. The duplicate was the
+lesser problem.
+
+## The rule that follows
+
+**Printify creates the Shopify listing. We never seed one by hand.**
+
+A listing Printify created is bound to a Printify product, carries the right
+variants, and routes an order to a printer. A listing we created is a picture
+of a product. Only one of those is a shop.
+
+The objection to this was that Printify names the product, so Shopify derives
+the handle from the title, so our URLs stop being ours. That objection rested
+on a false premise — that a Shopify handle is fixed at creation. It is not:
+
+```
+ProductInput.handle    settable on productUpdate
+redirectNewHandle      leaves a redirect at the old URL
+```
+
+So the order is: Printify publishes → Shopify creates the listing → we rename
+the handle to the catalogue's slug and set the pieces Printify does not know
+about. The catalogue stays the source of truth for slugs, product type and
+the second reading; Printify stays the source of truth for imagery, variants
+and fulfilment. Neither one guesses at the other's job.
+
+## Why the old store can't be repaired
+
+`plan.partnerDevelopment: true`. It is a Partner development store, and
+Shopify says without qualification: *"Dev stores can't be converted to
+production stores."*
 ([shopify.dev](https://shopify.dev/docs/apps/build/dev-dashboard/stores/development-stores))
+It can never take real money, and the `"Basic"` in `plan.displayName` is a
+feature tier for testing, not a billing plan. The upgrade button is missing
+because it does not exist.
 
-The Admin API confirms which kind of store it is:
+It has since stopped serving at all: the Storefront API now answers
 
 ```
-plan.displayName        "Basic App Development"
-plan.publicDisplayName  "Basic"
-plan.partnerDevelopment  true          ← this is the tell
+400 — {"message":"Online Store channel is locked."}
 ```
 
-`"Basic"` here is a *feature tier* — which features are unlocked for testing —
-not a billing plan. The upgrade button is missing from the admin because it
-does not exist.
+so the live site is currently rendering catalogue fallback with no imagery
+from any source. There is nothing to preserve.
 
-So: **create a normal store at shopify.com, re-seed it, repoint the site.**
+Do not build the replacement as a **client transfer store** either. After a
+transfer a store *"isn't eligible for promotions or free trials"*, so it
+would forfeit the intro pricing for nothing.
 
-## Why it can't just be switched on
+## What migration costs: almost nothing
 
-Documented restrictions on a dev store:
-
-- *"They can't be used for production and can't process real transactions."*
-- *"Real transactions through active payment providers, Store Credit, and Gift
-  Cards aren't supported."*
-- *"You can't remove the password page."*
-- *"Dev stores can't be transferred to a client."*
-
-The thing people remember as "upgrading a dev store" is a different store type
-— a **client transfer store**, created for handoff, where the *recipient*
-picks the plan after transfer. Do not build the new store that way either:
-after a transfer the store *"isn't eligible for promotions or free trials"*,
-so it would forfeit the intro pricing for no benefit.
-
-## What migration actually costs us: almost nothing
-
-The usual pain of a Shopify migration is orders, customers and handles. We
-have **zero orders**, no customers, and — the important part —
-**`src/lib/catalog.ts` is the source of truth for the whole line.** The store
-is downstream of this repo, not the other way round. Re-seeding a fresh store
-is the same job that has already been done three times.
+Zero orders, no customers, and `src/lib/catalog.ts` is the source of truth for
+the line. The store is downstream of this repo.
 
 | Thing | Survives? | How |
 | --- | --- | --- |
-| Product handles | **Yes, exactly** | Re-seeded from `catalog.ts`, which is where they are defined. The site filters on handles, so this is the one that mattered |
-| Titles, descriptions, types, prices, variants | Yes | Same |
+| Product handles | **Yes** | Set explicitly after Printify creates each listing |
+| Titles, descriptions, types, prices | Yes | From the catalogue, applied after creation |
+| Variants and fulfilment | **Better than before** | Printify's own, which is the entire point |
+| Imagery | **Better than before** | Printify pushes its mockups with the listing |
 | `sincerely.ironic_description` metafield | Yes | Recreate the definition first, then set per product |
-| "Everything" smart collection | Yes | One mutation |
-| Custom domain | **Nothing to move** | `sincerelyironic.com` points at Vercel, not Shopify. Shopify's `primaryDomain` is still the `.myshopify.com` one |
-| Printify products and uploads | Yes | The uploaded artwork lives in the Printify account, not the store. Add the new store in Printify and relink |
-| Storefront API token | **No** | Tokens are per-store. Install the Headless channel on the new store, take the new public token, update `SHOPIFY_STOREFRONT_ACCESS_TOKEN` and `SHOPIFY_STORE_DOMAIN` in Vercel |
-| Product and variant GIDs | No | Irrelevant — the site resolves products by handle and reads variant ids live |
+| Custom domain | **Nothing to move** | `sincerelyironic.com` points at Vercel, not Shopify |
+| Uploaded artwork | Yes | Lives in the Printify account, not the store |
+| Storefront API token | **No** | Per-store. New Headless channel, new token |
+| Product and variant GIDs | No | Irrelevant — the site resolves by handle, reads variants live |
 
 ## The order to do it in
 
-1. Sign up at [shopify.com](https://www.shopify.com/pricing) — **Basic**, $39/mo
-   monthly or $29/mo annual. There is currently a *3 days free, then $1/month
-   for 3 months* offer. Sign up **normally**, not as a client transfer store.
-2. Name it **Sincerely Ironic** — with no trailing space. The current store's
-   name ends in one, which is why its sales channel reads
-   `"Sincerely Ironic Apparel  Headless"`, and it leaks into customer emails.
-3. Start **Shopify Payments** activation immediately — it needs two-step auth,
-   bank details, business details and identity verification, and can take
-   days. Everything else can happen while it's pending.
-4. Install the **Headless** sales channel (free), create a storefront, copy the
-   **public** access token.
-5. Re-seed from this repo: metafield definition → 61 products with their
-   handles → the "Everything" smart collection → publish everything to Online
+1. **Sign up at [shopify.com](https://www.shopify.com/pricing)** — Basic, as a
+   normal store, not a client transfer. *(Done: the store exists and has been
+   renamed "Sincerely Ironic Apparel". It is in its free trial.)*
+2. **Name it without a trailing space.** The old store's name ended in one,
+   which is why its channel read `"Sincerely Ironic Apparel  Headless"` — and
+   it leaks into customer email.
+3. **Start Shopify Payments activation immediately.** Two-step auth, bank
+   details, business details, identity verification; it can take days.
+   Everything below can proceed while it is pending.
+4. **Connect the new store in Printify.** It appears as a new Printify *shop*
+   with its own id. Put that id in `PRINTIFY_SHOP_ID`; the product ledger is
+   keyed by shop, so the old shop's records stay intact and untouched.
+5. **Rebuild the products in the new shop** — `pnpm printify-products --create`.
+   Art comes from `print-files/`, which is regenerated from the catalogue.
+6. **Publish from Printify.** This is the step that was skipped before, and
+   the one that makes the shop a shop. Printify creates each Shopify listing,
+   bound to its own product.
+7. **Reconcile Shopify**: set each handle to the catalogue slug, set the
+   title, `productType`, price and the ironic metafield, and publish to Online
    Store *and* Headless.
-6. Update Vercel env: `SHOPIFY_STORE_DOMAIN` and
+8. **Install the Headless channel**, create a storefront, take the **public**
+   access token.
+9. **Update Vercel env** — `SHOPIFY_STORE_DOMAIN` and
    `SHOPIFY_STOREFRONT_ACCESS_TOKEN`. Redeploy.
-7. Add the new store in Printify, relink, and put real artwork on the fanny
-   pack and the robe — both still carry Printify's stock graphics.
-8. Place a real test order end to end before announcing anything.
-9. **Keep the dev store.** It becomes a free staging environment. Do not
-   delete it until the new store is verified.
+10. **Place a real order end to end** and confirm it appears in Printify.
+    Nothing is live until this has happened once.
+11. **Keep the dev store** as staging until the new one is verified.
 
 ## Things that will bite later
 
@@ -93,9 +128,9 @@ is the same job that has already been done three times.
   annual cap does not apply. A store created now falls under the new rules.
   ([help.shopify.com](https://help.shopify.com/en/manual/taxes/shopify-tax/pricing))
 - Shopify only *calculates* tax. Registering where there is nexus is on us.
-- Anything hardcoding a checkout or cart URL needs updating. `checkoutUrl`
-  from the Storefront API looks after itself.
-- Not fully verified: the Headless channel's listing has a truncated
-  *"Headless is only compatible with stores that:"* line. Every other source
-  treats headless as available from Basic upward, and the Headless channel
-  itself is free.
+- **Margins are thinner on two-sided prints.** A front-and-back tee costs
+  $18.45–19.72 against $38 — 51%, against 67% for a single-sided one.
+- **There is no Printify sandbox.** The gap between "customer paid" and
+  "Printify accepted the order" cannot be rehearsed; step 10 is the only test.
+- A second type treatment for a design cannot be a variant — a blueprint
+  fixes its options at colour and size. It has to be a second product.

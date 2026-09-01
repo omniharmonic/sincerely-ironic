@@ -65,10 +65,6 @@ export const product = {
     ironic: 'Boxy fit. Between sizes, size down. You’ll be fine.',
   },
   back: { sincere: 'All items', ironic: 'All items' },
-  styleNote: {
-    sincere: 'Same words, three ways of saying them.',
-    ironic: 'Same words, three ways of saying them. Pick whichever is you.',
-  },
 } satisfies Record<string, Both>;
 
 export const cart = {
@@ -91,28 +87,45 @@ export const ticker = {
 
 export const about = {
   title: { sincere: 'About', ironic: 'About us' },
+  /**
+   * Written copy, verbatim. Both readings are identical here on purpose: the
+   * device adds a notch of earnestness to the store's own voice, and this
+   * page is not the store talking — it is the statement, and it says what it
+   * says in either universe. `care` and `sizing` do the same.
+   */
   paragraphs: [
     {
-      sincere: 'Sincerely Ironic makes apparel. Small runs, imagined in Boulder, Colorado.',
-      ironic: 'Sincerely Ironic makes apparel. Small runs, imagined in Boulder, Colorado, at some length.',
+      sincere: 'We do not make clothes. We imagine them and the elves (slaves) of late stage modernity bring them to your door.',
+      ironic: 'We do not make clothes. We imagine them and the elves (slaves) of late stage modernity bring them to your door.',
     },
     {
-      sincere: 'It is the clothing line of Sixth Wall Productions, a theatre company. The clothes help pay for the shows.',
-      ironic: 'It is the clothing line of Sixth Wall Productions, a theatre company. The clothes help pay for the shows. Every order helps.',
+      sincere:
+        'You do not buy them because of their artisanal intrinsic meaning, the kind of meaning woven by generations of grandmothers, a craft passed by way of immanent embeddedness in reality.',
+      ironic:
+        'You do not buy them because of their artisanal intrinsic meaning, the kind of meaning woven by generations of grandmothers, a craft passed by way of immanent embeddedness in reality.',
     },
     {
-      sincere: 'Thank you for your support.',
-      ironic: 'Thank you so much for your support.',
+      sincere: 'You buy them because they are transcontextual, transgressive, transpersonal.',
+      ironic: 'You buy them because they are transcontextual, transgressive, transpersonal.',
+    },
+    {
+      sincere: 'You buy them because they are a statement to the world: I am self-aware and I am free.',
+      ironic: 'You buy them because they are a statement to the world: I am self-aware and I am free.',
+    },
+    {
+      sincere: 'They are post-cringe. They are what they say they are.',
+      ironic: 'They are post-cringe. They are what they say they are.',
+    },
+    {
+      sincere: 'Sincerely Ironic Apparel is a project of Sixth Wall Productions.',
+      ironic: 'Sincerely Ironic Apparel is a project of Sixth Wall Productions.',
     },
   ] satisfies Both[],
   questionsHeading: { sincere: 'Questions', ironic: 'Questions' },
   questions: [
-    { q: 'Is this real?', a: { sincere: 'Yes.', ironic: 'Yes!' } },
-    { q: 'Where does the money go?', a: { sincere: 'Into the next show.', ironic: 'Into the next show. Really.' } },
-    {
-      q: 'What if it doesn’t fit?',
-      a: { sincere: 'Send it back within thirty days.', ironic: 'Send it back within thirty days. We’ll sort it out.' },
-    },
+    { q: 'Chat, is this real?', a: { sincere: 'Yes.', ironic: 'Yes.' } },
+    { q: 'Are we all going to die?', a: { sincere: 'Yes.', ironic: 'Yes.' } },
+    { q: 'What is your return policy?', a: { sincere: 'No.', ironic: 'No.' } },
   ] satisfies { q: string; a: Both }[],
   sizing: {
     sincere: 'Boxy fit. Between sizes, size down. Caps and totes are one size.',

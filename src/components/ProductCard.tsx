@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 
-import { GarmentArt } from '@/components/GarmentArt';
+import { ArtFallback } from '@/components/ArtFallback';
 import type { Product } from '@/lib/shopify/types';
 
 export const money = (amount: number, currency: string) =>
@@ -23,13 +23,7 @@ export function ProductCard({ product, priority = false }: { product: Product; p
             priority={priority}
           />
         ) : (
-          <GarmentArt
-            garment={product.art.garment}
-            colourway={product.art.colourway}
-            prints={product.art.prints}
-            style={product.art.styles[0]}
-            title={product.title}
-          />
+          <ArtFallback title={product.title} />
         )}
         {!product.available ? <span className="mono absolute left-3 top-3 border border-line bg-bg px-2 py-1">Sold out</span> : null}
       </div>

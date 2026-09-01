@@ -163,24 +163,27 @@ export class Chrome {
   }
 
   /**
-   * Load a local file at an exact viewport and return a transparent PNG of
-   * it. `width`/`height` are CSS pixels and become the image's pixel size.
+   * Load a page at an exact viewport and return a PNG of it. `width`/`height`
+   * are CSS pixels and become the image's pixel size. Takes a local path or,
+   * for checking a deployed page, an http(s) URL.
    */
-  async shoot(file: string, width: number, height: number): Promise<Buffer> {
+  async shoot(file: string, width: number, height: number, opaque = false): Promise<Buffer> {
     await this.send(
       'Emulation.setDeviceMetricsOverride',
       { width, height, deviceScaleFactor: 1, mobile: false },
       this.session,
     );
-    // Alpha 0: the ground stays transparent rather than white.
+    // Alpha 0: the ground stays transparent rather than white. A real web
+    // page wants its own background instead.
     await this.send(
       'Emulation.setDefaultBackgroundColorOverride',
-      { color: { r: 0, g: 0, b: 0, a: 0 } },
+      opaque ? {} : { color: { r: 0, g: 0, b: 0, a: 0 } },
       this.session,
     );
 
     const loaded = this.once('Page.loadEventFired', this.session, 20_000);
-    await this.send('Page.navigate', { url: `file://${file}` }, this.session);
+    const url = /^https?:\/\//.test(file) ? file : `file://${file}`;
+    await this.send('Page.navigate', { url }, this.session);
     await loaded;
 
     // Webfonts arrive after load; without this the capture can catch a
@@ -206,6 +209,24 @@ export class Chrome {
     )) as { data: string };
 
     return Buffer.from(shot.data, 'base64');
+  }
+
+  /** Run an expression in the page and return its value. */
+  async evaluate<T>(expression: string): Promise<T> {
+    const res = (await this.send(
+      'Runtime.evaluate',
+      { expression, awaitPromise: true, returnByValue: true },
+      this.session,
+    )) as { result?: { value?: T }; exceptionDetails?: { text?: string } };
+    if (res.exceptionDetails) throw new Error(res.exceptionDetails.text ?? 'evaluate threw');
+    return res.result?.value as T;
+  }
+
+  /** Load a local page and wait for it, without capturing anything. */
+  async open(file: string): Promise<void> {
+    const loaded = this.once('Page.loadEventFired', this.session, 20_000);
+    await this.send('Page.navigate', { url: `file://${file}` }, this.session);
+    await loaded;
   }
 
   async close() {

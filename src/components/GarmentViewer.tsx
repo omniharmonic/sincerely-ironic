@@ -1,102 +1,106 @@
 'use client';
 
 import Image from 'next/image';
-import { useState } from 'react';
+import { useCallback, useRef, useState, useSyncExternalStore } from 'react';
 
-import { GarmentArt, type Side } from '@/components/GarmentArt';
-import { T } from '@/components/universe/T';
-import { product as copy } from '@/lib/copy';
+import { ArtFallback } from '@/components/ArtFallback';
+import { noColour, readColour, subscribeColour } from '@/lib/product/colour';
 import type { Product } from '@/lib/shopify/types';
-import { STYLES } from '@/lib/typeset';
+
+/** How far the image lifts under the cursor. */
+const ZOOM = 2.4;
 
 /**
- * Front and back of the drawn garment, and the type treatments the design
- * ships in. Real photographs replace the drawing the moment Shopify has any.
+ * Every photograph the vendor made of this product, and nothing drawn.
+ *
+ * There is no type-treatment picker here. The treatment is fixed when the
+ * product is built, so a chip offering another one was a choice the cart, the
+ * order and the printer never heard about.
  */
 export function GarmentViewer({ product }: { product: Product }) {
-  const [side, setSide] = useState<Side>('front');
-  const [index, setIndex] = useState(0);
-  const { garment, colourway, prints, styles } = product.art;
-  const [style, setStyle] = useState(styles[0]);
-  const hasBack = garment !== 'sock' && prints.some((p) => p.place === 'back');
+  const images = product.images;
+  const colour = useSyncExternalStore(subscribeColour, () => readColour(product.handle), noColour);
 
-  if (product.images.length > 0) {
-    const img = product.images[index];
-    return (
-      <div>
-        {/* Fitted, not filled: a vendor mockup arrives at whatever aspect it
-            likes — Printify's are square — and cropping one to this frame cut
-            the ends off the artwork. */}
-        <div className="relative aspect-[4/5] overflow-hidden border border-line bg-panel">
-          <Image
-            src={img.url}
-            alt={img.alt}
-            fill
-            priority
-            sizes="(min-width: 1024px) 50vw, 100vw"
-            className="object-contain p-[4%]"
-          />
-        </div>
-        {product.images.length > 1 ? (
-          <div className="mt-3 flex gap-2">
-            {product.images.map((im, i) => (
-              <button key={im.url} type="button" className="chip" aria-pressed={i === index} onClick={() => setIndex(i)} aria-label={`Image ${i + 1}`}>
-                {i + 1}
-              </button>
-            ))}
-          </div>
-        ) : null}
-      </div>
-    );
-  }
+  // Where the chosen colour is photographed, if one has been picked.
+  const wanted = colour ? product.colourImages[colour] : undefined;
+  const forColour = wanted ? images.findIndex((im) => im.url === wanted) : -1;
+
+  // A thumbnail choice is remembered against the colour it was made under, so
+  // picking a colour moves the gallery to that colour's own shot and going
+  // back to a thumbnail still works — and neither needs an effect to write
+  // state, which this repo's lint rules forbid anyway.
+  const [pick, setPick] = useState<{ colour: string | null; index: number } | null>(null);
+  const index = pick && pick.colour === colour ? pick.index : forColour >= 0 ? forColour : 0;
+  const current = images[Math.min(index, images.length - 1)];
+
+  const lens = useRef<HTMLDivElement | null>(null);
+
+  // Written straight to the DOM rather than through state: a pointer moves
+  // far more often than a component should re-render, which is the same
+  // reason the hero writes its transforms by hand.
+  const track = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    const el = lens.current;
+    // Touch has no hover, and a finger dragging the page should not zoom it.
+    if (!el || e.pointerType !== 'mouse') return;
+    const r = el.getBoundingClientRect();
+    const x = ((e.clientX - r.left) / r.width) * 100;
+    const y = ((e.clientY - r.top) / r.height) * 100;
+    el.style.transformOrigin = `${x.toFixed(2)}% ${y.toFixed(2)}%`;
+    el.style.transform = `scale(${ZOOM})`;
+  }, []);
+
+  const release = useCallback(() => {
+    const el = lens.current;
+    if (!el) return;
+    el.style.transform = '';
+    el.style.transformOrigin = '';
+  }, []);
 
   return (
     <div>
+      {/* Fitted, not filled: a vendor mockup arrives at whatever aspect it
+          likes — Printify's are square — and cropping one to this frame cut
+          the ends off the yard sign's own words. */}
       <div className="relative aspect-[4/5] overflow-hidden border border-line bg-panel">
-        <GarmentArt
-          garment={garment}
-          colourway={colourway}
-          prints={prints}
-          style={style}
-          side={side}
-          title={`${product.title}, ${side}`}
-        />
+        {current ? (
+          <div
+            ref={lens}
+            className="lens absolute inset-0"
+            onPointerMove={track}
+            onPointerLeave={release}
+            onPointerCancel={release}
+          >
+            <Image
+              src={current.url}
+              alt={current.alt}
+              fill
+              priority
+              sizes="(min-width: 1024px) 50vw, 100vw"
+              className="object-contain p-[4%]"
+            />
+          </div>
+        ) : (
+          <ArtFallback title={product.title} />
+        )}
       </div>
 
-      <div className="mt-3 flex flex-wrap items-center gap-2">
-        {hasBack ? (
-          <div className="flex gap-2" role="group" aria-label="Side">
-            <button type="button" className="chip" aria-pressed={side === 'front'} onClick={() => setSide('front')}>
-              Front
+      {images.length > 1 ? (
+        /* The thumbnail is the label. A row of numbers made the customer click
+           to find out what they were picking. */
+        <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label="Views">
+          {images.map((im, i) => (
+            <button
+              key={im.url}
+              type="button"
+              className="thumb"
+              aria-pressed={i === index}
+              aria-label={`View image ${i + 1} of ${images.length}`}
+              onClick={() => setPick({ colour, index: i })}
+            >
+              <Image src={im.url} alt="" fill sizes="64px" className="object-contain p-[6%]" />
             </button>
-            <button type="button" className="chip" aria-pressed={side === 'back'} onClick={() => setSide('back')}>
-              Back
-            </button>
-          </div>
-        ) : null}
-
-        {styles.length > 1 ? (
-          <div className="ml-auto flex gap-2" role="group" aria-label="Type treatment">
-            {styles.map((key) => (
-              <button
-                key={key}
-                type="button"
-                className="chip"
-                aria-pressed={style === key}
-                onClick={() => setStyle(key)}
-                title={STYLES[key].note}
-              >
-                {STYLES[key].label}
-              </button>
-            ))}
-          </div>
-        ) : null}
-      </div>
-
-      {styles.length > 1 ? (
-        <p className="mono mt-3 text-mute">
-          <T s={copy.styleNote.sincere} i={copy.styleNote.ironic} />
-        </p>
+          ))}
+        </div>
       ) : null}
     </div>
   );
