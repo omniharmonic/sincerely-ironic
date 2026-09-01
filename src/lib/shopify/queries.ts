@@ -27,7 +27,9 @@ export const PRODUCT_FRAGMENT = /* GraphQL */ `
 export const PRODUCTS_QUERY = /* GraphQL */ `
   ${PRODUCT_FRAGMENT}
   query Products {
-    products(first: 50, sortKey: CREATED_AT) {
+    # 250 is the Storefront API's per-page ceiling. The line passed 50 the
+    # moment the catalogue grew, and the overflow was dropped silently.
+    products(first: 250, sortKey: CREATED_AT) {
       nodes { ...ProductFields }
     }
   }
