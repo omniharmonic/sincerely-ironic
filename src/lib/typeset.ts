@@ -36,6 +36,10 @@ export interface TypeStyle {
   advance: number;
   /** Extra width the style wants, as a fraction of the panel. */
   fill: number;
+  /** Cap height as a fraction of the font size. Sets the baseline, so lines
+   *  sit tight without colliding — a fixed guess collided in the condensed
+   *  face, whose caps are much taller than its nominal size suggests. */
+  cap: number;
   variation?: string;
   letterSpacing?: number;
 }
@@ -50,9 +54,10 @@ export const STYLES: Record<StyleKey, TypeStyle> = {
     weight: 800,
     case: 'upper',
     justify: true,
-    lineHeight: 0.9,
+    lineHeight: 0.92,
     advance: 0.66,
     fill: 0.94,
+    cap: 0.74,
     variation: "'wdth' 112",
     letterSpacing: -0.02,
   },
@@ -65,9 +70,10 @@ export const STYLES: Record<StyleKey, TypeStyle> = {
     weight: 400,
     case: 'lower',
     justify: false,
-    lineHeight: 1.02,
+    lineHeight: 1.06,
     advance: 0.46,
     fill: 0.88,
+    cap: 0.72,
   },
   stack: {
     key: 'stack',
@@ -78,9 +84,10 @@ export const STYLES: Record<StyleKey, TypeStyle> = {
     weight: 400,
     case: 'upper',
     justify: true,
-    lineHeight: 0.82,
+    lineHeight: 0.96,
     advance: 0.42,
     fill: 0.96,
+    cap: 0.73,
   },
 };
 
@@ -192,7 +199,7 @@ export function typeset(
     const narrowest = Math.min(...widths);
     // The type can grow until either the widest line fills the measure or the
     // stack fills the panel height.
-    const size = Math.min(measure / widest, h / (count * style.lineHeight));
+    const size = Math.min(measure / widest, h / ((count - 1) * style.lineHeight + style.cap));
     // A block that sets larger but rags badly is the wrong trade: a line
     // stretched from two letters to the full measure looks like a mistake.
     // Weight the size by how even the lines are.
@@ -204,7 +211,9 @@ export function typeset(
   const chosen = best ?? { lines: [cased], size: Math.min(measure / emWidth(cased, style), h) };
   const fontSize = chosen.size * fill;
   const step = fontSize * style.lineHeight;
-  const height = step * chosen.lines.length;
+  // The block runs from the first line's cap top to the last line's baseline,
+  // so centring it centres what you actually see rather than the leading.
+  const height = step * (chosen.lines.length - 1) + fontSize * style.cap;
 
   return {
     style,
@@ -212,8 +221,7 @@ export function typeset(
     height,
     lines: chosen.lines.map((line, i) => ({
       text: line,
-      // Baseline sits about three quarters down each slot for these faces.
-      y: step * i + step * 0.78,
+      y: step * i + fontSize * style.cap,
       measure: style.justify ? measure * fill : undefined,
     })),
   };

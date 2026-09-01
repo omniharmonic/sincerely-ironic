@@ -14,7 +14,7 @@
  * whole device. Do not explain a print.
  */
 
-import { STYLE_KEYS, type StyleKey } from './typeset';
+import { STYLE_KEYS, type StyleKey } from './typeset.ts';
 
 export type Garment =
   | 'tee'
