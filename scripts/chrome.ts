@@ -211,6 +211,12 @@ export class Chrome {
     return Buffer.from(shot.data, 'base64');
   }
 
+  /** Plant a cookie, for reproducing a state the browser would arrive in on
+   *  its own — a cart id issued by a store that no longer has it. */
+  async setCookie(name: string, value: string, url: string): Promise<void> {
+    await this.send('Network.setCookie', { name, value, url }, this.session);
+  }
+
   /** Run an expression in the page and return its value. */
   async evaluate<T>(expression: string): Promise<T> {
     const res = (await this.send(
@@ -222,10 +228,12 @@ export class Chrome {
     return res.result?.value as T;
   }
 
-  /** Load a local page and wait for it, without capturing anything. */
+  /** Load a page and wait for it, without capturing anything. Takes a local
+   *  path or an http(s) URL, the same as `shoot`. */
   async open(file: string): Promise<void> {
     const loaded = this.once('Page.loadEventFired', this.session, 20_000);
-    await this.send('Page.navigate', { url: `file://${file}` }, this.session);
+    const url = /^https?:\/\//.test(file) ? file : `file://${file}`;
+    await this.send('Page.navigate', { url }, this.session);
     await loaded;
   }
 
