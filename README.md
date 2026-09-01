@@ -21,6 +21,7 @@ pnpm dev                     # http://localhost:3000
 | `pnpm dev` | Dev server |
 | `pnpm build` | Production build (typechecks) |
 | `pnpm lint` | ESLint |
+| `pnpm print-files` | Render every catalogue print to a 300 DPI transparent PNG in `print-files/` |
 
 Node 22+, pnpm 10.
 
@@ -54,6 +55,21 @@ Node 22+, pnpm 10.
 | Any other sentence on the site | `src/lib/copy.ts` — every entry has `sincere` and `ironic` |
 | Colours, type axes, the slick | `src/app/globals.css` `:root` |
 | The hero's motion | `src/components/Hero.tsx` (`BASE`, `BREATH`, `PULL`) |
+
+## Print files
+
+`pnpm print-files [handle-filter]` turns every print in the catalogue into the
+artwork a print-on-demand vendor wants: transparent PNG, 300 DPI, sized to the
+placement's print area (12×16in front and back, 5×2.25in cap, 3×1.5in sock,
+and so on — see `AREAS` in `scripts/print-files.ts`). Ink colour follows the
+garment: bone garments print ink, ink garments print bone. A `manifest.json`
+lists every file with its placement, size and colour.
+
+Because the type is set from the same catalogue and the same faces the site
+uses, the printed garment and the drawn one cannot drift apart. Rendering uses
+the local Chrome, so there is no image library to install; point `CHROME_PATH`
+at the binary if it is somewhere unusual. Adjust `AREAS` to match a specific
+vendor's template.
 
 ## Environment
 

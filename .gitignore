@@ -45,3 +45,6 @@ next-env.d.ts
 # screenshots from verification runs
 .playwright-mcp/
 *.png
+
+# generated print-ready artwork
+print-files/
