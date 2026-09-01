@@ -33,6 +33,7 @@ const inches = (n: number) => Math.round(n * DPI);
 const AREAS: Record<Print['place'], { w: number; h: number; label: string }> = {
   front: { w: 12, h: 16, label: 'Front' },
   back: { w: 12, h: 16, label: 'Back' },
+  chest: { w: 4, h: 4, label: 'Left chest' },
   left: { w: 4, h: 4, label: 'Left' },
   right: { w: 4, h: 4, label: 'Right' },
   sleeve: { w: 3.5, h: 14, label: 'Sleeve' },
@@ -68,11 +69,13 @@ function html(item: CatalogItem, print: Print, wPx: number, hPx: number): string
   const ink = INK[item.colourway];
   const isText = print.face === 'text';
   const family = isText ? 'Fraunces' : 'Anybody';
-  const longest = Math.max(...print.text.split(/\s+/).map((w) => w.length), 1);
-  // Fit the longest word across the area, then let the scale factor from the
-  // catalogue trim it further, exactly as the on-site art does.
-  const advance = isText ? 0.5 : 0.68;
-  const size = Math.min((wPx * 0.94) / (longest * advance), hPx * 0.44) * (print.scale ?? 1);
+  // The catalogue's scale is tuned for the on-screen art, where the panel is
+  // a different shape. Here the browser measures the real type and grows it
+  // until it fills the safe area; scale only ever trims from that maximum, so
+  // a print can never overrun its panel.
+  const trim = Math.min(1, print.scale ?? 1);
+  const boxW = Math.round(wPx * 0.9);
+  const boxH = Math.round(hPx * 0.86);
 
   return `<!doctype html>
 <meta charset="utf-8">
@@ -86,9 +89,10 @@ function html(item: CatalogItem, print: Print, wPx: number, hPx: number): string
     overflow: hidden;
   }
   .print {
+    width: ${boxW}px;
     color: ${ink};
     font-family: '${family}', sans-serif;
-    font-size: ${size.toFixed(1)}px;
+    font-size: 100px;
     line-height: 0.9;
     text-align: center;
     max-width: 94%;
@@ -99,7 +103,27 @@ function html(item: CatalogItem, print: Print, wPx: number, hPx: number): string
     word-break: keep-all;
   }
 </style>
-<div class="print">${print.text.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</div>`;
+<div class="print">${print.text.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</div>
+<script>
+  (function () {
+    var el = document.querySelector('.print');
+    function fits(px) {
+      el.style.fontSize = px + 'px';
+      return el.scrollHeight <= ${boxH} && el.scrollWidth <= ${boxW} + 1;
+    }
+    function fit() {
+      var lo = 6, hi = ${boxH};
+      for (var i = 0; i < 34; i++) {
+        var mid = (lo + hi) / 2;
+        if (fits(mid)) lo = mid; else hi = mid;
+      }
+      el.style.fontSize = (lo * ${trim}).toFixed(2) + 'px';
+      document.documentElement.dataset.fitted = 'yes';
+    }
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
+    else window.addEventListener('load', fit);
+  })();
+</script>`;
 }
 
 /**

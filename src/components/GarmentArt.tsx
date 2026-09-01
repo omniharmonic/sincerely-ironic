@@ -41,6 +41,7 @@ const SHAPES: Record<
     body: 'M120,95 L60,120 L30,220 L95,245 L95,470 L305,470 L305,245 L370,220 L340,120 L280,95 Q200,150 120,95 Z',
     extras: [{ d: 'M120,95 Q200,150 280,95 Q200,120 120,95 Z' }],
     areas: {
+      chest: { x: 118, y: 196, w: 96, h: 54, size: 17 },
       front: { x: 105, y: 190, w: 190, h: 220, size: 40 },
       back: { x: 105, y: 170, w: 190, h: 250, size: 44 },
     },
@@ -53,6 +54,7 @@ const SHAPES: Record<
       { d: 'M120,95 Q200,150 280,95 Q200,120 120,95 Z' },
     ],
     areas: {
+      chest: { x: 120, y: 196, w: 94, h: 54, size: 17 },
       front: { x: 110, y: 190, w: 180, h: 200, size: 38 },
       back: { x: 110, y: 170, w: 180, h: 240, size: 44 },
       sleeve: { x: -40, y: 275, w: 190, h: 34, size: 20, rotate: -80 },
@@ -67,6 +69,7 @@ const SHAPES: Record<
       { d: 'M135,355 L265,355 L280,440 L120,440 Z', stroke: true },
     ],
     areas: {
+      chest: { x: 120, y: 190, w: 94, h: 54, size: 17 },
       front: { x: 110, y: 185, w: 180, h: 160, size: 34 },
       back: { x: 105, y: 170, w: 190, h: 250, size: 46 },
     },
@@ -80,6 +83,7 @@ const SHAPES: Record<
       { d: 'M95,445 L305,445', stroke: true },
     ],
     areas: {
+      chest: { x: 120, y: 192, w: 94, h: 54, size: 17 },
       front: { x: 110, y: 185, w: 180, h: 200, size: 38 },
       back: { x: 105, y: 165, w: 190, h: 250, size: 46 },
     },
@@ -185,7 +189,7 @@ export function GarmentArt({
   }
 
   const visible = prints.filter((p) => {
-    if (side === 'front') return p.place === 'front' || p.place === 'sleeve';
+    if (side === 'front') return p.place === 'front' || p.place === 'chest' || p.place === 'sleeve';
     return p.place === 'back';
   });
 

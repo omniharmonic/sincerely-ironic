@@ -18,7 +18,7 @@ export interface Both {
 }
 
 export interface Print {
-  place: 'front' | 'back' | 'sleeve' | 'left' | 'right';
+  place: 'front' | 'back' | 'chest' | 'sleeve' | 'left' | 'right';
   text: string;
   /** Relative size, 1 = the garment's default. */
   scale?: number;
@@ -124,7 +124,7 @@ export const catalog: readonly CatalogItem[] = [
     'quietly-disrespectful-tee',
     'Quietly Disrespectful',
     'bone',
-    [{ place: 'front', text: 'quietly disrespectful', scale: 0.34, face: 'text' }],
+    [{ place: 'chest', text: 'quietly disrespectful', scale: 0.34, face: 'text' }],
     'Very soft.',
     'Heavyweight cotton, 6.5 oz. Boxy cut. Small print, left chest.',
   ),
