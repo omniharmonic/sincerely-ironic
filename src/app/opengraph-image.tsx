@@ -37,8 +37,8 @@ export default function OpenGraphImage() {
           }}
         >
           <svg viewBox={LOGO_PATHS.viewBox} width={420} height={354}>
-            <path d={LOGO_PATHS.white} fill="#ffffff" />
-            <path d={LOGO_PATHS.black} fill="#0d0d0d" />
+            <path d={LOGO_PATHS.b} fill="#ffffff" fillOpacity={0.62} stroke="#ffffff" strokeOpacity={0.9} strokeWidth={1.2} />
+            <path d={LOGO_PATHS.a} fill="#ffffff" fillOpacity={0.62} stroke="#ffffff" strokeOpacity={0.9} strokeWidth={1.2} />
           </svg>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
