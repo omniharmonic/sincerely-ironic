@@ -297,6 +297,11 @@ const DESIGNS = {
       { place: 'back', text: 'I have a story that you suck', style: 'gothic', fill: 0.62 },
     ],
   },
+  ketamine: {
+    slug: 'trauma-informed-ketamine-shaman',
+    title: 'Trauma-Informed Ketamine Shaman',
+    prints: front('Trauma-informed ketamine shaman'),
+  },
   veteran: {
     slug: 'culture-war-veteran',
     title: 'Culture War Veteran',
@@ -433,6 +438,7 @@ export const catalog: readonly CatalogItem[] = [
   make(D.autism, 'tee', 'ink'),
   make(D.asshole, 'tee', 'bone'),
   make(D.raisedme, 'tee', 'ink'),
+  make(D.ketamine, 'tee', 'ink'),
   make(D.veteran, 'tee', 'bone'),
   make(D.tier2, 'tee', 'ink'),
   make(D.escaped, 'tee', 'bone'),

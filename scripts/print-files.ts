@@ -17,20 +17,21 @@
  * listing every file with its placement, pixel size and ink colour.
  *
  * Rendering uses the local Chrome in headless mode, so there is no image
- * dependency to install. Fonts come from Google Fonts at render time.
+ * dependency to install. Fonts come from Google Fonts at render time. One
+ * browser is launched for the whole run and driven over the DevTools
+ * protocol — a browser per file cost a start-up each time and looked, fairly,
+ * like a runaway process.
  */
 
-import { execFile } from 'node:child_process';
-import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdir, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import { promisify } from 'node:util';
 import zlib from 'node:zlib';
+
+import { Chrome } from './chrome.ts';
 
 import { catalog, type CatalogItem, type Place, type Print } from '../src/lib/catalog.ts';
 import { EMBLEMS } from '../src/lib/emblems.ts';
 import { splitPanel, STYLES, typeset, type StyleKey } from '../src/lib/typeset.ts';
-
-const run = promisify(execFile);
 
 const DPI = 300;
 const px = (inches: number) => Math.round(inches * DPI);
@@ -73,8 +74,6 @@ const AREA_OVERRIDES: Partial<Record<CatalogItem['garment'], Partial<Record<Plac
 
 /** A bone garment takes ink; an ink garment takes bone. */
 const INK = { bone: '#0D0D0D', ink: '#F3F3F0' } as const;
-
-const CHROME = process.env.CHROME_PATH ?? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 
 const OUT = path.resolve('print-files');
 
@@ -159,9 +158,8 @@ function html(print: Print, styleKey: StyleKey, ink: string, w: number, h: numbe
  * the print area and ignore it, but some read it, so stamp a pHYs chunk in
  * after IHDR and make the file say what it is.
  */
-async function stampDpi(file: string, dpi: number) {
-  const png = await readFile(file);
-  if (png.length < 33 || png.readUInt32BE(12) !== 0x49484452) return; // not IHDR
+function stampDpi(png: Buffer, dpi: number): Buffer {
+  if (png.length < 33 || png.readUInt32BE(12) !== 0x49484452) return png; // not IHDR
 
   const perMetre = Math.round(dpi / 0.0254);
   const data = Buffer.alloc(9);
@@ -175,25 +173,7 @@ async function stampDpi(file: string, dpi: number) {
   chunk.writeUInt32BE(zlib.crc32(Buffer.concat([type, data])), 8 + data.length);
 
   const ihdrEnd = 8 + 8 + png.readUInt32BE(8) + 4;
-  await writeFile(file, Buffer.concat([png.subarray(0, ihdrEnd), chunk, png.subarray(ihdrEnd)]));
-}
-
-async function render(page: string, out: string, w: number, h: number) {
-  await run(CHROME, [
-    '--headless',
-    '--disable-gpu',
-    '--hide-scrollbars',
-    '--force-device-scale-factor=1',
-    '--default-background-color=00000000',
-    `--window-size=${w},${h}`,
-    '--virtual-time-budget=6000',
-    `--screenshot=${out}`,
-    `file://${page}`,
-  ]).catch((e: unknown) => {
-    // Chrome writes diagnostics to stderr and can still exit non-zero on some
-    // machines; the screenshot is what matters, so surface and carry on.
-    console.warn(`  chrome: ${(e as Error).message.split('\n')[0]}`);
-  });
+  return Buffer.concat([png.subarray(0, ihdrEnd), chunk, png.subarray(ihdrEnd)]);
 }
 
 async function main() {
@@ -212,57 +192,70 @@ async function main() {
   await mkdir(tmp, { recursive: true });
 
   const manifest: Record<string, unknown>[] = [];
+  const started = Date.now();
 
-  for (const item of items) {
-    if (item.prints.length === 0) {
-      console.log(`· ${item.handle} — no print`);
-      continue;
-    }
-    const styles = styleFilter ? item.styles.filter((s) => s === styleFilter) : item.styles;
+  const chrome = await Chrome.launch();
+  // Whatever happens next, the browser does not outlive this process.
+  const bail = () => {
+    void chrome.close().finally(() => process.exit(130));
+  };
+  process.once('SIGINT', bail);
+  process.once('SIGTERM', bail);
 
-    for (const styleKey of styles) {
-      for (const print of item.prints) {
-        // A placement can pin its own treatment — the gothic asides on backs.
-        // Render a pinned one once rather than per product style.
-        if (print.style && styleKey !== styles[0]) continue;
-        const effective = print.style ?? styleKey;
+  try {
+    for (const item of items) {
+      if (item.prints.length === 0) {
+        console.log(`· ${item.handle} — no print`);
+        continue;
+      }
+      const styles = styleFilter ? item.styles.filter((s) => s === styleFilter) : item.styles;
 
-        const { w, h, label } = area(item, print.place);
-        const wPx = px(w);
-        const hPx = px(h);
-        const name = `${item.handle}--${styleKey}--${print.place}.png`;
-        const page = path.join(tmp, `${name}.html`);
-        const ink = INK[item.colourway];
+      for (const styleKey of styles) {
+        for (const print of item.prints) {
+          // A placement can pin its own treatment — the gothic asides on
+          // backs. Render a pinned one once rather than per product style.
+          if (print.style && styleKey !== styles[0]) continue;
+          const effective = print.style ?? styleKey;
 
-        await writeFile(page, html(print, effective, ink, wPx, hPx), 'utf8');
-        const outFile = path.join(OUT, name);
-        await render(page, outFile, wPx, hPx);
-        await stampDpi(outFile, DPI);
+          const { w, h, label } = area(item, print.place);
+          const wPx = px(w);
+          const hPx = px(h);
+          const name = `${item.handle}--${styleKey}--${print.place}.png`;
+          const page = path.join(tmp, `${name}.html`);
+          const ink = INK[item.colourway];
 
-        manifest.push({
-          file: name,
-          product: item.title,
-          handle: item.handle,
-          garment: item.garment,
-          style: styleKey,
-          typeface: STYLES[effective].label,
-          placement: label,
-          text: print.text ?? '',
-          emblem: print.emblem ?? null,
-          inches: `${w} × ${h}`,
-          pixels: `${wPx} × ${hPx}`,
-          dpi: DPI,
-          ink,
-          garmentColour: item.colourway,
-        });
-        console.log(`✓ ${name}  ${wPx}×${hPx}`);
+          await writeFile(page, html(print, effective, ink, wPx, hPx), 'utf8');
+          const shot = await chrome.shoot(page, wPx, hPx);
+          await writeFile(path.join(OUT, name), stampDpi(shot, DPI));
+
+          manifest.push({
+            file: name,
+            product: item.title,
+            handle: item.handle,
+            garment: item.garment,
+            style: styleKey,
+            typeface: STYLES[effective].label,
+            placement: label,
+            text: print.text ?? '',
+            emblem: print.emblem ?? null,
+            inches: `${w} × ${h}`,
+            pixels: `${wPx} × ${hPx}`,
+            dpi: DPI,
+            ink,
+            garmentColour: item.colourway,
+          });
+          console.log(`✓ ${name}  ${wPx}×${hPx}`);
+        }
       }
     }
+  } finally {
+    await chrome.close();
   }
 
   await rm(tmp, { recursive: true, force: true });
   await writeFile(path.join(OUT, 'manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`, 'utf8');
-  console.log(`\n${manifest.length} print files in ${OUT}`);
+  const secs = ((Date.now() - started) / 1000).toFixed(1);
+  console.log(`\n${manifest.length} print files in ${OUT}  (${secs}s)`);
 }
 
 main().catch((e) => {
