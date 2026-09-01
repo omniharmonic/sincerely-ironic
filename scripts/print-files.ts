@@ -26,8 +26,9 @@ import path from 'node:path';
 import { promisify } from 'node:util';
 import zlib from 'node:zlib';
 
-import { catalog, type CatalogItem, type Place } from '../src/lib/catalog.ts';
-import { STYLES, typeset, type StyleKey } from '../src/lib/typeset.ts';
+import { catalog, type CatalogItem, type Place, type Print } from '../src/lib/catalog.ts';
+import { EMBLEMS } from '../src/lib/emblems.ts';
+import { splitPanel, STYLES, typeset, type StyleKey } from '../src/lib/typeset.ts';
 
 const run = promisify(execFile);
 
@@ -83,25 +84,53 @@ function area(item: CatalogItem, place: Place) {
 
 const escape = (t: string) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
+/** The emblem's primitives as SVG, scaled into its box. */
+function emblemSvg(which: keyof typeof EMBLEMS, x: number, y: number, size: number, ink: string): string {
+  const emblem = EMBLEMS[which];
+  const parts = emblem.shapes.map((sh) => {
+    const paint = sh.stroke
+      ? `fill="none" stroke="${ink}" stroke-width="${sh.stroke}"`
+      : `fill="${ink}"`;
+    if (sh.circle) return `<circle cx="${sh.circle.cx}" cy="${sh.circle.cy}" r="${sh.circle.r}" ${paint}/>`;
+    if (sh.points) return `<polygon points="${sh.points}" ${paint}/>`;
+    return `<path d="${sh.d}" ${paint}/>`;
+  });
+  return `<g transform="translate(${x.toFixed(2)} ${y.toFixed(2)}) scale(${(size / emblem.size).toFixed(5)})">
+      ${parts.join('\n      ')}
+    </g>`;
+}
+
 /**
  * The print as a standalone page: an SVG the exact pixel size of the print
- * area, with the block set by the shared engine and centred in it.
+ * area, with the emblem and the block laid out by the shared engine.
  */
-function html(text: string, styleKey: StyleKey, fill: number, ink: string, w: number, h: number): string {
+function html(print: Print, styleKey: StyleKey, ink: string, w: number, h: number): string {
   const style = STYLES[styleKey];
-  // Lay out in the panel's own pixel units, so the numbers are the file's.
-  const layout = typeset(text, styleKey, w, h, fill);
-  const top = (h - layout.height) / 2;
-  const href = `https://fonts.googleapis.com/css2?family=${style.googleFamily}&display=block`;
+  const split = splitPanel(Boolean(print.emblem), Boolean(print.text), w, h);
 
-  const lines = layout.lines
-    .map(
-      (line) =>
-        `<text x="${w / 2}" y="${(top + line.y).toFixed(2)}" text-anchor="middle"` +
-        (line.measure ? ` textLength="${line.measure.toFixed(2)}" lengthAdjust="spacingAndGlyphs"` : '') +
-        `>${escape(line.text)}</text>`,
-    )
-    .join('\n    ');
+  let fontSize = 0;
+  const body: string[] = [];
+
+  if (print.emblem && split.emblem) {
+    body.push(emblemSvg(print.emblem, split.emblem.x, split.emblem.y, split.emblem.size, ink));
+  }
+
+  if (print.text && split.text) {
+    const box = split.text;
+    // Lay out in the panel's own pixel units, so the numbers are the file's.
+    const layout = typeset(print.text, styleKey, box.w, box.h, print.fill ?? 1);
+    fontSize = layout.fontSize;
+    const top = box.y + (box.h - layout.height) / 2;
+    for (const line of layout.lines) {
+      body.push(
+        `<text x="${(box.x + box.w / 2).toFixed(2)}" y="${(top + line.y).toFixed(2)}" text-anchor="middle"` +
+          (line.measure ? ` textLength="${line.measure.toFixed(2)}" lengthAdjust="spacingAndGlyphs"` : '') +
+          `>${escape(line.text)}</text>`,
+      );
+    }
+  }
+
+  const href = `https://fonts.googleapis.com/css2?family=${style.googleFamily}&display=block`;
 
   return `<!doctype html>
 <meta charset="utf-8">
@@ -114,13 +143,13 @@ function html(text: string, styleKey: StyleKey, fill: number, ink: string, w: nu
     fill: ${ink};
     font-family: '${style.googleFamily.split(':')[0].replace(/\+/g, ' ')}';
     font-weight: ${style.weight};
-    font-size: ${layout.fontSize.toFixed(2)}px;
+    font-size: ${fontSize.toFixed(2)}px;
     ${style.variation ? `font-variation-settings: ${style.variation};` : ''}
     ${style.letterSpacing ? `letter-spacing: ${style.letterSpacing}em;` : ''}
   }
 </style>
 <svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
-    ${lines}
+    ${body.join('\n    ')}
 </svg>`;
 }
 
@@ -205,7 +234,7 @@ async function main() {
         const page = path.join(tmp, `${name}.html`);
         const ink = INK[item.colourway];
 
-        await writeFile(page, html(print.text, effective, print.fill ?? 1, ink, wPx, hPx), 'utf8');
+        await writeFile(page, html(print, effective, ink, wPx, hPx), 'utf8');
         const outFile = path.join(OUT, name);
         await render(page, outFile, wPx, hPx);
         await stampDpi(outFile, DPI);
@@ -218,7 +247,8 @@ async function main() {
           style: styleKey,
           typeface: STYLES[effective].label,
           placement: label,
-          text: print.text,
+          text: print.text ?? '',
+          emblem: print.emblem ?? null,
           inches: `${w} × ${h}`,
           pixels: `${wPx} × ${hPx}`,
           dpi: DPI,

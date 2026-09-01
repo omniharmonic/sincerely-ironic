@@ -14,6 +14,7 @@
  * whole device. Do not explain a print.
  */
 
+import type { EmblemKey } from './emblems.ts';
 import { STYLE_KEYS, type StyleKey } from './typeset.ts';
 
 export type Garment =
@@ -26,6 +27,8 @@ export type Garment =
   | 'bucket'
   | 'tote'
   | 'blanket'
+  | 'sign'
+  | 'fannypack'
   | 'sock';
 
 export type Colourway = 'bone' | 'ink';
@@ -39,7 +42,10 @@ export interface Both {
 
 export interface Print {
   place: Place;
-  text: string;
+  /** Omit for an emblem on its own. */
+  text?: string;
+  /** Drawn above the text, or alone. */
+  emblem?: EmblemKey;
   /** Overrides the product's style for this placement. Back asides run gothic. */
   style?: StyleKey;
   /** Fraction of the panel the block fills. 1 fills it. */
@@ -162,6 +168,24 @@ const GARMENTS: Record<Garment, GarmentSpec> = {
     more: 'Extremely soft.',
     carriesBack: false,
   },
+  sign: {
+    type: 'Yard sign',
+    price: 43,
+    sizes: ONE_SIZE,
+    suffix: 'sign',
+    base: 'Corrugated plastic yard sign, 18 × 24in. Printed one side. Stake included.',
+    more: 'Put it on the lawn.',
+    carriesBack: false,
+  },
+  fannypack: {
+    type: 'Fanny pack',
+    price: 40,
+    sizes: ONE_SIZE,
+    suffix: 'fannypack',
+    base: 'Fanny pack. Adjustable strap, zip closure.',
+    more: 'Holds the essentials.',
+    carriesBack: false,
+  },
   sock: {
     type: 'Socks',
     price: 18,
@@ -184,6 +208,7 @@ interface Design {
 }
 
 const front = (text: string): Print[] => [{ place: 'front', text }];
+const badge = (text: string, emblem: EmblemKey): Print[] => [{ place: 'front', emblem, text }];
 const frontBack = (text: string, aside: string): Print[] => [
   { place: 'front', text },
   { place: 'back', text: aside, style: 'gothic', fill: 0.44 },
@@ -272,6 +297,29 @@ const DESIGNS = {
       { place: 'back', text: 'I have a story that you suck', style: 'gothic', fill: 0.62 },
     ],
   },
+  veteran: {
+    slug: 'culture-war-veteran',
+    title: 'Culture War Veteran',
+    prints: badge('Culture war veteran', 'veteran'),
+  },
+  tier2: { slug: 'im-tier-2', title: 'I’m Tier 2', prints: badge('I’m tier 2', 'veteran') },
+  escaped: {
+    slug: 'escaped-samsara',
+    title: 'I Already Escaped Samsara but I Had to Come Back to Save Ur Ass',
+    prints: front('I already escaped samsara but I had to come back to save ur ass'),
+  },
+  sorry: {
+    slug: 'samsara-is-never',
+    title: 'Samsara Is Never Having to Say You’re Sorry',
+    prints: front('Samsara is never having to say you’re sorry'),
+  },
+  memeplex: { slug: 'your-memeplex', title: 'Your Memeplex', prints: front('Your memeplex'), styles: GOTHIC_FIRST },
+  joincults: { slug: 'join-cults', title: 'Join Cults!', prints: front('Join cults!'), styles: GOTHIC_FIRST },
+  mamo: {
+    slug: 'my-other-shaman',
+    title: 'My Other Shaman Is a Mamo',
+    prints: front('My other shaman is a mamo'),
+  },
   raisedme: {
     slug: 'wilber-hanzi-gebser',
     title: 'Wilber, Hanzi and Gebser Raised Me',
@@ -297,7 +345,7 @@ function make(design: Design, garment: Garment, colourway: Colourway): CatalogIt
   // Sweatpants carry the slogan down the leg rather than across a chest.
   const prints: Print[] =
     garment === 'sweatpants'
-      ? [{ place: 'leg', text: kept[0].text, style: kept[0].style }]
+      ? [{ place: 'leg', text: kept[0].text, emblem: kept[0].emblem, style: kept[0].style }]
       : [...kept];
 
   return {
@@ -313,6 +361,46 @@ function make(design: Design, garment: Garment, colourway: Colourway): CatalogIt
     description: { sincere: base, ironic: `${base} ${g.more}` },
   };
 }
+
+/**
+ * Made in Printify rather than here, so their Shopify handles were fixed at
+ * creation and do not follow `<slug>-<garment>`. Shopify never changes a
+ * handle once set, so the catalogue matches theirs rather than the reverse.
+ * Their art lives in Printify — the site shows the Shopify mockups, and the
+ * drawn silhouettes below are only a fallback.
+ */
+export const printifyMade: readonly CatalogItem[] = [
+  {
+    handle: 'yard-sign',
+    title: 'In This House',
+    garment: 'sign',
+    colourway: 'ink',
+    type: 'Yard sign',
+    price: 43,
+    sizes: ONE_SIZE,
+    styles: ['wide'],
+    prints: [{ place: 'front', text: 'In this house' }],
+    description: {
+      sincere: 'Corrugated plastic yard sign, 18 × 24in. Printed one side. Stake included.',
+      ironic: 'Corrugated plastic yard sign, 18 × 24in. Printed one side. Stake included. Put it on the lawn.',
+    },
+  },
+  {
+    handle: 'fanny-pack',
+    title: 'Fanny Pack',
+    garment: 'fannypack',
+    colourway: 'ink',
+    type: 'Fanny pack',
+    price: 40,
+    sizes: ONE_SIZE,
+    styles: ['wide'],
+    prints: [{ place: 'front', text: 'Sincerely Ironic' }],
+    description: {
+      sincere: 'Fanny pack. Adjustable strap, zip closure.',
+      ironic: 'Fanny pack. Adjustable strap, zip closure. Holds the essentials.',
+    },
+  },
+];
 
 const D = DESIGNS;
 
@@ -345,6 +433,13 @@ export const catalog: readonly CatalogItem[] = [
   make(D.autism, 'tee', 'ink'),
   make(D.asshole, 'tee', 'bone'),
   make(D.raisedme, 'tee', 'ink'),
+  make(D.veteran, 'tee', 'bone'),
+  make(D.tier2, 'tee', 'ink'),
+  make(D.escaped, 'tee', 'bone'),
+  make(D.sorry, 'tee', 'ink'),
+  make(D.memeplex, 'tee', 'bone'),
+  make(D.joincults, 'tee', 'ink'),
+  make(D.mamo, 'tee', 'bone'),
 
   /* longsleeves */
   make(D.transcended, 'longsleeve', 'bone'),
@@ -356,6 +451,7 @@ export const catalog: readonly CatalogItem[] = [
   make(D.anthro, 'hoodie', 'bone'),
   make(D.enm, 'hoodie', 'ink'),
   make(D.narcissist, 'hoodie', 'bone'),
+  make(D.veteran, 'hoodie', 'ink'),
 
   /* crewnecks, and the pants that match them */
   make(D.transcontextual, 'crewneck', 'ink'),
@@ -368,13 +464,16 @@ export const catalog: readonly CatalogItem[] = [
   make(D.manifested, 'cap', 'ink'),
   make(D.untriggerable, 'bucket', 'bone'),
   make(D.buttmolly, 'bucket', 'ink'),
+  make(D.veteran, 'cap', 'ink'),
+  make(D.joincults, 'bucket', 'bone'),
 
   /* the rest */
   make(D.spaceholder, 'tote', 'bone'),
   make(D.lore, 'tote', 'ink'),
   make(D.autism, 'blanket', 'bone'),
+  ...printifyMade,
 ];
 
 export const catalogByHandle: Record<string, CatalogItem> = Object.fromEntries(
-  catalog.map((item) => [item.handle, item]),
+  [...catalog, ...printifyMade].map((item) => [item.handle, item]),
 );

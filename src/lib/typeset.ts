@@ -226,3 +226,34 @@ export function typeset(
     })),
   };
 }
+
+/* ------------------------------------------------------------------ panels */
+
+export interface PanelSplit {
+  /** Square box for the emblem, in panel units. */
+  emblem?: { x: number; y: number; size: number };
+  /** Box the type is set into. */
+  text?: { x: number; y: number; w: number; h: number };
+}
+
+/**
+ * Divide a print panel between an emblem and its wordmark. Both renderers
+ * call this, so a patch sits the same on the drawn garment and on the file
+ * that goes to the printer.
+ */
+export function splitPanel(hasEmblem: boolean, hasText: boolean, w: number, h: number): PanelSplit {
+  if (hasEmblem && hasText) {
+    // The badge takes the upper field, the words sit under it.
+    const band = h * 0.6;
+    const size = Math.min(w * 0.62, band * 0.94);
+    return {
+      emblem: { x: (w - size) / 2, y: (band - size) / 2, size },
+      text: { x: 0, y: band, w, h: h - band },
+    };
+  }
+  if (hasEmblem) {
+    const size = Math.min(w, h) * 0.92;
+    return { emblem: { x: (w - size) / 2, y: (h - size) / 2, size } };
+  }
+  return { text: { x: 0, y: 0, w, h } };
+}

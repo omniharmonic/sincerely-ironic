@@ -1,5 +1,6 @@
 import type { Colourway, Garment, Place, Print } from '@/lib/catalog';
-import { typeset, type StyleKey } from '@/lib/typeset';
+import { EMBLEMS } from '@/lib/emblems';
+import { splitPanel, typeset, type StyleKey } from '@/lib/typeset';
 
 /**
  * Typographic garment art.
@@ -141,6 +142,28 @@ const SHAPES: Record<Garment, Shape> = {
       front: { x: 84, y: 194, w: 232, h: 180 },
     },
   },
+  sign: {
+    body: 'M64,104 L336,104 L336,330 L64,330 Z',
+    extras: [
+      { d: 'M120,330 L120,462', stroke: true, width: 7 },
+      { d: 'M280,330 L280,462', stroke: true, width: 7 },
+      { d: 'M120,392 L280,392', stroke: true, width: 5 },
+    ],
+    areas: {
+      front: { x: 86, y: 126, w: 228, h: 182 },
+    },
+  },
+  fannypack: {
+    body: 'M78,224 C78,196 108,186 200,186 C292,186 322,196 322,224 L322,306 C322,334 292,344 200,344 C108,344 78,334 78,306 Z',
+    extras: [
+      { d: 'M78,238 L26,268 L26,286 L78,268', stroke: true },
+      { d: 'M322,238 L374,268 L374,286 L322,268', stroke: true },
+      { d: 'M120,300 L280,300', stroke: true },
+    ],
+    areas: {
+      front: { x: 112, y: 214, w: 176, h: 78 },
+    },
+  },
   sock: {
     body: 'M60,60 L60,320 Q60,372 112,372 L250,372 Q288,372 288,336 Q288,306 250,300 L150,290 L150,60 Z',
     extras: [{ d: 'M60,60 L150,60 L150,110 L60,110 Z' }],
@@ -150,6 +173,22 @@ const SHAPES: Record<Garment, Shape> = {
     },
   },
 };
+
+function Emblem({ which, colour }: { which: keyof typeof EMBLEMS; colour: string }) {
+  const emblem = EMBLEMS[which];
+  return (
+    <>
+      {emblem.shapes.map((sh, i) => {
+        const paint = sh.stroke
+          ? { fill: 'none', stroke: colour, strokeWidth: sh.stroke }
+          : { fill: colour };
+        if (sh.circle) return <circle key={i} cx={sh.circle.cx} cy={sh.circle.cy} r={sh.circle.r} {...paint} />;
+        if (sh.points) return <polygon key={i} points={sh.points} {...paint} />;
+        return <path key={i} d={sh.d} {...paint} />;
+      })}
+    </>
+  );
+}
 
 function PrintBlock({
   print,
@@ -162,32 +201,54 @@ function PrintBlock({
   colour: string;
   style: StyleKey;
 }) {
-  const layout = typeset(print.text, print.style ?? style, area.w, area.h, print.fill ?? 1);
-  const top = area.y + (area.h - layout.height) / 2;
-  const cx = area.x + area.w / 2;
-  const transform = area.rotate ? `rotate(${area.rotate} ${cx} ${area.y + area.h / 2})` : undefined;
+  const split = splitPanel(Boolean(print.emblem), Boolean(print.text), area.w, area.h);
+  const rotate = area.rotate
+    ? `rotate(${area.rotate} ${area.x + area.w / 2} ${area.y + area.h / 2})`
+    : undefined;
 
   return (
-    <g transform={transform} fill={colour}>
-      {layout.lines.map((line, i) => (
-        <text
-          key={i}
-          x={cx}
-          y={top + line.y}
-          textAnchor="middle"
-          textLength={line.measure}
-          lengthAdjust={line.measure ? 'spacingAndGlyphs' : undefined}
-          style={{
-            fontFamily: layout.style.family,
-            fontWeight: layout.style.weight,
-            fontSize: layout.fontSize,
-            fontVariationSettings: layout.style.variation,
-            letterSpacing: layout.style.letterSpacing ? `${layout.style.letterSpacing}em` : undefined,
-          }}
+    <g transform={rotate}>
+      {print.emblem && split.emblem ? (
+        <g
+          transform={`translate(${area.x + split.emblem.x} ${area.y + split.emblem.y}) scale(${
+            split.emblem.size / EMBLEMS[print.emblem].size
+          })`}
         >
-          {line.text}
-        </text>
-      ))}
+          <Emblem which={print.emblem} colour={colour} />
+        </g>
+      ) : null}
+
+      {print.text && split.text
+        ? (() => {
+            const box = split.text;
+            const layout = typeset(print.text, print.style ?? style, box.w, box.h, print.fill ?? 1);
+            const top = area.y + box.y + (box.h - layout.height) / 2;
+            const cx = area.x + box.x + box.w / 2;
+            return (
+              <g fill={colour}>
+                {layout.lines.map((line, i) => (
+                  <text
+                    key={i}
+                    x={cx}
+                    y={top + line.y}
+                    textAnchor="middle"
+                    textLength={line.measure}
+                    lengthAdjust={line.measure ? 'spacingAndGlyphs' : undefined}
+                    style={{
+                      fontFamily: layout.style.family,
+                      fontWeight: layout.style.weight,
+                      fontSize: layout.fontSize,
+                      fontVariationSettings: layout.style.variation,
+                      letterSpacing: layout.style.letterSpacing ? `${layout.style.letterSpacing}em` : undefined,
+                    }}
+                  >
+                    {line.text}
+                  </text>
+                ))}
+              </g>
+            );
+          })()
+        : null}
     </g>
   );
 }
