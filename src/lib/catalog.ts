@@ -158,7 +158,7 @@ const GARMENTS: Record<Garment, GarmentSpec> = {
     price: 78,
     sizes: ONE_SIZE,
     suffix: 'blanket',
-    base: 'Plush sherpa-backed blanket, 60 × 80in. Printed one side.',
+    base: 'Plush sherpa-backed blanket, 60 × 80in.',
     more: 'Extremely soft.',
     carriesBack: false,
   },
