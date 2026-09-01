@@ -23,7 +23,7 @@
   --soft: 0;
 
   /* The slick. Four stops and a hue that never stops turning. */
-  --slick: linear-gradient(100deg, #ff4fb0 0%, #ffe94d 30%, #4df0ff 62%, #8a4dff 84%, #ff4fb0 100%);
+  --slick: linear-gradient(100deg, #ff2e9e 0%, #ffb52e 30%, #1fcfee 62%, #7c3aed 84%, #ff2e9e 100%);
 
   --ticker-h: 30px;
   --header-h: 64px;
@@ -142,7 +142,7 @@ body {
 /* The wordmark: two faces in one name. */
 .wordmark {
   display: inline-flex;
-  align-items: baseline;
+  align-items: center;
   gap: 0.28em;
   text-decoration: none;
   color: inherit;
@@ -249,35 +249,22 @@ body {
   border-bottom-color: currentColor;
 }
 
-/* The switch */
+/* The switch. Unlabelled. */
 .switch {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  padding: 6px 8px;
+  padding: 5px;
   border: 1px solid var(--line);
   border-radius: 999px;
   background: var(--panel);
   color: inherit;
   cursor: pointer;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
   transition:
     border-color 0.3s,
     background-color 0.55s;
 }
 .switch:hover {
   border-color: var(--fg);
-}
-.switch__label {
-  opacity: 0.45;
-  transition: opacity 0.3s;
-}
-.switch[data-state='sincere'] .switch__label[data-side='sincere'],
-.switch[data-state='ironic'] .switch__label[data-side='ironic'] {
-  opacity: 1;
 }
 .switch__track {
   position: relative;
@@ -489,7 +476,10 @@ body {
   overflow-wrap: normal;
   word-break: keep-all;
 }
-.garment__print--lower {
+.garment__print--keep {
+  text-transform: none;
+}
+.garment__print--text {
   text-transform: none;
   font-family: var(--font-text);
   font-weight: 500;
@@ -555,11 +545,27 @@ body {
   }
 }
 
-@media (max-width: 720px) {
-  .switch__label {
-    display: none;
-  }
-  .switch {
-    padding: 6px;
-  }
+/* ---------- the mark ---------- */
+
+.logo {
+  display: inline-block;
+  aspect-ratio: 264.58 / 223.18;
+  height: 1.7em;
+  border-radius: 6%;
+  overflow: hidden;
+  vertical-align: middle;
+  flex: none;
+}
+.logo__figures {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.wordmark__mark {
+  height: 1.55em;
+  margin-right: 0.1em;
+  align-self: center;
+}
+.hero__mark {
+  height: clamp(96px, 16vw, 220px);
 }

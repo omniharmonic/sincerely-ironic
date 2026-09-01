@@ -5,26 +5,28 @@ import { notFound } from 'next/navigation';
 import { GarmentViewer } from '@/components/GarmentViewer';
 import { money } from '@/components/ProductCard';
 import { ProductForm } from '@/components/ProductForm';
-import { FlipButton } from '@/components/universe/FlipButton';
 import { T, THtml } from '@/components/universe/T';
 import { catalog } from '@/lib/catalog';
-import { grid, product as copy } from '@/lib/copy';
+import { product as copy } from '@/lib/copy';
 import { getProduct } from '@/lib/shopify/products';
 
 export function generateStaticParams() {
   return catalog.map((c) => ({ handle: c.handle }));
 }
 
+const strip = (html: string) => html.replace(/<[^>]+>/g, '');
+
 export async function generateMetadata({ params }: PageProps<'/products/[handle]'>): Promise<Metadata> {
   const { handle } = await params;
   const product = await getProduct(handle);
   if (!product) return {};
+  const description = strip(product.description.sincere);
   return {
     title: product.title,
-    description: product.tagline.sincere,
+    description,
     openGraph: {
       title: product.title,
-      description: product.tagline.sincere,
+      description,
       images: product.images[0] ? [product.images[0].url] : undefined,
     },
   };
@@ -53,22 +55,13 @@ export default async function ProductPage({ params }: PageProps<'/products/[hand
         <h1 className="display mt-6 text-[clamp(40px,6vw,88px)]" style={{ ['--wdth' as string]: 118 }}>
           {product.title}
         </h1>
-        <p className="text-lg mt-4 text-[clamp(18px,1.6vw,22px)] italic leading-snug text-mute">
-          <T s={product.tagline.sincere} i={product.tagline.ironic} />
-        </p>
-        <p className="mono mt-6 text-[14px] tabular-nums">{money(product.price.amount, product.price.currency)}</p>
+        <p className="mono mt-5 text-[14px] tabular-nums">{money(product.price.amount, product.price.currency)}</p>
 
-        <ProductForm sizes={product.sizes} available={product.available} />
+        <ProductForm sizes={product.sizes} available={product.available} purchasable={product.source === 'shopify'} />
 
         <THtml s={product.description.sincere} i={product.description.ironic} className="prose mt-10" />
 
-        <p className="text mt-6 text-[16px] text-mute">
-          <FlipButton>
-            <T s={grid.otherReading.sincere} i={grid.otherReading.ironic} />
-          </FlipButton>
-        </p>
-
-        <dl className="mono mt-12 grid gap-3 border-t border-line pt-5 text-mute normal-case tracking-normal leading-relaxed">
+        <dl className="mono mt-12 grid gap-3 border-t border-line pt-5 normal-case leading-relaxed tracking-normal text-mute">
           <div>
             <T s={copy.fit.sincere} i={copy.fit.ironic} />
           </div>

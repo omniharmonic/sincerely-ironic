@@ -1,21 +1,14 @@
 /**
- * The ten garments, in both registers.
+ * The line. Local source of truth for handle, garment, print and both
+ * readings of the description; it seeded Shopify and it is the fallback when
+ * the Storefront token is absent. When Shopify answers, Shopify wins for
+ * title, price, variants and images. Art always comes from here.
  *
- * This file is the local source of truth. It seeded Shopify once (see
- * docs/superpowers/specs), it keys the typographic garment art by handle, and
- * it is the fallback catalogue when the Storefront token is absent, so the
- * site always renders. When Shopify answers, Shopify wins for title, price,
- * variants and images; the art and the print text always come from here.
+ * The second reading is the first one, a notch more earnest. That is the
+ * whole device. Do not explain a print.
  */
 
-export type Garment =
-  | 'tee'
-  | 'longsleeve'
-  | 'hoodie'
-  | 'crewneck'
-  | 'cap'
-  | 'sock'
-  | 'tote';
+export type Garment = 'tee' | 'longsleeve' | 'hoodie' | 'crewneck' | 'cap' | 'sock' | 'tote';
 
 export type Colourway = 'bone' | 'ink';
 
@@ -25,11 +18,12 @@ export interface Both {
 }
 
 export interface Print {
-  /** Where on the garment. Art places it. */
   place: 'front' | 'back' | 'sleeve' | 'left' | 'right';
   text: string;
   /** Relative size, 1 = the garment's default. */
   scale?: number;
+  /** Display is Anybody, uppercase unless the text has lowercase. Text is Fraunces italic. */
+  face?: 'display' | 'text';
 }
 
 export interface CatalogItem {
@@ -43,14 +37,20 @@ export interface CatalogItem {
   sizes: readonly string[];
   prints: readonly Print[];
   description: Both;
-  /** One line under the title on the product page. */
-  tagline: Both;
 }
 
 export const APPAREL_SIZES = ['S', 'M', 'L', 'XL', 'XXL'] as const;
 export const ONE_SIZE = ['One size'] as const;
 
 export const VENDOR = 'Sincerely Ironic';
+
+const TEE_FB = 'Heavyweight cotton, 6.5 oz. Boxy cut. Printed front and back.';
+const HOODIE = '12 oz fleece, brushed inside. Double-lined hood, kangaroo pocket. Printed front and back.';
+const CREW = '10 oz fleece. Raglan sleeve, ribbed hem and cuffs. Printed chest and back.';
+const CAP = 'Six-panel unstructured cap. Embroidered. Brass buckle, one size.';
+const TOTE = 'Heavy canvas. Long handles. Printed both sides.';
+
+const both = (base: string, more: string): Both => ({ sincere: base, ironic: `${base} ${more}` });
 
 export const catalog: readonly CatalogItem[] = [
   {
@@ -65,16 +65,7 @@ export const catalog: readonly CatalogItem[] = [
       { place: 'front', text: 'SINCERELY', scale: 0.55 },
       { place: 'back', text: 'IRONIC', scale: 1.4 },
     ],
-    tagline: {
-      sincere: 'The name, split across the body.',
-      ironic: 'The name, on a shirt, which is what names are for.',
-    },
-    description: {
-      sincere:
-        'The front says the part you lead with. The back says the part people read after you have walked past. Heavyweight cotton, 6.5 oz, boxy, drops a little past the hip. Printed in the same ink both sides. We mean both.',
-      ironic:
-        'A shirt with our name on it. That is it. We put the brand on the product, which is what brands do, which we said we would not do. It is a very good shirt. Buy it and help us be wrong.',
-    },
+    description: both(TEE_FB, 'We hope you love it.'),
   },
   {
     handle: 'no-spectators-tee',
@@ -86,18 +77,9 @@ export const catalog: readonly CatalogItem[] = [
     sizes: APPAREL_SIZES,
     prints: [
       { place: 'front', text: 'THERE ARE NO SPECTATORS', scale: 1 },
-      { place: 'back', text: 'there were never meant to be', scale: 0.4 },
+      { place: 'back', text: 'there were never meant to be', scale: 0.4, face: 'text' },
     ],
-    tagline: {
-      sincere: 'Position one, printed where other people can see it.',
-      ironic: 'A shirt about not watching, made to be looked at.',
-    },
-    description: {
-      sincere:
-        'Before the seats went in, everyone at a rite was in it. This is a reminder printed where other people can see it, which means the person wearing it is not the one it is for. Heavyweight cotton, boxy.',
-      ironic:
-        'A shirt that says there are no spectators, worn to be looked at. We noticed. It is still true. Also it is the softest one we make.',
-    },
+    description: both(TEE_FB, 'One of our favourites.'),
   },
   {
     handle: 'this-is-not-merch-tee',
@@ -109,18 +91,9 @@ export const catalog: readonly CatalogItem[] = [
     sizes: APPAREL_SIZES,
     prints: [
       { place: 'front', text: 'THIS IS NOT MERCH.', scale: 1 },
-      { place: 'back', text: '(it is merch)', scale: 0.45 },
+      { place: 'back', text: '(it is merch)', scale: 0.45, face: 'text' },
     ],
-    tagline: {
-      sincere: 'The souvenir comes first. The event is wherever you wear it.',
-      ironic: 'It is merch.',
-    },
-    description: {
-      sincere:
-        'Merch is a souvenir of something you attended. This is the other way round: the thing you attend comes after, wherever you wear it. That is what a sixth wall is. The play leaves the building on somebody’s back. Same cotton. Same box cut.',
-      ironic:
-        'It is merch. We wrote a whole paragraph in the other universe about why it is not, and it is. Fits great though.',
-    },
+    description: both(TEE_FB, 'A classic.'),
   },
   {
     handle: 'hollow-form-tee',
@@ -131,16 +104,7 @@ export const catalog: readonly CatalogItem[] = [
     price: 34,
     sizes: APPAREL_SIZES,
     prints: [],
-    tagline: {
-      sincere: 'A plain shirt with nothing on it. The vehicle.',
-      ironic: 'A blank t-shirt for thirty-four dollars.',
-    },
-    description: {
-      sincere:
-        'A plain, well-made shirt with nothing on it. The most known shape in the world, empty, which is exactly what makes it a good vehicle. Whatever you do while wearing it is the print. Heavyweight cotton, boxy, no label at the neck.',
-      ironic:
-        'A blank t-shirt for thirty-four dollars. We know. It is the same shirt as the others without the part that costs us money. The difference is you are paying for the idea, which we also know, and which you also know, which is the idea.',
-    },
+    description: both('Heavyweight cotton, 6.5 oz. Boxy cut. No print, no neck label.', 'Sometimes that’s the one.'),
   },
   {
     handle: 'a-world-is-a-play-longsleeve',
@@ -154,16 +118,7 @@ export const catalog: readonly CatalogItem[] = [
       { place: 'front', text: 'A WORLD IS A PLAY', scale: 0.55 },
       { place: 'sleeve', text: 'THAT ENOUGH PEOPLE KEPT PERFORMING', scale: 1 },
     ],
-    tagline: {
-      sincere: 'The sentence the company stands on, finished down the sleeve.',
-      ironic: 'Either the wisest thing we have said or a fortune cookie.',
-    },
-    description: {
-      sincere:
-        'The sentence the company stands on, finished down the left sleeve so it can only be read by someone standing close. Money was a play. Nation was one. This is a longsleeve. Ribbed cuffs, dropped shoulder, 7 oz.',
-      ironic:
-        'A longsleeve with a sentence on it that is either the wisest thing we have ever said or a fortune cookie, depending on the light. Runs slightly long in the arm on purpose so the sleeve text is not cut off. That is called design.',
-    },
+    description: both('7 oz cotton. Dropped shoulder, ribbed cuffs. Printed chest and left sleeve.', 'Runs a little long in the arm, which we like.'),
   },
   {
     handle: 'road-hoodie',
@@ -177,16 +132,7 @@ export const catalog: readonly CatalogItem[] = [
       { place: 'front', text: 'IF YOU MEET US ON THE ROAD,', scale: 0.6 },
       { place: 'back', text: 'KILL US.', scale: 1.5 },
     ],
-    tagline: {
-      sincere: 'The instruction every honest teacher gives.',
-      ironic: 'We put a koan on a hoodie.',
-    },
-    description: {
-      sincere:
-        'If something claims to be it, it is not; if you meet the company on the road, do the obvious thing. Front and back, so the sentence needs a second person to finish it. 12 oz fleece, brushed inside, double-lined hood.',
-      ironic:
-        'We put a koan on a hoodie. The Buddha said it about himself and we said it about a limited liability company. Extremely warm. Kangaroo pocket.',
-    },
+    description: both(HOODIE, 'Very warm.'),
   },
   {
     handle: 'fourth-wall-cap',
@@ -197,16 +143,7 @@ export const catalog: readonly CatalogItem[] = [
     price: 32,
     sizes: ONE_SIZE,
     prints: [{ place: 'front', text: 'THE FOURTH WALL IS FURNITURE', scale: 1 }],
-    tagline: {
-      sincere: 'The wall that was a threshold is now a chair.',
-      ironic: 'A hat that breaks the fourth wall by talking about it.',
-    },
-    description: {
-      sincere:
-        'Every film winks at the camera now, so the wink does nothing. The wall that was a threshold is now a chair. Six-panel unstructured cap, brass buckle, embroidered, one size.',
-      ironic:
-        'A hat that breaks the fourth wall by talking about how the fourth wall is broken, which is the most fourth-wall thing you can do. Fits most heads.',
-    },
+    description: both(CAP, 'Fits most heads well.'),
   },
   {
     handle: 'noun-verb-socks',
@@ -220,16 +157,7 @@ export const catalog: readonly CatalogItem[] = [
       { place: 'left', text: 'NOUN', scale: 1 },
       { place: 'right', text: 'VERB', scale: 1 },
     ],
-    tagline: {
-      sincere: 'One sock says which is which. Mismatched is the pair.',
-      ironic: 'A sentence from the ankle down.',
-    },
-    description: {
-      sincere:
-        'A partnership makes a noun; we cultivate verbs. One sock says which is which. Wear them mismatched, that is the pair. Combed cotton, ribbed, mid-calf, one size.',
-      ironic:
-        'Socks. One says NOUN and one says VERB, so you can be a sentence from the ankle down. Nobody will see them. That is fine. You will know.',
-    },
+    description: both('Combed cotton, ribbed, mid-calf. One says one, one says the other. One size.', 'They go together.'),
   },
   {
     handle: 'we-build-no-brand-tote',
@@ -243,16 +171,7 @@ export const catalog: readonly CatalogItem[] = [
       { place: 'front', text: 'WE BUILD NO BRAND', scale: 1 },
       { place: 'back', text: 'SINCERELY IRONIC', scale: 0.45 },
     ],
-    tagline: {
-      sincere: 'Position eight, with the name under it so it has something to contradict.',
-      ironic: 'The whole company on a tote.',
-    },
-    description: {
-      sincere:
-        'Position eight, printed on a bag, with the name underneath so the sentence has something to contradict. Heavy canvas, long handles, holds a week of groceries or one production.',
-      ironic:
-        'The bag says we build no brand and then has our logo on it. This is the whole company on a tote. Twenty-eight dollars.',
-    },
+    description: both(TOTE, 'Holds a lot.'),
   },
   {
     handle: 'one-organism-crewneck',
@@ -266,16 +185,7 @@ export const catalog: readonly CatalogItem[] = [
       { place: 'front', text: 'ONE ORGANISM', scale: 0.55 },
       { place: 'back', text: '1:40', scale: 1.6 },
     ],
-    tagline: {
-      sincere: 'Around an hour and forty minutes in, a room stops being a crowd.',
-      ironic: 'A sweatshirt about group trance, sold individually.',
-    },
-    description: {
-      sincere:
-        'Around an hour and forty minutes without a break, a room stops being a crowd and becomes one thing. The back has the number. 10 oz fleece, raglan, ribbed hem.',
-      ironic:
-        'A sweatshirt about group trance, sold individually. The back says 1:40, which is either the time it takes or a bible verse, and we are not going to tell you.',
-    },
+    description: both(CREW, 'Cosy.'),
   },
 ] as const;
 

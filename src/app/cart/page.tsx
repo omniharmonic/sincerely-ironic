@@ -18,7 +18,7 @@ export default function CartPage() {
       </h1>
       <p className="text-lg mt-6 text-[20px] text-mute">
         <button type="button" onClick={() => setOpen(true)} className="cursor-pointer underline underline-offset-4 hover:text-accent">
-          Open the cart
+          Open cart
         </button>
         <span className="mx-3 opacity-40">/</span>
         <Link href="/#shop" className="underline underline-offset-4 hover:text-accent">

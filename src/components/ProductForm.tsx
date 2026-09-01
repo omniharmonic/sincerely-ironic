@@ -7,13 +7,17 @@ import { T } from '@/components/universe/T';
 import { product as copy } from '@/lib/copy';
 import type { Size } from '@/lib/shopify/types';
 
-export function ProductForm({ sizes, available }: { sizes: Size[]; available: boolean }) {
-  const { add, pending, live } = useCart();
+/**
+ * `purchasable` is true only when the product actually came from Shopify —
+ * a configured-but-rejected token must not produce a button that fails.
+ */
+export function ProductForm({ sizes, available, purchasable }: { sizes: Size[]; available: boolean; purchasable: boolean }) {
+  const { add, pending } = useCart();
   const firstAvailable = sizes.find((s) => s.available) ?? sizes[0];
   const [selected, setSelected] = useState<Size | undefined>(sizes.length === 1 ? firstAvailable : undefined);
   const [justAdded, setJustAdded] = useState(false);
 
-  const canBuy = live && available && selected?.available;
+  const canBuy = purchasable && available && selected?.available;
 
   return (
     <form
@@ -47,7 +51,7 @@ export function ProductForm({ sizes, available }: { sizes: Size[]; available: bo
         </div>
       </fieldset>
 
-      {live ? (
+      {purchasable ? (
         <button type="submit" className="btn mt-6 w-full sm:w-auto sm:min-w-[240px]" disabled={!selected || !canBuy || pending}>
           {!available ? (
             <T s={copy.soldOut.sincere} i={copy.soldOut.ironic} />
@@ -60,12 +64,14 @@ export function ProductForm({ sizes, available }: { sizes: Size[]; available: bo
           )}
         </button>
       ) : (
-        <p className="mono mt-6 max-w-[40ch] border-l-2 border-accent pl-3 normal-case leading-relaxed tracking-normal text-mute">
+        <p className="mono mt-6 text-mute">
           <T s={copy.unavailable.sincere} i={copy.unavailable.ironic} />
         </p>
       )}
-      {!selected && live && available ? (
-        <p className="mono mt-3 text-mute">Pick a size.</p>
+      {!selected && purchasable && available ? (
+        <p className="mono mt-3 text-mute">
+          <T s={copy.pick.sincere} i={copy.pick.ironic} />
+        </p>
       ) : null}
     </form>
   );

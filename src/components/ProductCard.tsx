@@ -2,7 +2,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 import { GarmentArt } from '@/components/GarmentArt';
-import { T } from '@/components/universe/T';
 import type { Product } from '@/lib/shopify/types';
 
 export const money = (amount: number, currency: string) =>
@@ -31,9 +30,7 @@ export function ProductCard({ product, priority = false }: { product: Product; p
         <h3 className="display card__name">{product.title}</h3>
         <span className="mono mt-2 shrink-0 tabular-nums">{money(product.price.amount, product.price.currency)}</span>
       </div>
-      <p className="text mt-2 text-[15px] italic leading-snug text-mute">
-        <T s={product.tagline.sincere} i={product.tagline.ironic} />
-      </p>
+      <p className="mono mt-2 text-mute">{product.type}</p>
     </Link>
   );
 }

@@ -34,7 +34,6 @@ function fromCatalog(item: CatalogItem): Product {
       sincere: paragraph(item.description.sincere),
       ironic: paragraph(item.description.ironic),
     },
-    tagline: item.tagline,
     art: { garment: item.garment, colourway: item.colourway, prints: item.prints },
     source: 'catalog',
   };
@@ -67,7 +66,6 @@ function fromShopify(raw: RawProduct): Product | null {
       available: v.availableForSale,
     })),
     description: { sincere: raw.descriptionHtml || paragraph(item.description.sincere), ironic },
-    tagline: item.tagline,
     art: { garment: item.garment, colourway: item.colourway, prints: item.prints },
     source: 'shopify',
   };

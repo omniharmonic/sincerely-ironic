@@ -1,10 +1,13 @@
 import { ImageResponse } from 'next/og';
 
+import { LOGO_PATHS } from '@/components/Logo';
 import { hero, site } from '@/lib/copy';
 
-export const alt = `${site.name} — ${hero.statement}`;
+export const alt = `${site.name} — ${hero.statement.sincere}`;
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
+
+const SLICK = 'linear-gradient(100deg, #FF2E9E 0%, #FFB52E 30%, #1FCFEE 62%, #7C3AED 100%)';
 
 export default function OpenGraphImage() {
   return new ImageResponse(
@@ -14,35 +17,37 @@ export default function OpenGraphImage() {
           width: '100%',
           height: '100%',
           display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between',
-          padding: 64,
+          alignItems: 'center',
+          gap: 64,
+          padding: 72,
           background: '#F3F3F0',
           color: '#0D0D0D',
           fontFamily: 'sans-serif',
         }}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 22, letterSpacing: 4, textTransform: 'uppercase', opacity: 0.6 }}>
-          <span>{site.name}</span>
-          <span>Universe: unconfirmed</span>
-        </div>
         <div
           style={{
             display: 'flex',
-            fontSize: 250,
-            fontWeight: 900,
-            letterSpacing: -12,
-            lineHeight: 0.85,
-            backgroundImage: 'linear-gradient(100deg, #FF4FB0 0%, #FFE94D 30%, #4DF0FF 62%, #8A4DFF 100%)',
-            backgroundClip: 'text',
-            color: 'transparent',
+            width: 420,
+            height: 354,
+            borderRadius: 22,
+            overflow: 'hidden',
+            backgroundImage: SLICK,
+            flexShrink: 0,
           }}
         >
-          {hero.statement}
+          <svg viewBox={LOGO_PATHS.viewBox} width={420} height={354}>
+            <path d={LOGO_PATHS.white} fill="#ffffff" />
+            <path d={LOGO_PATHS.black} fill="#0d0d0d" />
+          </svg>
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 22, letterSpacing: 4, textTransform: 'uppercase', opacity: 0.6 }}>
-          <span>Apparel · Sixth Wall Productions</span>
-          <span>sincerelyironic.com</span>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
+          <div style={{ display: 'flex', fontSize: 84, fontWeight: 900, letterSpacing: -4, lineHeight: 0.95, textTransform: 'uppercase' }}>
+            {hero.statement.sincere}
+          </div>
+          <div style={{ display: 'flex', fontSize: 22, letterSpacing: 4, textTransform: 'uppercase', opacity: 0.6 }}>
+            {site.name} · sincerelyironic.com
+          </div>
         </div>
       </div>
     ),

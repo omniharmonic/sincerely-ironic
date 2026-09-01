@@ -167,3 +167,24 @@ switch is the theme control and it is deliberate), photography.
   the *public* access token into Vercel env `SHOPIFY_STOREFRONT_ACCESS_TOKEN`.
 - Upgrade the store off the trial plan and connect payments.
 - Publish the products to the Headless channel once it exists.
+
+---
+
+## Revision, 2026-08-31 (later)
+
+The first pass explained itself: "you arrived in the sincere universe",
+"Exists: unconfirmed", six positions ending in "It cannot be both. It is."
+Cut. The revised contract:
+
+- **Minimal.** The store says what a store says; the garment says what it
+  says. No sentence names the joke, the switch, or the company's ideas.
+- **The second reading is the first, a notch more earnest.** "Thank you for
+  your support." / "Thank you so much for your support." That is the only
+  device, and it is genuinely unclear which reading is the straight one.
+- **Unlabelled switch.** Light/dark, copy shifts by a word. No SINCERE / IRONIC.
+- **The mark**: the supplied two-silhouette SVG, one white and one black, on
+  the slick. Header, hero, favicon, OG. The hero statement is now ink; the
+  rainbow lives in the mark and the switch knob only.
+- **Positions section → care instructions**, set large.
+- Product descriptions are garment facts; taglines removed.
+- Product line unchanged for now (inventory is a later conversation).

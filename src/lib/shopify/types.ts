@@ -31,7 +31,6 @@ export interface Product {
   images: ProductImage[];
   sizes: Size[];
   description: Both;
-  tagline: Both;
   art: {
     garment: Garment;
     colourway: Colourway;

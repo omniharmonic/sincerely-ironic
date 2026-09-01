@@ -120,18 +120,23 @@ function isLower(text: string) {
 /* Average advance of Anybody at wdth 112, weight 800, uppercase — used to
    shrink the type until the longest word fits on one line. */
 const ADVANCE = 0.68;
+const ADVANCE_TEXT = 0.5;
 
 function PrintBlock({ print, area, colour }: { print: Print; area: Area; colour: string }) {
   const wanted = area.size * (print.scale ?? 1);
   const longest = Math.max(...print.text.split(/\s+/).map((w) => w.length), 1);
-  const size = Math.min(wanted, (area.w * 0.96) / (longest * ADVANCE));
+  const size = Math.min(wanted, (area.w * 0.96) / (longest * (print.face === 'text' ? ADVANCE_TEXT : ADVANCE)));
   const transform = area.rotate ? `rotate(${area.rotate} ${area.x + area.w / 2} ${area.y + area.h / 2})` : undefined;
   return (
     <foreignObject x={area.x} y={area.y} width={area.w} height={area.h} transform={transform}>
       <div
         // @ts-expect-error xmlns is required for foreignObject HTML in some engines
         xmlns="http://www.w3.org/1999/xhtml"
-        className={`garment__print ${isLower(print.text) ? 'garment__print--lower' : ''}`}
+        className={[
+          'garment__print',
+          print.face === 'text' ? 'garment__print--text' : '',
+          isLower(print.text) ? 'garment__print--keep' : '',
+        ].join(' ')}
         style={{ color: colour, fontSize: size }}
       >
         {print.text}

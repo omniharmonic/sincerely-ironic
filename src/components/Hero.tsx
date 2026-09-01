@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  motion,
   useMotionTemplate,
   useReducedMotion,
   useScroll,
@@ -9,25 +10,23 @@ import {
   useTransform,
   useVelocity,
 } from 'motion/react';
-import { motion } from 'motion/react';
 import Link from 'next/link';
 
 import { T } from '@/components/universe/T';
-import { useUniverse } from '@/components/universe/UniverseProvider';
 import { hero } from '@/lib/copy';
+import { Logo } from './Logo';
 
 const BASE = 118; // resting width, a little wide
 const BREATH = 7; // idle sway, bounded
 const PULL = 42; // how far fast scrolling compresses the letters
 
 /**
- * The statement. Identical in both universes; that is the joke and the
- * thesis. Its width axis is a pure function of scroll velocity plus a
- * bounded idle sway — never an accumulator, so it cannot wind up.
+ * The mark, then the statement. The statement's width axis is a pure
+ * function of scroll velocity plus a bounded idle sway — never an
+ * accumulator, so it cannot wind up.
  */
 export function Hero() {
   const reduce = useReducedMotion();
-  const { arrived, ready } = useUniverse();
 
   const { scrollY } = useScroll();
   const velocity = useVelocity(scrollY);
@@ -43,20 +42,18 @@ export function Hero() {
   const fontVariationSettings = useMotionTemplate`"wdth" ${wdth}`;
 
   return (
-    <section className="relative" style={{ padding: 'clamp(56px, 9vw, 120px) var(--gutter) clamp(40px, 6vw, 80px)' }}>
-      <p className="mono mb-8 text-mute" aria-live="polite">
-        {ready ? `You arrived in the ${arrived} universe.` : ' '}
-      </p>
+    <section className="relative" style={{ padding: 'clamp(40px, 7vw, 96px) var(--gutter) clamp(40px, 6vw, 80px)' }}>
+      <Logo className="hero__mark" />
 
       <motion.h1
-        className="display slick"
-        style={{ fontVariationSettings, fontSize: 'clamp(72px, 13.2vw, 232px)', lineHeight: 0.84, maxWidth: '8ch' }}
+        className="display mt-10"
+        style={{ fontVariationSettings, fontSize: 'clamp(48px, 7.2vw, 136px)', lineHeight: 0.88, maxWidth: '15ch' }}
       >
-        {hero.statement}
+        <T s={hero.statement.sincere} i={hero.statement.ironic} />
       </motion.h1>
 
       <div className="mt-10 grid gap-8 md:grid-cols-[minmax(0,52ch)_auto] md:items-end">
-        <p className="text-lg text-[clamp(19px,1.9vw,26px)] leading-[1.35]">
+        <p className="text-lg text-[clamp(18px,1.7vw,24px)] leading-[1.4] text-mute">
           <T s={hero.sub.sincere} i={hero.sub.ironic} />
         </p>
         <Link href="#shop" className="btn justify-self-start md:justify-self-end">

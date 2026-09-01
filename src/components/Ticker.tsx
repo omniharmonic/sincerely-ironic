@@ -25,28 +25,24 @@ function useClock() {
   return now;
 }
 
-/**
- * The status bar. Everything a store status bar would say, plus the one
- * thing this one is not sure about.
- */
+/** Store status. What a store status bar says. */
 export function Ticker() {
   const { universe } = useUniverse();
   const { count } = useCart();
   const time = useClock();
   const items = [
-    ticker.store[universe],
-    `Universe: ${universe}`,
-    ticker.exists[universe],
-    `Cart: ${count}`,
+    ticker.open,
+    ticker.ships,
     `Boulder ${time ?? '--:--'} MT`,
-    ticker.ships[universe],
-    ticker.dba[universe],
+    ticker.returns,
+    `Cart: ${count}`,
+    ticker.thanks[universe],
   ];
   // Duplicated so the marquee loops seamlessly at -50%.
   const track = [...items, ...items];
 
   return (
-    <div className="ticker mono" aria-live="off" role="status">
+    <div className="ticker mono" role="status" aria-live="off">
       <div className="ticker__track">
         {track.map((t, i) => (
           <span key={i} aria-hidden={i >= items.length}>

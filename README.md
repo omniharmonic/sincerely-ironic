@@ -3,9 +3,10 @@
 The apparel storefront of [Sixth Wall Productions](https://sixthwall.productions),
 doing business as. Live at **<https://sincerelyironic.com>**.
 
-A real store that is not sure it exists. Every line of copy on the site has
-two readings — sincere and ironic — and the visitor lands in one of the two
-universes at random. The switch in the header moves them. It remembers.
+Every line of copy on the site has two readings, and the visitor lands in one
+of the two at random. The unlabelled switch in the header moves them; it
+remembers. The second reading is the first one, a notch more earnest. Nothing
+on the site says so.
 
 ## Quick start
 

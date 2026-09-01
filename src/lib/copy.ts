@@ -1,9 +1,6 @@
 /**
- * Site copy that is not a product. Every entry has both readings.
- *
- * Voice: mechanism, not meaning. First person plural. Long sentences land on
- * short flat ones. No hedging. Funny is allowed; cute is not. Never "journey",
- * never "transformational" as an adjective, never "brand partnership".
+ * Site copy. Two readings of everything; the second is the first, a notch
+ * more earnest. Short. Nothing on this site explains itself.
  */
 import type { Both } from './catalog';
 
@@ -15,172 +12,113 @@ export const site = {
     url: 'https://sixthwall.productions',
     email: 'hello@sixthwall.productions',
   },
-  description:
-    'Apparel from Sixth Wall Productions. Every piece is sincere and ironic. The store is real; the universe is unconfirmed.',
+  description: 'Apparel. Small runs, printed and shipped from Colorado.',
   shipsFrom: 'Boulder, Colorado',
 } as const;
 
 export const nav = {
-  shop: { sincere: 'Shop', ironic: 'Shop' },
-  about: { sincere: 'What this is', ironic: 'What this is' },
-  cart: { sincere: 'Cart', ironic: 'Cart' },
-} satisfies Record<string, Both>;
+  shop: 'Shop',
+  about: 'About',
+  cart: 'Cart',
+} as const;
 
 export const hero = {
-  /** Identical in both universes. That is the point. */
-  statement: 'WE MEAN IT.',
-  sub: {
-    sincere:
-      'A play leaves the building on somebody’s back. These are the clothes it leaves in. Apparel from Sixth Wall Productions, dressed for the street.',
-    ironic:
-      'A theatre company that builds no brand has a clothing line. This is it. Every piece is sincere, every piece is ironic, and the store may or may not exist.',
+  statement: {
+    sincere: 'THANK YOU FOR YOUR SUPPORT.',
+    ironic: 'THANK YOU SO MUCH FOR YOUR SUPPORT.',
   },
-  cta: { sincere: 'See the clothes', ironic: 'Fine, show me' },
-} satisfies { statement: string; sub: Both; cta: Both };
+  sub: {
+    sincere: 'Apparel. Small runs, printed and shipped from Colorado.',
+    ironic: 'Apparel. Small runs, printed and shipped from Colorado, with love.',
+  },
+  cta: { sincere: 'Shop', ironic: 'Shop' },
+} satisfies Record<string, Both>;
 
-export const positions: readonly Both[] = [
-  { sincere: 'This is a store.', ironic: 'This is a store. Probably.' },
-  { sincere: 'The clothes are real. They ship.', ironic: 'The clothes are real. The universe is unconfirmed.' },
-  { sincere: 'Every piece is sincere.', ironic: 'Every piece is sincere, which we say ironically.' },
-  { sincere: 'Every piece is ironic.', ironic: 'Every piece is ironic, which we mean.' },
-  { sincere: 'It cannot be both.', ironic: 'It cannot be both.' },
-  { sincere: 'It is.', ironic: 'Switch and check.' },
+/** Care instructions, set large. */
+export const care: readonly Both[] = [
+  { sincere: 'Machine wash cold.', ironic: 'Machine wash cold.' },
+  { sincere: 'Tumble dry low.', ironic: 'Tumble dry low.' },
+  { sincere: 'Do not bleach.', ironic: 'Do not bleach.' },
+  { sincere: 'Iron inside out.', ironic: 'Iron inside out.' },
+  { sincere: 'Wear often.', ironic: 'Wear often.' },
+  { sincere: 'Thank you.', ironic: 'Thank you so much.' },
 ];
 
 export const grid = {
-  heading: { sincere: 'Everything', ironic: 'Everything (both)' },
-  count: (n: number): Both => ({
-    sincere: `${n} pieces`,
-    ironic: `${n} pieces, allegedly`,
-  }),
-  otherReading: {
-    sincere: 'The other reading is one switch away.',
-    ironic: 'The straight version is one switch away.',
-  },
+  heading: { sincere: 'Everything', ironic: 'Everything' },
+  count: (n: number): Both => ({ sincere: `${n} items`, ironic: `${n} items, all good` }),
 } as const;
 
 export const product = {
   size: { sincere: 'Size', ironic: 'Size' },
   add: { sincere: 'Add to cart', ironic: 'Add to cart' },
   adding: { sincere: 'Adding', ironic: 'Adding' },
-  added: { sincere: 'Added', ironic: 'Added' },
-  soldOut: { sincere: 'Sold out', ironic: 'Gone' },
-  unavailable: {
-    sincere: 'The register opens when the storefront key is in. Soon.',
-    ironic: 'You can buy this in the other universe. This one is waiting on a key.',
-  },
+  added: { sincere: 'Added', ironic: 'Added!' },
+  soldOut: { sincere: 'Sold out', ironic: 'Sold out, sorry' },
+  unavailable: { sincere: 'Not available right now.', ironic: 'Not available right now. Sorry.' },
+  pick: { sincere: 'Pick a size.', ironic: 'Pick a size.' },
   details: {
-    sincere: `Ships from ${site.shipsFrom}. Returns within 30 days, unworn. Printed to order.`,
-    ironic: `Ships from a real place with a real zip code. Returns within 30 days if you have not worn it to a rite.`,
+    sincere: `Ships from ${site.shipsFrom} within a week. Returns within 30 days, unworn.`,
+    ironic: `Ships from ${site.shipsFrom} within a week. Returns within 30 days, unworn. No questions asked.`,
   },
   fit: {
     sincere: 'Boxy fit. Between sizes, size down.',
-    ironic: 'Boxy fit. Between sizes, pick the universe where you are the other one.',
+    ironic: 'Boxy fit. Between sizes, size down. You’ll be fine.',
   },
-  back: { sincere: 'All pieces', ironic: 'Back to the pile' },
+  back: { sincere: 'All items', ironic: 'All items' },
 } satisfies Record<string, Both>;
 
 export const cart = {
   title: { sincere: 'Cart', ironic: 'Cart' },
-  empty: {
-    sincere: 'Nothing here yet. That is a fine place to start.',
-    ironic: 'Empty, like most carts, most of the time.',
-  },
+  empty: { sincere: 'Your cart is empty.', ironic: 'Your cart is empty. No pressure.' },
   subtotal: { sincere: 'Subtotal', ironic: 'Subtotal' },
-  note: {
-    sincere: 'Shipping and tax are worked out at checkout.',
-    ironic: 'Shipping and tax appear at checkout, as is tradition.',
-  },
+  note: { sincere: 'Shipping and tax at checkout.', ironic: 'Shipping and tax at checkout.' },
   checkout: { sincere: 'Check out', ironic: 'Check out' },
-  keep: { sincere: 'Keep looking', ironic: 'Keep looking' },
+  keep: { sincere: 'Keep shopping', ironic: 'Keep shopping' },
   remove: { sincere: 'Remove', ironic: 'Remove' },
   close: { sincere: 'Close', ironic: 'Close' },
 } satisfies Record<string, Both>;
 
 export const ticker = {
-  store: { sincere: 'Store: open', ironic: 'Store: open, allegedly' },
-  exists: { sincere: 'Exists: yes', ironic: 'Exists: unconfirmed' },
-  ships: { sincere: `Ships from: ${site.shipsFrom}`, ironic: 'Ships from: here, or the other one' },
-  dba: { sincere: 'Sixth Wall Productions DBA', ironic: 'A Sixth Wall Productions production' },
-} satisfies Record<string, Both>;
+  open: 'Open',
+  ships: `Ships from ${site.shipsFrom}`,
+  returns: 'Returns within 30 days',
+  thanks: { sincere: 'Thank you for your support', ironic: 'Thank you so much for your support' },
+} as const;
 
 export const about = {
-  title: { sincere: 'What this is.', ironic: 'What this is, apparently.' },
+  title: { sincere: 'About', ironic: 'About us' },
   paragraphs: [
     {
-      sincere:
-        'Sincerely Ironic is the apparel line of Sixth Wall Productions, a company that makes ritual theatre and immersive worlds. Theatre has six walls. The sixth is the exit: the one a play goes through when it leaves the building and becomes the way some people live. Clothes are the simplest thing that walks out of a building. So these are the sixth wall, sold by the piece.',
-      ironic:
-        'Sincerely Ironic is what happens when a theatre company that says it builds no brand needs to pay for a venue. Theatre has six walls, apparently. We were told the sixth one is the exit. This is the gift shop by the exit.',
+      sincere: 'Sincerely Ironic makes apparel. Small runs, printed in Colorado, shipped from Boulder.',
+      ironic: 'Sincerely Ironic makes apparel. Small runs, printed in Colorado, shipped from Boulder, by hand.',
     },
     {
-      sincere:
-        'Everything here is both sincere and ironic. That is not a mood; it is the position. A symbol has to be raised straight to work, and it can never hold the whole of what it points at. We know that. We raise it anyway, and we tell you we know. Held with a straight face and a wink at once.',
-      ironic:
-        'Every piece is sincere and ironic at once, which is a way of saying we would like to sell you a shirt and also be right about it. The switch at the top of the page changes the universe. It does not change the shirt.',
+      sincere: 'It is the clothing line of Sixth Wall Productions, a theatre company. The clothes help pay for the shows.',
+      ironic: 'It is the clothing line of Sixth Wall Productions, a theatre company. The clothes help pay for the shows. Every order helps.',
     },
     {
-      sincere:
-        'The store is real. Orders ship from Boulder, Colorado. Returns within thirty days, unworn. The company does not build a brand, and this is its brand. If you meet us on the road, you know what to do.',
-      ironic:
-        'The store exists. We are fairly sure. Orders ship from a real place with a real zip code. Returns within thirty days if you have not worn it to a rite. If you meet us on the road, we will probably be wearing this.',
+      sincere: 'Thank you for your support.',
+      ironic: 'Thank you so much for your support.',
     },
   ] satisfies Both[],
-  questionsHeading: { sincere: 'Questions', ironic: 'Questions, anticipated' },
+  questionsHeading: { sincere: 'Questions', ironic: 'Questions' },
   questions: [
+    { q: 'Is this real?', a: { sincere: 'Yes.', ironic: 'Yes!' } },
+    { q: 'Where does the money go?', a: { sincere: 'Into the next show.', ironic: 'Into the next show. Really.' } },
     {
-      q: { sincere: 'Is this real?', ironic: 'Is this real?' },
-      a: { sincere: 'Yes. The clothes ship.', ironic: 'The clothes are real. We are not sure about the rest.' },
+      q: 'What if it doesn’t fit?',
+      a: { sincere: 'Send it back within thirty days.', ironic: 'Send it back within thirty days. We’ll sort it out.' },
     },
-    {
-      q: { sincere: 'Which universe am I in?', ironic: 'Which universe am I in?' },
-      a: {
-        sincere: 'The one you landed in. The switch in the header moves you. It remembers.',
-        ironic: 'Check the ticker. If it says unconfirmed, that is the one.',
-      },
-    },
-    {
-      q: { sincere: 'Why is the blank one thirty-four dollars?', ironic: 'Why is the blank one thirty-four dollars?' },
-      a: {
-        sincere: 'It is the same shirt as the others, without the print. The price is the shirt.',
-        ironic: 'Because we knew you would ask.',
-      },
-    },
-    {
-      q: { sincere: 'Where does the money go?', ironic: 'Where does the money go?' },
-      a: {
-        sincere: 'Into the next production. A world is being built, and it costs money to book a room.',
-        ironic: 'Into a room with a stage in it. We are not a charity. We are a theatre, which is worse.',
-      },
-    },
-    {
-      q: { sincere: 'Do you do collaborations?', ironic: 'Do you do collaborations?' },
-      a: {
-        sincere: `Story partnerships, never the other kind. Write to ${site.parent.email}.`,
-        ironic: 'We do not say the other phrase. We have a whole document about it.',
-      },
-    },
-  ] satisfies { q: Both; a: Both }[],
+  ] satisfies { q: string; a: Both }[],
   sizing: {
-    sincere: 'Boxy fit. Between sizes, size down. Cap, socks and tote are one size, which is also a position.',
-    ironic: 'Boxy fit. Between sizes, size down. Cap, socks and tote are one size. We did not want to talk about it.',
+    sincere: 'Boxy fit. Between sizes, size down. Caps and totes are one size.',
+    ironic: 'Boxy fit. Between sizes, size down. Caps and totes are one size.',
   },
 } as const;
 
 export const notFound = {
-  title: { sincere: 'This page exists in the other universe.', ironic: 'This page exists in the other universe.' },
-  body: {
-    sincere: 'Or it never did. Either way, it is not here. The switch is above; the clothes are below.',
-    ironic: 'We checked. It is not there either. Try the clothes.',
-  },
-  cta: { sincere: 'Back to the store', ironic: 'Back to the store' },
-} satisfies Record<string, Both>;
-
-export const footer = {
-  line: {
-    sincere: 'Sincerely Ironic is Sixth Wall Productions, doing business as.',
-    ironic: 'Sincerely Ironic is Sixth Wall Productions in a different shirt.',
-  },
-  parent: { sincere: 'The company', ironic: 'The people responsible' },
-  write: { sincere: 'Write to us', ironic: 'Write to us' },
+  title: { sincere: 'Nothing here.', ironic: 'Nothing here. Sorry!' },
+  body: { sincere: 'The page may have moved. The clothes have not.', ironic: 'The page may have moved. The clothes have not.' },
+  cta: { sincere: 'Back to the shop', ironic: 'Back to the shop' },
 } satisfies Record<string, Both>;

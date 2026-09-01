@@ -8,14 +8,10 @@ import {
   useSyncExternalStore,
   type ReactNode,
 } from 'react';
-import { ARRIVED_KEY, STORAGE_KEY, other, type Universe } from '@/lib/universe';
+import { STORAGE_KEY, other, type Universe } from '@/lib/universe';
 
 interface UniverseContextValue {
   universe: Universe;
-  /** Which one the visitor first landed in, this browser. */
-  arrived: Universe;
-  /** True once the client has read the real value off <html>. */
-  ready: boolean;
   set: (u: Universe) => void;
   flip: () => void;
 }
@@ -41,26 +37,10 @@ function readFromDocument(): Universe {
   return document.documentElement.dataset.universe === 'ironic' ? 'ironic' : 'sincere';
 }
 
-let arrivedCache: Universe | null = null;
-function readArrived(): Universe {
-  if (arrivedCache) return arrivedCache;
-  try {
-    const a = localStorage.getItem(ARRIVED_KEY);
-    arrivedCache = a === 'ironic' ? 'ironic' : 'sincere';
-  } catch {
-    arrivedCache = 'sincere';
-  }
-  return arrivedCache;
-}
-
 const serverSincere = (): Universe => 'sincere';
-const clientReady = () => true;
-const serverNotReady = () => false;
 
 export function UniverseProvider({ children }: { children: ReactNode }) {
   const universe = useSyncExternalStore(subscribe, readFromDocument, serverSincere);
-  const arrived = useSyncExternalStore(subscribe, readArrived, serverSincere);
-  const ready = useSyncExternalStore(subscribe, clientReady, serverNotReady);
 
   const set = useCallback((u: Universe) => {
     document.documentElement.dataset.universe = u;
@@ -74,10 +54,7 @@ export function UniverseProvider({ children }: { children: ReactNode }) {
 
   const flip = useCallback(() => set(other(readFromDocument())), [set]);
 
-  const value = useMemo(
-    () => ({ universe, arrived, ready, set, flip }),
-    [universe, arrived, ready, set, flip],
-  );
+  const value = useMemo(() => ({ universe, set, flip }), [universe, set, flip]);
 
   return <UniverseContext.Provider value={value}>{children}</UniverseContext.Provider>;
 }
