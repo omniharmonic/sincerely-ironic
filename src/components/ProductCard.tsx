@@ -12,6 +12,8 @@ export function ProductCard({ product, priority = false }: { product: Product; p
   return (
     <Link href={`/products/${product.handle}`} className="card group">
       <div className="card__art">
+        {/* The image fit is set in globals.css (`.card__art img`), where it
+            can say why: a vendor mockup is fitted, never cropped. */}
         {image ? (
           <Image
             src={image.url}
@@ -19,7 +21,6 @@ export function ProductCard({ product, priority = false }: { product: Product; p
             fill
             sizes="(min-width: 1536px) 20vw, (min-width: 1024px) 33vw, 50vw"
             priority={priority}
-            className="object-cover"
           />
         ) : (
           <GarmentArt

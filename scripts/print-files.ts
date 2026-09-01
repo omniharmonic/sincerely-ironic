@@ -12,6 +12,13 @@
  *   pnpm print-files                 # everything
  *   pnpm print-files two-wolves      # handles containing "two-wolves"
  *   pnpm print-files "" gothic       # every design, gothic only
+ *   pnpm print-files "" "" --both-inks   # also the opposite-ink counterpart
+ *
+ * A catalogue entry names one colourway, so by default each print is drawn in
+ * the one ink that colourway needs. A Printify product carries BOTH colourways
+ * as variants, though, and each needs its own file — dark ink on the natural
+ * garment, light ink on the black one. `--both-inks` additionally writes a
+ * `--alt` file in the opposite ink. The default filenames are untouched.
  *
  * Output: print-files/<handle>--<style>--<place>.png, plus a manifest.json
  * listing every file with its placement, pixel size and ink colour.
@@ -48,10 +55,13 @@ const px = (inches: number) => Math.round(inches * DPI);
  * `400 code 8203`.
  */
 const AREAS: Record<Place, { w: number; h: number; label: string }> = {
-  // 15x18 is the current standard DTG area; 12x16 is the legacy one and
-  // throws away a third of the canvas.
-  front: { w: 15, h: 18, label: 'Front' },
-  back: { w: 15, h: 18, label: 'Back' },
+  // 15x17, because that is what the blank actually is. Comfort Colors 1717 at
+  // provider 99 tops out at 4494x5097 px — an aspect of 0.88, not the 0.83 of
+  // the 15x18 that was assumed here. Files cut to the wrong aspect still
+  // print, but every design had to scale to ~0.95 to fit inside the panel
+  // instead of filling it. (12x16 is the legacy area; do not go back to it.)
+  front: { w: 15, h: 17, label: 'Front' },
+  back: { w: 15, h: 17, label: 'Back' },
   chest: { w: 4, h: 4, label: 'Left chest' },
   sleeve: { w: 3.5, h: 14, label: 'Sleeve' },
   // A leg hit is a wordmark near the thigh, not a banner down the whole
@@ -177,8 +187,13 @@ function stampDpi(png: Buffer, dpi: number): Buffer {
 }
 
 async function main() {
-  const handleFilter = process.argv[2] ?? '';
-  const styleFilter = process.argv[3] as StyleKey | undefined;
+  // Flags are pulled out first, so `--both-inks` on its own is not mistaken
+  // for a handle filter.
+  const args = process.argv.slice(2);
+  const bothInks = args.includes('--both-inks');
+  const positional = args.filter((a) => !a.startsWith('--'));
+  const handleFilter = positional[0] ?? '';
+  const styleFilter = (positional[1] || undefined) as StyleKey | undefined;
 
   const items = handleFilter ? catalog.filter((c) => c.handle.includes(handleFilter)) : catalog;
   if (items.length === 0) {
@@ -227,6 +242,33 @@ async function main() {
           await writeFile(page, html(print, effective, ink, wPx, hPx), 'utf8');
           const shot = await chrome.shoot(page, wPx, hPx);
           await writeFile(path.join(OUT, name), stampDpi(shot, DPI));
+
+          if (bothInks) {
+            // The same block in the ink the other colourway needs.
+            const altInk = ink === INK.bone ? INK.ink : INK.bone;
+            const altName = name.replace(/\.png$/, '--alt.png');
+            const altPage = path.join(tmp, `${altName}.html`);
+            await writeFile(altPage, html(print, effective, altInk, wPx, hPx), 'utf8');
+            const altShot = await chrome.shoot(altPage, wPx, hPx);
+            await writeFile(path.join(OUT, altName), stampDpi(altShot, DPI));
+            manifest.push({
+              file: altName,
+              product: item.title,
+              handle: item.handle,
+              garment: item.garment,
+              style: styleKey,
+              typeface: STYLES[effective].label,
+              placement: label,
+              text: print.text ?? '',
+              emblem: print.emblem ?? null,
+              inches: `${w} × ${h}`,
+              pixels: `${wPx} × ${hPx}`,
+              dpi: DPI,
+              ink: altInk,
+              garmentColour: item.colourway === 'bone' ? 'ink' : 'bone',
+            });
+            console.log(`✓ ${altName}  ${wPx}×${hPx}`);
+          }
 
           manifest.push({
             file: name,

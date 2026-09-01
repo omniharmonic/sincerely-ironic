@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "eslint",
     "print-files": "node --experimental-strip-types scripts/print-files.ts",
-    "logo-files": "node --experimental-strip-types scripts/logo-files.ts"
+    "logo-files": "node --experimental-strip-types scripts/logo-files.ts",
+    "printify-upload": "node --experimental-strip-types scripts/printify-upload.ts",
+    "printify-products": "node --experimental-strip-types scripts/printify-products.ts"
   },
   "dependencies": {
     "motion": "13.1.1",

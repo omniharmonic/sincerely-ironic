@@ -24,8 +24,18 @@ export function GarmentViewer({ product }: { product: Product }) {
     const img = product.images[index];
     return (
       <div>
+        {/* Fitted, not filled: a vendor mockup arrives at whatever aspect it
+            likes — Printify's are square — and cropping one to this frame cut
+            the ends off the artwork. */}
         <div className="relative aspect-[4/5] overflow-hidden border border-line bg-panel">
-          <Image src={img.url} alt={img.alt} fill priority sizes="(min-width: 1024px) 50vw, 100vw" className="object-cover" />
+          <Image
+            src={img.url}
+            alt={img.alt}
+            fill
+            priority
+            sizes="(min-width: 1024px) 50vw, 100vw"
+            className="object-contain p-[4%]"
+          />
         </div>
         {product.images.length > 1 ? (
           <div className="mt-3 flex gap-2">

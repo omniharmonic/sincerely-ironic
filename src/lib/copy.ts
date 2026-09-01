@@ -120,7 +120,10 @@ export const about = {
   },
 } as const;
 
-/** Labels for the shop filter. `all` leads; the rest come from product types. */
+/**
+ * Labels for the shop filter. `all` leads and doubles as the clear — a
+ * separate Clear button would just be a second way to press it.
+ */
 export const filters = {
   label: { sincere: 'Filter', ironic: 'Filter' },
   all: { sincere: 'Everything', ironic: 'Everything' },
@@ -128,7 +131,6 @@ export const filters = {
     sincere: 'Nothing in that category yet.',
     ironic: 'Nothing in that category yet. Try another.',
   },
-  clear: { sincere: 'Clear', ironic: 'Clear' },
 } as const;
 
 export const notFound = {

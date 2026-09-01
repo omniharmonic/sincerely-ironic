@@ -48,3 +48,6 @@ next-env.d.ts
 
 # generated print-ready artwork
 print-files/
+
+# printify upload ledger holds no secrets, but is machine state
+scripts/printify-uploads.json

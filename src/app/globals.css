@@ -441,10 +441,19 @@ body {
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
 }
+/* The drawn art is authored to this frame, so it fills it. */
 .card__art svg {
+  object-fit: cover;
   transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+/* A photograph is not. Mockups arrive at whatever aspect the vendor chose —
+   Printify's are square — and cropping one to 4:5 cut the ends off the yard
+   sign's own words. Fit it inside the frame instead: never cropped, never
+   stretched, just letterboxed against the panel. */
+.card__art img {
+  object-fit: contain;
+  padding: 5%;
 }
 .card:hover .card__art {
   border-color: var(--fg);
@@ -554,14 +563,36 @@ body {
 /* The lockup, the nav and the switch have to share a phone's width. */
 @media (max-width: 560px) {
   .header {
-    gap: 10px;
+    gap: 14px;
   }
-  .wordmark {
-    font-size: 15px;
-  }
+  /* No .wordmark font-size here: the component sets it inline, so a rule at
+     this specificity is dead. Header.tsx passes a clamp() instead. */
   .nav {
     min-width: 0;
     gap: 14px;
+  }
+
+  /* The count sits beside the heading until the two would touch — which at a
+     phone's width, with the longer of the two readings, is exactly what
+     happened. Let it drop to its own line rather than be crushed against the
+     heading and wrap to two. */
+  #shop > header {
+    flex-wrap: wrap;
+    column-gap: 16px;
+    row-gap: 4px;
+  }
+}
+
+/* Small phones: buy back the width the lockup needs from the gutter. */
+@media (max-width: 400px) {
+  :root {
+    --gutter: 14px;
+  }
+  .header {
+    gap: 12px;
+  }
+  .nav {
+    gap: 12px;
   }
 }
 
