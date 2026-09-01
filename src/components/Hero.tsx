@@ -1,0 +1,68 @@
+'use client';
+
+import {
+  useMotionTemplate,
+  useReducedMotion,
+  useScroll,
+  useSpring,
+  useTime,
+  useTransform,
+  useVelocity,
+} from 'motion/react';
+import { motion } from 'motion/react';
+import Link from 'next/link';
+
+import { T } from '@/components/universe/T';
+import { useUniverse } from '@/components/universe/UniverseProvider';
+import { hero } from '@/lib/copy';
+
+const BASE = 118; // resting width, a little wide
+const BREATH = 7; // idle sway, bounded
+const PULL = 42; // how far fast scrolling compresses the letters
+
+/**
+ * The statement. Identical in both universes; that is the joke and the
+ * thesis. Its width axis is a pure function of scroll velocity plus a
+ * bounded idle sway — never an accumulator, so it cannot wind up.
+ */
+export function Hero() {
+  const reduce = useReducedMotion();
+  const { arrived, ready } = useUniverse();
+
+  const { scrollY } = useScroll();
+  const velocity = useVelocity(scrollY);
+  const smooth = useSpring(velocity, { stiffness: 70, damping: 28, mass: 0.6 });
+  const time = useTime();
+
+  const wdth = useTransform([smooth, time], ([v, t]: number[]) => {
+    if (reduce) return BASE;
+    const breath = Math.sin(t / 2600) * BREATH;
+    const pull = Math.max(-1, Math.min(1, v / 2600)) * PULL;
+    return Math.max(50, Math.min(150, BASE + breath - Math.abs(pull)));
+  });
+  const fontVariationSettings = useMotionTemplate`"wdth" ${wdth}`;
+
+  return (
+    <section className="relative" style={{ padding: 'clamp(56px, 9vw, 120px) var(--gutter) clamp(40px, 6vw, 80px)' }}>
+      <p className="mono mb-8 text-mute" aria-live="polite">
+        {ready ? `You arrived in the ${arrived} universe.` : ' '}
+      </p>
+
+      <motion.h1
+        className="display slick"
+        style={{ fontVariationSettings, fontSize: 'clamp(72px, 13.2vw, 232px)', lineHeight: 0.84, maxWidth: '8ch' }}
+      >
+        {hero.statement}
+      </motion.h1>
+
+      <div className="mt-10 grid gap-8 md:grid-cols-[minmax(0,52ch)_auto] md:items-end">
+        <p className="text-lg text-[clamp(19px,1.9vw,26px)] leading-[1.35]">
+          <T s={hero.sub.sincere} i={hero.sub.ironic} />
+        </p>
+        <Link href="#shop" className="btn justify-self-start md:justify-self-end">
+          <T s={hero.cta.sincere} i={hero.cta.ironic} /> ↓
+        </Link>
+      </div>
+    </section>
+  );
+}

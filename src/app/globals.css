@@ -1,26 +1,564 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
+/*
+ * Tokens. Two universes, one switch. `data-universe` on <html> is set by an
+ * inline script before paint, so the ground is right on the first frame.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --paper: #f3f3f0;
+  --ink: #0d0d0d;
+  --bone: #e9e6dd;
+  --coal: #161616;
+
+  --bg: var(--paper);
+  --fg: var(--ink);
+  --mute: rgba(13, 13, 13, 0.52);
+  --faint: rgba(13, 13, 13, 0.12);
+  --line: rgba(13, 13, 13, 0.16);
+  --panel: rgba(13, 13, 13, 0.035);
+  --accent: #1f4bff;
+
+  /* Fraunces axes: the sincere face is upright and firm. */
+  --wonk: 0;
+  --soft: 0;
+
+  /* The slick. Four stops and a hue that never stops turning. */
+  --slick: linear-gradient(100deg, #ff4fb0 0%, #ffe94d 30%, #4df0ff 62%, #8a4dff 84%, #ff4fb0 100%);
+
+  --ticker-h: 30px;
+  --header-h: 64px;
+  --gutter: clamp(18px, 4vw, 56px);
+}
+
+:root[data-universe='ironic'] {
+  --bg: var(--ink);
+  --fg: var(--paper);
+  --mute: rgba(243, 243, 240, 0.5);
+  --faint: rgba(243, 243, 240, 0.12);
+  --line: rgba(243, 243, 240, 0.18);
+  --panel: rgba(243, 243, 240, 0.05);
+  --accent: #ff3d9a;
+  --wonk: 1;
+  --soft: 100;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-bg: var(--bg);
+  --color-fg: var(--fg);
+  --color-mute: var(--mute);
+  --color-faint: var(--faint);
+  --color-line: var(--line);
+  --color-panel: var(--panel);
+  --color-accent: var(--accent);
+  --font-display: var(--font-anybody), 'Arial Narrow', Impact, sans-serif;
+  --font-text: var(--font-fraunces), Georgia, serif;
+  --font-mono: var(--font-plex), ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+@property --hue {
+  syntax: '<angle>';
+  inherits: true;
+  initial-value: 0deg;
+}
+
+/* ---------- ground ---------- */
+
+html {
+  color-scheme: light;
+  scroll-behavior: smooth;
+}
+html[data-universe='ironic'] {
+  color-scheme: dark;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-text);
+  font-weight: 400;
+  font-variation-settings:
+    'SOFT' var(--soft),
+    'WONK' var(--wonk),
+    'opsz' 14;
+  -webkit-font-smoothing: antialiased;
+  padding-bottom: var(--ticker-h);
+  transition:
+    background-color 0.55s ease,
+    color 0.55s ease;
+  overflow-x: hidden;
+}
+
+/* Both readings live in the DOM. The universe decides which one you see. */
+[data-universe='sincere'] [data-i],
+[data-universe='ironic'] [data-s] {
+  display: none;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* ---------- type ---------- */
+
+.display {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-variation-settings: 'wdth' var(--wdth, 110);
+  letter-spacing: -0.02em;
+  line-height: 0.86;
+  text-transform: uppercase;
+  transition: font-variation-settings 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.text {
+  font-family: var(--font-text);
+  font-variation-settings:
+    'SOFT' var(--soft),
+    'WONK' var(--wonk),
+    'opsz' 14;
+}
+
+.text-lg {
+  font-variation-settings:
+    'SOFT' var(--soft),
+    'WONK' var(--wonk),
+    'opsz' 32;
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-feature-settings: 'tnum';
+}
+
+/* The wordmark: two faces in one name. */
+.wordmark {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.28em;
+  text-decoration: none;
+  color: inherit;
+  white-space: nowrap;
+}
+.wordmark__sincere {
+  font-family: var(--font-text);
+  font-style: italic;
+  font-weight: 500;
+  font-variation-settings:
+    'SOFT' var(--soft),
+    'WONK' 1,
+    'opsz' 20;
+  font-size: 1.05em;
+  letter-spacing: -0.01em;
+}
+.wordmark__ironic {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-variation-settings: 'wdth' 125;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  font-size: 1em;
+  transition: font-variation-settings 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.wordmark:hover .wordmark__ironic,
+.wordmark:focus-visible .wordmark__ironic {
+  font-variation-settings: 'wdth' 150;
+}
+
+/* ---------- the slick ---------- */
+
+.slick {
+  background-image: var(--slick);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  animation:
+    slick-slide 14s linear infinite,
+    slick-hue 24s linear infinite;
+  filter: hue-rotate(var(--hue)) saturate(1.3);
+}
+
+.slick-bg {
+  background-image: var(--slick);
+  background-size: 300% 100%;
+  animation:
+    slick-slide 14s linear infinite,
+    slick-hue 24s linear infinite;
+  filter: hue-rotate(var(--hue)) saturate(1.3);
+}
+
+@keyframes slick-slide {
+  from {
+    background-position: 0% 50%;
+  }
+  to {
+    background-position: 300% 50%;
+  }
+}
+@keyframes slick-hue {
+  from {
+    --hue: 0deg;
+  }
+  to {
+    --hue: 360deg;
+  }
+}
+
+/* ---------- chrome ---------- */
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  height: var(--header-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 0 var(--gutter);
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  border-bottom: 1px solid var(--line);
+  transition:
+    background-color 0.55s ease,
+    border-color 0.55s ease;
+}
+
+.nav a {
+  color: inherit;
+  text-decoration: none;
+  padding: 8px 2px;
+  border-bottom: 1px solid transparent;
+  transition:
+    border-color 0.2s,
+    color 0.2s;
+}
+.nav a:hover,
+.nav a[aria-current='page'] {
+  border-bottom-color: currentColor;
+}
+
+/* The switch */
+.switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--panel);
+  color: inherit;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  transition:
+    border-color 0.3s,
+    background-color 0.55s;
+}
+.switch:hover {
+  border-color: var(--fg);
+}
+.switch__label {
+  opacity: 0.45;
+  transition: opacity 0.3s;
+}
+.switch[data-state='sincere'] .switch__label[data-side='sincere'],
+.switch[data-state='ironic'] .switch__label[data-side='ironic'] {
+  opacity: 1;
+}
+.switch__track {
+  position: relative;
+  width: 40px;
+  height: 20px;
+  border-radius: 999px;
+  background: var(--fg);
+  flex: none;
+}
+.switch__knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  transform: translateX(0);
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.switch[data-state='ironic'] .switch__knob {
+  transform: translateX(20px);
+}
+
+/* Ticker */
+.ticker {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 40;
+  height: var(--ticker-h);
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  border-top: 1px solid var(--line);
+  background: var(--bg);
+  transition:
+    background-color 0.55s ease,
+    border-color 0.55s ease;
+}
+.ticker__track {
+  display: flex;
+  gap: 0;
+  white-space: nowrap;
+  animation: ticker 48s linear infinite;
+  will-change: transform;
+}
+.ticker__track > span {
+  padding: 0 1.4em;
+}
+.ticker__track > span::after {
+  content: '·';
+  margin-left: 2.8em;
+  opacity: 0.4;
+}
+.ticker:hover .ticker__track {
+  animation-play-state: paused;
+}
+@keyframes ticker {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* ---------- buttons ---------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 22px;
+  border: 1px solid var(--fg);
+  border-radius: 999px;
+  background: var(--fg);
+  color: var(--bg);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color 0.25s,
+    color 0.25s,
+    border-color 0.25s,
+    transform 0.2s;
+}
+.btn:hover:not(:disabled) {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.btn--ghost {
+  background: transparent;
+  color: var(--fg);
+}
+.btn--ghost:hover:not(:disabled) {
+  background: var(--fg);
+  border-color: var(--fg);
+  color: var(--bg);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    border-color 0.2s,
+    background-color 0.2s,
+    color 0.2s;
+}
+.chip:hover:not(:disabled) {
+  border-color: var(--fg);
+}
+.chip[aria-pressed='true'] {
+  background: var(--fg);
+  border-color: var(--fg);
+  color: var(--bg);
+}
+.chip:disabled {
+  opacity: 0.3;
+  text-decoration: line-through;
+  cursor: not-allowed;
+}
+
+/* ---------- product card ---------- */
+
+.card {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+  --wdth: 100;
+}
+.card__art {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  overflow: hidden;
+  transition:
+    border-color 0.3s,
+    background-color 0.55s;
+}
+.card__art img,
+.card__art svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.card__art svg {
+  transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.card:hover .card__art {
+  border-color: var(--fg);
+}
+.card:hover .card__art svg {
+  transform: scale(1.04);
+}
+.card:hover {
+  --wdth: 135;
+}
+.card__name {
+  font-size: clamp(22px, 2.2vw, 30px);
+}
+
+/* ---------- garment art ---------- */
+
+.garment {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.garment__print {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  width: 100%;
+  height: 100%;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-variation-settings: 'wdth' 112;
+  text-transform: uppercase;
+  line-height: 0.9;
+  letter-spacing: -0.02em;
+  overflow-wrap: anywhere;
+}
+.garment__print--lower {
+  text-transform: none;
+  font-family: var(--font-text);
+  font-weight: 500;
+  font-style: italic;
+  font-variation-settings:
+    'SOFT' 50,
+    'WONK' 1,
+    'opsz' 24;
+  letter-spacing: 0;
+  line-height: 1.1;
+}
+
+/* ---------- prose ---------- */
+
+.prose p {
+  font-size: clamp(17px, 1.35vw, 20px);
+  line-height: 1.55;
+  max-width: 62ch;
+}
+.prose p + p {
+  margin-top: 1em;
+}
+
+/* ---------- drawer ---------- */
+
+.drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(2px);
+}
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 51;
+  width: min(440px, 100vw);
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  color: var(--fg);
+  border-left: 1px solid var(--line);
+  box-shadow: -30px 0 60px rgba(0, 0, 0, 0.18);
+}
+
+/* ---------- motion ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .slick,
+  .slick-bg,
+  .ticker__track {
+    animation: none !important;
+  }
+  .display,
+  .card__art svg,
+  .wordmark__ironic {
+    transition: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .switch__label {
+    display: none;
+  }
+  .switch {
+    padding: 6px;
+  }
 }

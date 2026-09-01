@@ -1,36 +1,76 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Sincerely Ironic
 
-## Getting Started
+The apparel storefront of [Sixth Wall Productions](https://sixthwall.productions),
+doing business as. Live at **<https://sincerelyironic.com>**.
 
-First, run the development server:
+A real store that is not sure it exists. Every line of copy on the site has
+two readings — sincere and ironic — and the visitor lands in one of the two
+universes at random. The switch in the header moves them. It remembers.
+
+## Quick start
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
+cp .env.example .env.local   # add the Storefront token when you have it
+pnpm dev                     # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+| Command | Does |
+| --- | --- |
+| `pnpm dev` | Dev server |
+| `pnpm build` | Production build (typechecks) |
+| `pnpm lint` | ESLint |
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Node 22+, pnpm 10.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## How it works
 
-## Learn More
+- **Two universes, one attribute.** `data-universe` on `<html>` is the store.
+  An inline script in `<head>` sets it before paint from `localStorage`
+  (random on first visit), so there is no flash. `<T s i />` renders *both*
+  readings into the DOM and CSS hides the other one. Colours, Fraunces'
+  `WONK`/`SOFT` axes, and the accent all key off the same attribute.
+- **Shopify holds the copy.** The sincere description is the product
+  description; the ironic one is the metafield `sincerely.ironic_description`
+  (storefront-readable). Both editable in admin.
+- **The catalogue is the fallback.** `src/lib/catalog.ts` lists the ten
+  garments with their typographic art and both readings. It seeded Shopify,
+  it keys the drawn garments by handle, and it renders the whole site when the
+  Storefront token is absent — with *Add to cart* replaced by a note.
+- **Cart** is Shopify's Storefront cart. Cart id in an httpOnly cookie, server
+  actions for line changes, checkout is Shopify's hosted checkout.
+- **Type is the imagery.** Anybody (variable width, driven by scroll velocity
+  on the hero), Fraunces (the sincere voice, wonked in the ironic universe),
+  IBM Plex Mono (labels, prices, the ticker — the same utility face as the
+  parent site).
 
-To learn more about Next.js, take a look at the following resources:
+## Where to change things
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| To change… | Edit |
+| --- | --- |
+| Product copy | Shopify admin (description + ironic metafield); or `src/lib/catalog.ts` for the fallback |
+| A garment's print or silhouette | `src/lib/catalog.ts` (`prints`) and `src/components/GarmentArt.tsx` (`SHAPES`) |
+| Any other sentence on the site | `src/lib/copy.ts` — every entry has `sincere` and `ironic` |
+| Colours, type axes, the slick | `src/app/globals.css` `:root` |
+| The hero's motion | `src/components/Hero.tsx` (`BASE`, `BREATH`, `PULL`) |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Environment
 
-## Deploy on Vercel
+| Var | What |
+| --- | --- |
+| `SHOPIFY_STORE_DOMAIN` | `fkpeqz-bp.myshopify.com` |
+| `SHOPIFY_STOREFRONT_ACCESS_TOKEN` | Public Storefront API token from the Headless channel |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Adding a product
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Add it to `src/lib/catalog.ts` first — handle, garment, prints, both
+   readings. A Shopify product with no catalogue entry is not shown; that is
+   the contract.
+2. Create it in Shopify with the same handle, vendor `Sincerely Ironic`,
+   a `Size` option, and the ironic metafield. Publish to every channel.
+
+## Deploy
+
+Vercel, project `sincerely-ironic`, production on push to `main`. The domain's
+nameservers point at Vercel DNS. See `docs/superpowers/specs/` for the design
+spec and the manual steps the APIs would not automate.
