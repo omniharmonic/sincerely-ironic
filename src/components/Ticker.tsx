@@ -32,8 +32,8 @@ export function Ticker() {
   const time = useClock();
   const items = [
     ticker.open,
-    ticker.ships,
-    `Boulder ${time ?? '--:--'} MT`,
+    ticker.imagined,
+    `Boulder ${time ?? "--:--"} MT`,
     ticker.returns,
     `Cart: ${count}`,
     ticker.thanks[universe],

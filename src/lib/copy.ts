@@ -12,8 +12,9 @@ export const site = {
     url: 'https://sixthwall.productions',
     email: 'hello@sixthwall.productions',
   },
-  description: 'Apparel. Small runs, printed and shipped from Colorado.',
-  shipsFrom: 'Boulder, Colorado',
+  description: 'Apparel. Small runs, imagined in Colorado.',
+  /** Where the line is made up. Printing and shipping happen elsewhere. */
+  imaginedIn: 'Boulder, Colorado',
 } as const;
 
 export const nav = {
@@ -56,8 +57,8 @@ export const product = {
   unavailable: { sincere: 'Not available right now.', ironic: 'Not available right now. Sorry.' },
   pick: { sincere: 'Pick a size.', ironic: 'Pick a size.' },
   details: {
-    sincere: `Ships from ${site.shipsFrom} within a week. Returns within 30 days, unworn.`,
-    ironic: `Ships from ${site.shipsFrom} within a week. Returns within 30 days, unworn. No questions asked.`,
+    sincere: `Imagined in ${site.imaginedIn}. Printed to order. Returns within 30 days, unworn.`,
+    ironic: `Imagined in ${site.imaginedIn}. Printed to order. Returns within 30 days, unworn. No questions asked.`,
   },
   fit: {
     sincere: 'Boxy fit. Between sizes, size down.',
@@ -83,7 +84,7 @@ export const cart = {
 
 export const ticker = {
   open: 'Open',
-  ships: `Ships from ${site.shipsFrom}`,
+  imagined: `Imagined in ${site.imaginedIn}`,
   returns: 'Returns within 30 days',
   thanks: { sincere: 'Thank you for your support', ironic: 'Thank you so much for your support' },
 } as const;
@@ -92,8 +93,8 @@ export const about = {
   title: { sincere: 'About', ironic: 'About us' },
   paragraphs: [
     {
-      sincere: 'Sincerely Ironic makes apparel. Small runs, printed in Colorado, shipped from Boulder.',
-      ironic: 'Sincerely Ironic makes apparel. Small runs, printed in Colorado, shipped from Boulder, by hand.',
+      sincere: 'Sincerely Ironic makes apparel. Small runs, imagined in Boulder, Colorado.',
+      ironic: 'Sincerely Ironic makes apparel. Small runs, imagined in Boulder, Colorado, at some length.',
     },
     {
       sincere: 'It is the clothing line of Sixth Wall Productions, a theatre company. The clothes help pay for the shows.',
@@ -117,6 +118,17 @@ export const about = {
     sincere: 'Boxy fit. Between sizes, size down. Caps and totes are one size.',
     ironic: 'Boxy fit. Between sizes, size down. Caps and totes are one size.',
   },
+} as const;
+
+/** Labels for the shop filter. `all` leads; the rest come from product types. */
+export const filters = {
+  label: { sincere: 'Filter', ironic: 'Filter' },
+  all: { sincere: 'Everything', ironic: 'Everything' },
+  none: {
+    sincere: 'Nothing in that category yet.',
+    ironic: 'Nothing in that category yet. Try another.',
+  },
+  clear: { sincere: 'Clear', ironic: 'Clear' },
 } as const;
 
 export const notFound = {

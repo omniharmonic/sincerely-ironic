@@ -41,6 +41,13 @@ const POINTER_SWELL = 0.42;
 /** Per-frame approach of the smoothed pointer to the real one. */
 const POINTER_EASE = 0.12;
 
+/**
+ * How gently a face turns over when the loop doubles back. Smaller is a
+ * sharper turn. This is the width of the band, in units of the tangent's
+ * horizontal component, over which the face rolls through edge-on.
+ */
+const TURN_SOFT = 0.26;
+
 interface Shape {
   w: number;
   h: number;
@@ -170,15 +177,19 @@ export function SerpentHero() {
         scale *= 1 + near * POINTER_SWELL;
       }
 
-      // The face is a profile. Turning it through the full tangent would stand
-      // it on its head halfway round the loop, so it is mirrored to face the
-      // way it travels and only banked a little.
+      // The face is a profile, so it has to mirror when the loop doubles
+      // back. Flipping it on the sign of the tangent snapped it inside out in
+      // a single frame. Instead the horizontal scale is drawn smoothly through
+      // zero: the face narrows to edge-on, passes through, and opens out the
+      // other way — a surface turning over rather than a picture flipping,
+      // which is what gives the loop its twist.
+      const turn = Math.tanh(dx / len / TURN_SOFT);
       const facing = dx >= 0 ? 1 : -1;
       const bank = Math.max(-24, Math.min(24, ((Math.atan2(dy, dx * facing) * 180) / Math.PI) * 0.5));
 
       g.setAttribute(
         'transform',
-        `translate(${x.toFixed(2)} ${y.toFixed(2)}) rotate(${bank.toFixed(2)}) scale(${(facing * scale).toFixed(4)} ${scale.toFixed(4)})`,
+        `translate(${x.toFixed(2)} ${y.toFixed(2)}) rotate(${bank.toFixed(2)}) scale(${(turn * scale).toFixed(4)} ${scale.toFixed(4)})`,
       );
       g.setAttribute('opacity', alpha.toFixed(3));
     }

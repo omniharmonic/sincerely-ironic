@@ -27,7 +27,7 @@ export function Footer() {
         </ul>
       </div>
       <p className="mono mt-12 text-mute">
-        © {new Date().getFullYear()} {site.name} · {site.shipsFrom}
+        © {new Date().getFullYear()} {site.name} · Imagined in {site.imaginedIn}
       </p>
     </footer>
   );
