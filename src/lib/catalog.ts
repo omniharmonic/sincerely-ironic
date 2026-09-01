@@ -27,6 +27,7 @@ export type Garment =
   | 'bucket'
   | 'tote'
   | 'blanket'
+  | 'robe'
   | 'sign'
   | 'fannypack'
   | 'sock';
@@ -166,6 +167,15 @@ const GARMENTS: Record<Garment, GarmentSpec> = {
     suffix: 'blanket',
     base: 'Plush sherpa-backed blanket, 60 × 80in.',
     more: 'Extremely soft.',
+    carriesBack: false,
+  },
+  robe: {
+    type: 'Robe',
+    price: 59,
+    sizes: ['XS', 'S', 'M', 'L', 'XL', '2XL'],
+    suffix: 'robe',
+    base: 'Mid-length robe. Bell sleeves, belted. Light polyester, all-over print.',
+    more: 'For after.',
     carriesBack: false,
   },
   sign: {
@@ -393,6 +403,21 @@ export const printifyMade: readonly CatalogItem[] = [
     description: {
       sincere: 'Corrugated plastic yard sign, 18 × 24in. Printed one side. Stake included.',
       ironic: 'Corrugated plastic yard sign, 18 × 24in. Printed one side. Stake included. Put it on the lawn.',
+    },
+  },
+  {
+    handle: 'long-sleeve-kimono-robe-aop',
+    title: 'Robe',
+    garment: 'robe',
+    colourway: 'bone',
+    type: 'Robe',
+    price: 59,
+    sizes: ['XS', 'S', 'M', 'L', 'XL', '2XL'],
+    styles: ['gothic'],
+    prints: [{ place: 'front', text: 'Sincerely Ironic', fill: 0.5 }],
+    description: {
+      sincere: 'Mid-length robe. Bell sleeves, belted. Light polyester, all-over print.',
+      ironic: 'Mid-length robe. Bell sleeves, belted. Light polyester, all-over print. For after.',
     },
   },
   {

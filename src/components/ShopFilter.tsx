@@ -31,6 +31,9 @@ const EDGE_DASH = /^-|-$/g;
 
 const slugify = (type: string) => type.toLowerCase().replace(NOT_ALNUM, '-').replace(EDGE_DASH, '');
 
+/** Product types are singular; a heading over a grid of them is not. */
+const plural = (type: string) => (type.endsWith('s') ? type : `${type}s`);
+
 /* The address bar, as a store. `popstate` covers back and forward; a filter
    click has to say so itself, since pushState fires no event. */
 const listeners = new Set<() => void>();
@@ -76,14 +79,17 @@ export function ShopFilter({ products }: { products: Product[] }) {
   const asked = new URLSearchParams(search).get('type');
   const active = asked && options.some((o) => o.slug === asked) ? asked : null;
 
-  const shown = active ? products.filter((p) => slugify(p.type) === active) : products;
+  const chosen = active ? (options.find((o) => o.slug === active) ?? null) : null;
+  const shown = chosen ? products.filter((p) => slugify(p.type) === active) : products;
   const count = grid.count(shown.length);
 
   return (
     <>
       <header className="flex items-baseline justify-between border-t border-line pt-5">
+        {/* The heading is the filter. Leaving it on "Everything" while the
+            grid showed only hoodies made the two disagree. */}
         <h2 className="display text-[clamp(28px,3.4vw,48px)]" style={{ ['--wdth' as string]: 125 }}>
-          <T s={grid.heading.sincere} i={grid.heading.ironic} />
+          {chosen ? plural(chosen.label) : <T s={grid.heading.sincere} i={grid.heading.ironic} />}
         </h2>
         <p className="mono text-mute" aria-live="polite">
           <T s={count.sincere} i={count.ironic} />

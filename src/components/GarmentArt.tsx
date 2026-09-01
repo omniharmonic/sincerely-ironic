@@ -142,6 +142,20 @@ const SHAPES: Record<Garment, Shape> = {
       front: { x: 84, y: 194, w: 232, h: 180 },
     },
   },
+  robe: {
+    body: 'M120,96 L74,120 L98,246 L104,470 L296,470 L302,246 L326,120 L280,96 Z',
+    extras: [
+      { d: 'M74,120 L26,352 L88,366 L112,242 Z' },
+      { d: 'M326,120 L374,352 L312,366 L288,242 Z' },
+      // The two front edges cross at the waist, the way a robe closes.
+      { d: 'M120,96 L186,470', stroke: true },
+      { d: 'M280,96 L214,470', stroke: true },
+      { d: 'M104,286 L296,286', stroke: true, width: 9 },
+    ],
+    areas: {
+      front: { x: 132, y: 150, w: 136, h: 92 },
+    },
+  },
   sign: {
     body: 'M64,104 L336,104 L336,330 L64,330 Z',
     extras: [

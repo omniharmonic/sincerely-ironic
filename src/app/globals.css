@@ -148,7 +148,11 @@ body {
 /* The wordmark: two faces in one name. */
 .wordmark {
   display: inline-flex;
-  align-items: center;
+  /* The two words are different faces at different sizes, so they have to be
+     set on a shared baseline. Centring them instead — which is what happened
+     when the mark was added — drops one below the other and the name stops
+     reading as one line. The mark keeps its own centring below. */
+  align-items: baseline;
   gap: 0.28em;
   text-decoration: none;
   color: inherit;
