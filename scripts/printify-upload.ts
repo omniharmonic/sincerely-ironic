@@ -109,7 +109,11 @@ async function main() {
   for (const f of failures) console.log(`  ${f.file}: ${f.reason}`);
 }
 
-main().catch((e) => {
-  console.error(e);
-  process.exit(1);
-});
+// Only upload when run directly. Other scripts import this module for
+// `loadMap`, and that must not kick off a run as a side effect.
+if (import.meta.url === `file://${process.argv[1]}`) {
+  main().catch((e) => {
+    console.error(e);
+    process.exit(1);
+  });
+}

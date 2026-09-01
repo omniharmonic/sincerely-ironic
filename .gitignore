@@ -51,3 +51,6 @@ print-files/
 
 # printify upload ledger holds no secrets, but is machine state
 scripts/printify-uploads.json
+
+# generated intermediates, not ledgers
+scripts/*-mutations.txt

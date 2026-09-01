@@ -1,0 +1,516 @@
+{
+  "culture-war-veteran-cap": {
+    "printifyId": "6a967b141545dc678a02339d",
+    "title": "Culture War Veteran",
+    "images": [
+      "https://images.printify.com/mockup/6a967b141545dc678a02339d/105372/102307/culture-war-veteran.jpg?camera_label=front",
+      "https://images.printify.com/mockup/6a967b141545dc678a02339d/105372/102724/culture-war-veteran.jpg?camera_label=back",
+      "https://images.printify.com/mockup/6a967b141545dc678a02339d/105372/112104/culture-war-veteran.jpg?camera_label=left"
+    ]
+  },
+  "culture-war-veteran-hoodie": {
+    "printifyId": "6a967b1277419b3da40ad5eb",
+    "title": "Culture War Veteran",
+    "images": [
+      "https://images.printify.com/mockup/6a967b1277419b3da40ad5eb/109644/104856/culture-war-veteran.jpg?camera_label=front",
+      "https://images.printify.com/mockup/6a967b1277419b3da40ad5eb/109644/104932/culture-war-veteran.jpg?camera_label=person-1-front",
+      "https://images.printify.com/mockup/6a967b1277419b3da40ad5eb/109644/104933/culture-war-veteran.jpg?camera_label=person-1-back"
+    ]
+  },
+  "culture-war-veteran-tee": {
+    "printifyId": "6a967b0c3f6450d39204ce4b",
+    "title": "Culture War Veteran",
+    "images": [
+      "https://images.printify.com/mockup/6a967b0c3f6450d39204ce4b/78993/98445/culture-war-veteran.jpg?camera_label=front",
+      "https://images.printify.com/mockup/6a967b0c3f6450d39204ce4b/78993/100629/culture-war-veteran.jpg?camera_label=folded",
+      "https://images.printify.com/mockup/6a967b0c3f6450d39204ce4b/78993/126095/culture-war-veteran.jpg?camera_label=person-5-context"
+    ]
+  },
+  "transwoke-tee": {
+    "printifyId": "6a9682f03f6450d39204d691",
+    "title": "Transwoke",
+    "images": [
+      "https://images.printify.com/mockup/6a9682f03f6450d39204d691/78993/98445/transwoke.jpg?camera_label=front",
+      "https://images.printify.com/mockup/6a9682f03f6450d39204d691/78993/100629/transwoke.jpg?camera_label=folded",
+      "https://images.printify.com/mockup/6a9682f03f6450d39204d691/78993/126095/transwoke.jpg?camera_label=person-5-context"
+    ]
+  },
+  "nondualer-than-you-tee": {
+    "printifyId": "6a9682f390802d480702ab3e",
+    "title": "Nondualer Than You",
+    "images": [
+      "https://images.printify.com/mockup/6a9682f390802d480702ab3e/73204/98445/nondualer-than-you.jpg?camera_label=front",
+      "https://images.printify.com/mockup/6a9682f390802d480702ab3e/73204/100629/nondualer-than-you.jpg?camera_label=folded",
+      "https://images.printify.com/mockup/6a9682f390802d480702ab3e/73204/126095/nondualer-than-you.jpg?camera_label=person-5-context"
+    ]
+  },
+  "two-wolves-tee": {
+    "printifyId": "6a9682f9cbe1b8021a02fac8",
+    "title": "Inside Me There Are Two Wolves",
+    "images": [
+      "https://images.printify.com/mockup/6a9682f9cbe1b8021a02fac8/78993/98445/inside-me-there-are-two-wolves.jpg?camera_label=front",
+      "https://images.printify.com/mockup/6a9682f9cbe1b8021a02fac8/78993/98446/inside-me-there-are-two-wolves.jpg?camera_label=back",
+      "https://images.printify.com/mockup/6a9682f9cbe1b8021a02fac8/78993/100629/inside-me-there-are-two-wolves.jpg?camera_label=folded"
+    ]
+  },
+  "spiritually-bypass-tee": {
+    "printifyId": "6a9682fd77419b3da40ade6a",
+    "title": "I Use Non-Duality to Spiritually Bypass",
+    "images": [
+      "https://images.printify.com/mockup/6a9682fd77419b3da40ade6a/73204/98445/i-use-non-duality-to-spiritually-bypass.jpg?camera_label=front",
+      "https://images.printify.com/mockup/6a9682fd77419b3da40ade6a/73204/100629/i-use-non-duality-to-spiritually-bypass.jpg?camera_label=folded",
+      "https://images.printify.com/mockup/6a9682fd77419b3da40ade6a/73204/126095/i-use-non-duality-to-spiritually-bypass.jpg?camera_label=person-5-context"
+    ]
+  },
+  "got-lore-tee": {
+    "printifyId": "6a968302ee75e02d6f01231c",
+    "title": "Got Lore?",
+    "images": [
+      "https://images.printify.com/mockup/6a968302ee75e02d6f01231c/73204/98445/got-lore.jpg?camera_label=front",
+      "https://images.printify.com/mockup/6a968302ee75e02d6f01231c/73204/100629/got-lore.jpg?camera_label=folded",
+      "https://images.printify.com/mockup/6a968302ee75e02d6f01231c/73204/126095/got-lore.jpg?camera_label=person-5-context"
+    ]
+  },
+  "have-you-tried-suffering-tee": {
+    "printifyId": "6a9683053f6450d39204d6ae",
+    "title": "Have You Tried Suffering?",
+    "images": [
+      "https://images.printify.com/mockup/6a9683053f6450d39204d6ae/78993/98445/have-you-tried-suffering.jpg?camera_label=front",
+      "https://images.printify.com/mockup/6a9683053f6450d39204d6ae/78993/100629/have-you-tried-suffering.jpg?camera_label=folded",
+      "https://images.printify.com/mockup/6a9683053f6450d39204d6ae/78993/126095/have-you-tried-suffering.jpg?camera_label=person-5-context"
+    ]
+  },
+  "immanence-supremacist-tee": {
+    "printifyId": "6a968309ee75e02d6f012324",
+    "title": "Immanence Supremacist",
+    "images": [
+      "https://images.printify.com/mockup/6a968309ee75e02d6f012324/73204/98445/immanence-supremacist.jpg?camera_label=front",
+      "https://images.printify.com/mockup/6a968309ee75e02d6f012324/73204/100629/immanence-supremacist.jpg?camera_label=folded",
+      "https://images.printify.com/mockup/6a968309ee75e02d6f012324/73204/126095/immanence-supremacist.jpg?camera_label=person-5-context"
+    ]
+  },
+  "quietly-disrespectful-tee": {
+    "printifyId": "6a96830d3f6450d39204d6b2",
+    "title": "Quietly Disrespectful",
+    "images": [
+      "https://images.printify.com/mockup/6a96830d3f6450d39204d6b2/78993/98445/quietly-disrespectful.jpg?camera_label=front",
+      "https://images.printify.com/mockup/6a96830d3f6450d39204d6b2/78993/100629/quietly-disrespectful.jpg?camera_label=folded",
+      "https://images.printify.com/mockup/6a96830d3f6450d39204d6b2/78993/126095/quietly-disrespectful.jpg?camera_label=person-5-context"
+    ]
+  },
+  "nonattachment-tee": {
+    "printifyId": "6a96831090802d480702ab55",
+    "title": "Nonattachment Is for Wusses",
+    "images": [
+      "https://images.printify.com/mockup/6a96831090802d480702ab55/73204/98445/nonattachment-is-for-wusses.jpg?camera_label=front",
+      "https://images.printify.com/mockup/6a96831090802d480702ab55/73204/100629/nonattachment-is-for-wusses.jpg?camera_label=folded",
+      "https://images.printify.com/mockup/6a96831090802d480702ab55/73204/126095/nonattachment-is-for-wusses.jpg?camera_label=person-5-context"
+    ]
+  },
+  "bdsm-tee": {
+    "printifyId": "6a9683143f6450d39204d6b8",
+    "title": "BDSM",
+    "images": [
+      "https://images.printify.com/mockup/6a9683143f6450d39204d6b8/78993/98445/bdsm.jpg?camera_label=front",
+      "https://images.printify.com/mockup/6a9683143f6450d39204d6b8/78993/98446/bdsm.jpg?camera_label=back",
+      "https://images.printify.com/mockup/6a9683143f6450d39204d6b8/78993/100629/bdsm.jpg?camera_label=folded"
+    ]
+  },
+  "living-prophecy-tee": {
+    "printifyId": "6a968318ee75e02d6f012332",
+    "title": "Are You Even a Living Prophecy, Bro?",
+    "images": [
+      "https://images.printify.com/mockup/6a968318ee75e02d6f012332/73204/98445/are-you-even-a-living-prophecy-bro.jpg?camera_label=front",
+      "https://images.printify.com/mockup/6a968318ee75e02d6f012332/73204/100629/are-you-even-a-living-prophecy-bro.jpg?camera_label=folded",
+      "https://images.printify.com/mockup/6a968318ee75e02d6f012332/73204/126095/are-you-even-a-living-prophecy-bro.jpg?camera_label=person-5-context"
+    ]
+  },
+  "embrace-paradox-tee": {
+    "printifyId": "6a96831cee75e02d6f012334",
+    "title": "Do You Embrace Paradox or Naw, Brah?",
+    "images": [
+      "https://images.printify.com/mockup/6a96831cee75e02d6f012334/78993/98445/do-you-embrace-paradox-or-naw-brah.jpg?camera_label=front",
+      "https://images.printify.com/mockup/6a96831cee75e02d6f012334/78993/100629/do-you-embrace-paradox-or-naw-brah.jpg?camera_label=folded",
+      "https://images.printify.com/mockup/6a96831cee75e02d6f012334/78993/126095/do-you-embrace-paradox-or-naw-brah.jpg?camera_label=person-5-context"
+    ]
+  },
+  "net-zero-trauma-tee": {
+    "printifyId": "6a968320cbe1b8021a02fade",
+    "title": "Net Zero Trauma",
+    "images": [
+      "https://images.printify.com/mockup/6a968320cbe1b8021a02fade/73204/98445/net-zero-trauma.jpg?camera_label=front",
+      "https://images.printify.com/mockup/6a968320cbe1b8021a02fade/73204/98446/net-zero-trauma.jpg?camera_label=back",
+      "https://images.printify.com/mockup/6a968320cbe1b8021a02fade/73204/100629/net-zero-trauma.jpg?camera_label=folded"
+    ]
+  },
+  "bodhisattvas-finish-last-tee": {
+    "printifyId": "6a9683233e225a2d300aa729",
+    "title": "Bodhisattvas Finish Last",
+    "images": [
+      "https://images.printify.com/mockup/6a9683233e225a2d300aa729/78993/98445/bodhisattvas-finish-last.jpg?camera_label=front",
+      "https://images.printify.com/mockup/6a9683233e225a2d300aa729/78993/100629/bodhisattvas-finish-last.jpg?camera_label=folded",
+      "https://images.printify.com/mockup/6a9683233e225a2d300aa729/78993/126095/bodhisattvas-finish-last.jpg?camera_label=person-5-context"
+    ]
+  },
+  "little-bit-enlightened-tee": {
+    "printifyId": "6a9683273e225a2d300aa72e",
+    "title": "I’m Just Gonna Get a Little Bit Enlightened, Stan",
+    "images": [
+      "https://images.printify.com/mockup/6a9683273e225a2d300aa72e/73204/98445/im-just-gonna-get-a-little-bit-enlightened-stan.jpg?camera_label=front",
+      "https://images.printify.com/mockup/6a9683273e225a2d300aa72e/73204/100629/im-just-gonna-get-a-little-bit-enlightened-stan.jpg?camera_label=folded",
+      "https://images.printify.com/mockup/6a9683273e225a2d300aa72e/73204/126095/im-just-gonna-get-a-little-bit-enlightened-stan.jpg?camera_label=person-5-context"
+    ]
+  },
+  "ethical-non-monogamy-tee": {
+    "printifyId": "6a96832b3e225a2d300aa730",
+    "title": "Ethical Non-Monogamy",
+    "images": [
+      "https://images.printify.com/mockup/6a96832b3e225a2d300aa730/78993/98445/ethical-non-monogamy.jpg?camera_label=front",
+      "https://images.printify.com/mockup/6a96832b3e225a2d300aa730/78993/100629/ethical-non-monogamy.jpg?camera_label=folded",
+      "https://images.printify.com/mockup/6a96832b3e225a2d300aa730/78993/126095/ethical-non-monogamy.jpg?camera_label=person-5-context"
+    ]
+  },
+  "butt-molly-tee": {
+    "printifyId": "6a96832f3f6450d39204d6d2",
+    "title": "Butt Molly",
+    "images": [
+      "https://images.printify.com/mockup/6a96832f3f6450d39204d6d2/73204/98445/butt-molly.jpg?camera_label=front",
+      "https://images.printify.com/mockup/6a96832f3f6450d39204d6d2/73204/100629/butt-molly.jpg?camera_label=folded",
+      "https://images.printify.com/mockup/6a96832f3f6450d39204d6d2/73204/126095/butt-molly.jpg?camera_label=person-5-context"
+    ]
+  },
+  "spiritual-narcissist-tee": {
+    "printifyId": "6a96833490802d480702ab7a",
+    "title": "Spiritual Narcissist",
+    "images": [
+      "https://images.printify.com/mockup/6a96833490802d480702ab7a/78993/98445/spiritual-narcissist.jpg?camera_label=front",
+      "https://images.printify.com/mockup/6a96833490802d480702ab7a/78993/100629/spiritual-narcissist.jpg?camera_label=folded",
+      "https://images.printify.com/mockup/6a96833490802d480702ab7a/78993/126095/spiritual-narcissist.jpg?camera_label=person-5-context"
+    ]
+  },
+  "untriggerable-tee": {
+    "printifyId": "6a96833877419b3da40ade91",
+    "title": "Untriggerable",
+    "images": [
+      "https://images.printify.com/mockup/6a96833877419b3da40ade91/73204/98445/untriggerable.jpg?camera_label=front",
+      "https://images.printify.com/mockup/6a96833877419b3da40ade91/73204/100629/untriggerable.jpg?camera_label=folded",
+      "https://images.printify.com/mockup/6a96833877419b3da40ade91/73204/126095/untriggerable.jpg?camera_label=person-5-context"
+    ]
+  },
+  "securely-non-attached-tee": {
+    "printifyId": "6a96833c3f6450d39204d6de",
+    "title": "Securely Non-Attached",
+    "images": [
+      "https://images.printify.com/mockup/6a96833c3f6450d39204d6de/78993/98445/securely-non-attached.jpg?camera_label=front",
+      "https://images.printify.com/mockup/6a96833c3f6450d39204d6de/78993/100629/securely-non-attached.jpg?camera_label=folded",
+      "https://images.printify.com/mockup/6a96833c3f6450d39204d6de/78993/126095/securely-non-attached.jpg?camera_label=person-5-context"
+    ]
+  },
+  "spiritual-influencer-tee": {
+    "printifyId": "6a96833f77419b3da40ade97",
+    "title": "Spiritual Influencer",
+    "images": [
+      "https://images.printify.com/mockup/6a96833f77419b3da40ade97/73204/98445/spiritual-influencer.jpg?camera_label=front",
+      "https://images.printify.com/mockup/6a96833f77419b3da40ade97/73204/100629/spiritual-influencer.jpg?camera_label=folded",
+      "https://images.printify.com/mockup/6a96833f77419b3da40ade97/73204/126095/spiritual-influencer.jpg?camera_label=person-5-context"
+    ]
+  },
+  "i-manifested-this-tee": {
+    "printifyId": "6a9683433e225a2d300aa73d",
+    "title": "I Manifested This",
+    "images": [
+      "https://images.printify.com/mockup/6a9683433e225a2d300aa73d/78993/98445/i-manifested-this.jpg?camera_label=front",
+      "https://images.printify.com/mockup/6a9683433e225a2d300aa73d/78993/100629/i-manifested-this.jpg?camera_label=folded",
+      "https://images.printify.com/mockup/6a9683433e225a2d300aa73d/78993/126095/i-manifested-this.jpg?camera_label=person-5-context"
+    ]
+  },
+  "made-in-china-tee": {
+    "printifyId": "6a9683473f6450d39204d6e8",
+    "title": "This Was Made by a Slave in China",
+    "images": [
+      "https://images.printify.com/mockup/6a9683473f6450d39204d6e8/73204/98445/this-was-made-by-a-slave-in-china.jpg?camera_label=front",
+      "https://images.printify.com/mockup/6a9683473f6450d39204d6e8/73204/100629/this-was-made-by-a-slave-in-china.jpg?camera_label=folded",
+      "https://images.printify.com/mockup/6a9683473f6450d39204d6e8/73204/126095/this-was-made-by-a-slave-in-china.jpg?camera_label=person-5-context"
+    ]
+  },
+  "binging-samadhi-tee": {
+    "printifyId": "6a96834b3e225a2d300aa745",
+    "title": "Binging Samadhi",
+    "images": [
+      "https://images.printify.com/mockup/6a96834b3e225a2d300aa745/78993/98445/binging-samadhi.jpg?camera_label=front",
+      "https://images.printify.com/mockup/6a96834b3e225a2d300aa745/78993/100629/binging-samadhi.jpg?camera_label=folded",
+      "https://images.printify.com/mockup/6a96834b3e225a2d300aa745/78993/126095/binging-samadhi.jpg?camera_label=person-5-context"
+    ]
+  },
+  "autism-tee": {
+    "printifyId": "6a968350ee75e02d6f01235f",
+    "title": "Autism",
+    "images": [
+      "https://images.printify.com/mockup/6a968350ee75e02d6f01235f/73204/98445/autism.jpg?camera_label=front",
+      "https://images.printify.com/mockup/6a968350ee75e02d6f01235f/73204/100629/autism.jpg?camera_label=folded",
+      "https://images.printify.com/mockup/6a968350ee75e02d6f01235f/73204/126095/autism.jpg?camera_label=person-5-context"
+    ]
+  },
+  "having-the-experience-tee": {
+    "printifyId": "6a968353cbe1b8021a02fafd",
+    "title": "I’m Having the Experience of You Being an Asshole",
+    "images": [
+      "https://images.printify.com/mockup/6a968353cbe1b8021a02fafd/78993/98445/im-having-the-experience-of-you-being-an-asshole.jpg?camera_label=front",
+      "https://images.printify.com/mockup/6a968353cbe1b8021a02fafd/78993/98446/im-having-the-experience-of-you-being-an-asshole.jpg?camera_label=back",
+      "https://images.printify.com/mockup/6a968353cbe1b8021a02fafd/78993/100629/im-having-the-experience-of-you-being-an-asshole.jpg?camera_label=folded"
+    ]
+  },
+  "wilber-hanzi-gebser-tee": {
+    "printifyId": "6a968358ee75e02d6f012368",
+    "title": "Wilber, Hanzi and Gebser Raised Me",
+    "images": [
+      "https://images.printify.com/mockup/6a968358ee75e02d6f012368/73204/98445/wilber-hanzi-and-gebser-raised-me.jpg?camera_label=front",
+      "https://images.printify.com/mockup/6a968358ee75e02d6f012368/73204/100629/wilber-hanzi-and-gebser-raised-me.jpg?camera_label=folded",
+      "https://images.printify.com/mockup/6a968358ee75e02d6f012368/73204/126095/wilber-hanzi-and-gebser-raised-me.jpg?camera_label=person-5-context"
+    ]
+  },
+  "rizz-em-with-the-tism-tee": {
+    "printifyId": "6a96835cee75e02d6f01236a",
+    "title": "Rizz ’em With the ’tism",
+    "images": [
+      "https://images.printify.com/mockup/6a96835cee75e02d6f01236a/78993/98445/rizz-em-with-the-tism.jpg?camera_label=front",
+      "https://images.printify.com/mockup/6a96835cee75e02d6f01236a/78993/100629/rizz-em-with-the-tism.jpg?camera_label=folded",
+      "https://images.printify.com/mockup/6a96835cee75e02d6f01236a/78993/126095/rizz-em-with-the-tism.jpg?camera_label=person-5-context"
+    ]
+  },
+  "trauma-informed-ketamine-shaman-tee": {
+    "printifyId": "6a968360ee75e02d6f01236d",
+    "title": "Trauma-Informed Ketamine Shaman",
+    "images": [
+      "https://images.printify.com/mockup/6a968360ee75e02d6f01236d/73204/98445/trauma-informed-ketamine-shaman.jpg?camera_label=front",
+      "https://images.printify.com/mockup/6a968360ee75e02d6f01236d/73204/100629/trauma-informed-ketamine-shaman.jpg?camera_label=folded",
+      "https://images.printify.com/mockup/6a968360ee75e02d6f01236d/73204/126095/trauma-informed-ketamine-shaman.jpg?camera_label=person-5-context"
+    ]
+  },
+  "im-tier-2-tee": {
+    "printifyId": "6a96836390802d480702ab8c",
+    "title": "I’m Tier 2",
+    "images": [
+      "https://images.printify.com/mockup/6a96836390802d480702ab8c/73204/98445/im-tier-2.jpg?camera_label=front",
+      "https://images.printify.com/mockup/6a96836390802d480702ab8c/73204/100629/im-tier-2.jpg?camera_label=folded",
+      "https://images.printify.com/mockup/6a96836390802d480702ab8c/73204/126095/im-tier-2.jpg?camera_label=person-5-context"
+    ]
+  },
+  "escaped-samsara-tee": {
+    "printifyId": "6a9683673e225a2d300aa754",
+    "title": "I Already Escaped Samsara but I Had to Come Back to Save Ur Ass",
+    "images": [
+      "https://images.printify.com/mockup/6a9683673e225a2d300aa754/78993/98445/i-already-escaped-samsara-but-i-had-to-come-back-to-save-ur-ass.jpg?camera_label=front",
+      "https://images.printify.com/mockup/6a9683673e225a2d300aa754/78993/100629/i-already-escaped-samsara-but-i-had-to-come-back-to-save-ur-ass.jpg?camera_label=folded",
+      "https://images.printify.com/mockup/6a9683673e225a2d300aa754/78993/126095/i-already-escaped-samsara-but-i-had-to-come-back-to-save-ur-ass.jpg?camera_label=person-5-context"
+    ]
+  },
+  "samsara-is-never-tee": {
+    "printifyId": "6a96836bee75e02d6f012372",
+    "title": "Samsara Is Never Having to Say You’re Sorry",
+    "images": [
+      "https://images.printify.com/mockup/6a96836bee75e02d6f012372/73204/98445/samsara-is-never-having-to-say-youre-sorry.jpg?camera_label=front",
+      "https://images.printify.com/mockup/6a96836bee75e02d6f012372/73204/100629/samsara-is-never-having-to-say-youre-sorry.jpg?camera_label=folded",
+      "https://images.printify.com/mockup/6a96836bee75e02d6f012372/73204/126095/samsara-is-never-having-to-say-youre-sorry.jpg?camera_label=person-5-context"
+    ]
+  },
+  "your-memeplex-tee": {
+    "printifyId": "6a96836f3f6450d39204d6f6",
+    "title": "Your Memeplex",
+    "images": [
+      "https://images.printify.com/mockup/6a96836f3f6450d39204d6f6/78993/98445/your-memeplex.jpg?camera_label=front",
+      "https://images.printify.com/mockup/6a96836f3f6450d39204d6f6/78993/100629/your-memeplex.jpg?camera_label=folded",
+      "https://images.printify.com/mockup/6a96836f3f6450d39204d6f6/78993/126095/your-memeplex.jpg?camera_label=person-5-context"
+    ]
+  },
+  "join-cults-tee": {
+    "printifyId": "6a96837377419b3da40adead",
+    "title": "Join Cults!",
+    "images": [
+      "https://images.printify.com/mockup/6a96837377419b3da40adead/73204/98445/join-cults.jpg?camera_label=front",
+      "https://images.printify.com/mockup/6a96837377419b3da40adead/73204/100629/join-cults.jpg?camera_label=folded",
+      "https://images.printify.com/mockup/6a96837377419b3da40adead/73204/126095/join-cults.jpg?camera_label=person-5-context"
+    ]
+  },
+  "my-other-shaman-tee": {
+    "printifyId": "6a96837777419b3da40adeb1",
+    "title": "My Other Shaman Is a Mamo",
+    "images": [
+      "https://images.printify.com/mockup/6a96837777419b3da40adeb1/78993/98445/my-other-shaman-is-a-mamo.jpg?camera_label=front",
+      "https://images.printify.com/mockup/6a96837777419b3da40adeb1/78993/100629/my-other-shaman-is-a-mamo.jpg?camera_label=folded",
+      "https://images.printify.com/mockup/6a96837777419b3da40adeb1/78993/126095/my-other-shaman-is-a-mamo.jpg?camera_label=person-5-context"
+    ]
+  },
+  "transcended-and-included-longsleeve": {
+    "printifyId": "6a96837bcbe1b8021a02fb17",
+    "title": "I’ve Already Transcended and Included Your Worldview",
+    "images": [
+      "https://images.printify.com/mockup/6a96837bcbe1b8021a02fb17/98829/108630/ive-already-transcended-and-included-your-worldview.jpg?camera_label=front",
+      "https://images.printify.com/mockup/6a96837bcbe1b8021a02fb17/98829/108632/ive-already-transcended-and-included-your-worldview.jpg?camera_label=person-1-front",
+      "https://images.printify.com/mockup/6a96837bcbe1b8021a02fb17/98829/108633/ive-already-transcended-and-included-your-worldview.jpg?camera_label=person-1-back"
+    ]
+  },
+  "untriggerable-longsleeve": {
+    "printifyId": "6a96837eee75e02d6f012386",
+    "title": "Untriggerable",
+    "images": [
+      "https://images.printify.com/mockup/6a96837eee75e02d6f012386/73222/108630/untriggerable.jpg?camera_label=front",
+      "https://images.printify.com/mockup/6a96837eee75e02d6f012386/73222/108632/untriggerable.jpg?camera_label=person-1-front",
+      "https://images.printify.com/mockup/6a96837eee75e02d6f012386/73222/108633/untriggerable.jpg?camera_label=person-1-back"
+    ]
+  },
+  "i-manifested-this-longsleeve": {
+    "printifyId": "6a968380cbe1b8021a02fb22",
+    "title": "I Manifested This",
+    "images": [
+      "https://images.printify.com/mockup/6a968380cbe1b8021a02fb22/98829/108630/i-manifested-this.jpg?camera_label=front",
+      "https://images.printify.com/mockup/6a968380cbe1b8021a02fb22/98829/108632/i-manifested-this.jpg?camera_label=person-1-front",
+      "https://images.printify.com/mockup/6a968380cbe1b8021a02fb22/98829/108633/i-manifested-this.jpg?camera_label=person-1-back"
+    ]
+  },
+  "vibemancer-hoodie": {
+    "printifyId": "6a968382cbe1b8021a02fb24",
+    "title": "Vibemancer",
+    "images": [
+      "https://images.printify.com/mockup/6a968382cbe1b8021a02fb24/109644/104856/vibemancer.jpg?camera_label=front",
+      "https://images.printify.com/mockup/6a968382cbe1b8021a02fb24/109644/104857/vibemancer.jpg?camera_label=back",
+      "https://images.printify.com/mockup/6a968382cbe1b8021a02fb24/109644/104932/vibemancer.jpg?camera_label=person-1-front"
+    ]
+  },
+  "anthroposophical-af-hoodie": {
+    "printifyId": "6a968384ee75e02d6f012392",
+    "title": "Anthroposophical AF",
+    "images": [
+      "https://images.printify.com/mockup/6a968384ee75e02d6f012392/109649/104856/anthroposophical-af.jpg?camera_label=front",
+      "https://images.printify.com/mockup/6a968384ee75e02d6f012392/109649/104932/anthroposophical-af.jpg?camera_label=person-1-front",
+      "https://images.printify.com/mockup/6a968384ee75e02d6f012392/109649/104933/anthroposophical-af.jpg?camera_label=person-1-back"
+    ]
+  },
+  "ethical-non-monogamy-hoodie": {
+    "printifyId": "6a968386cbe1b8021a02fb2a",
+    "title": "Ethical Non-Monogamy",
+    "images": [
+      "https://images.printify.com/mockup/6a968386cbe1b8021a02fb2a/109644/104856/ethical-non-monogamy.jpg?camera_label=front",
+      "https://images.printify.com/mockup/6a968386cbe1b8021a02fb2a/109644/104932/ethical-non-monogamy.jpg?camera_label=person-1-front",
+      "https://images.printify.com/mockup/6a968386cbe1b8021a02fb2a/109644/104933/ethical-non-monogamy.jpg?camera_label=person-1-back"
+    ]
+  },
+  "spiritual-narcissist-hoodie": {
+    "printifyId": "6a968387ee75e02d6f012397",
+    "title": "Spiritual Narcissist",
+    "images": [
+      "https://images.printify.com/mockup/6a968387ee75e02d6f012397/109649/104856/spiritual-narcissist.jpg?camera_label=front",
+      "https://images.printify.com/mockup/6a968387ee75e02d6f012397/109649/104932/spiritual-narcissist.jpg?camera_label=person-1-front",
+      "https://images.printify.com/mockup/6a968387ee75e02d6f012397/109649/104933/spiritual-narcissist.jpg?camera_label=person-1-back"
+    ]
+  },
+  "transcontextual-crewneck": {
+    "printifyId": "6a9683893f6450d39204d723",
+    "title": "Transcontextual",
+    "images": [
+      "https://images.printify.com/mockup/6a9683893f6450d39204d723/104055/101381/transcontextual.jpg?camera_label=front",
+      "https://images.printify.com/mockup/6a9683893f6450d39204d723/104055/101468/transcontextual.jpg?camera_label=person-1-front",
+      "https://images.printify.com/mockup/6a9683893f6450d39204d723/104055/101469/transcontextual.jpg?camera_label=person-1-back"
+    ]
+  },
+  "spiritual-influencer-crewneck": {
+    "printifyId": "6a96838b77419b3da40adec4",
+    "title": "Spiritual Influencer",
+    "images": [
+      "https://images.printify.com/mockup/6a96838b77419b3da40adec4/104097/101381/spiritual-influencer.jpg?camera_label=front",
+      "https://images.printify.com/mockup/6a96838b77419b3da40adec4/104097/101468/spiritual-influencer.jpg?camera_label=person-1-front",
+      "https://images.printify.com/mockup/6a96838b77419b3da40adec4/104097/101469/spiritual-influencer.jpg?camera_label=person-1-back"
+    ]
+  },
+  "securely-non-attached-sweatpants": {
+    "printifyId": "6a96838dcbe1b8021a02fb2e",
+    "title": "Securely Non-Attached",
+    "images": [
+      "https://images.printify.com/mockup/6a96838dcbe1b8021a02fb2e/103934/126668/securely-non-attached.jpg?camera_label=front",
+      "https://images.printify.com/mockup/6a96838dcbe1b8021a02fb2e/103934/126669/securely-non-attached.jpg?camera_label=back"
+    ]
+  },
+  "spiritual-influencer-sweatpants": {
+    "printifyId": "6a96838f77419b3da40adec9",
+    "title": "Spiritual Influencer",
+    "images": [
+      "https://images.printify.com/mockup/6a96838f77419b3da40adec9/253682/126668/spiritual-influencer.jpg?camera_label=front",
+      "https://images.printify.com/mockup/6a96838f77419b3da40adec9/253682/126669/spiritual-influencer.jpg?camera_label=back"
+    ]
+  },
+  "lore-rizz-cap": {
+    "printifyId": "6a9683913e225a2d300aa775",
+    "title": "Lore Rizz",
+    "images": [
+      "https://images.printify.com/mockup/6a9683913e225a2d300aa775/105380/102307/lore-rizz.jpg?camera_label=front",
+      "https://images.printify.com/mockup/6a9683913e225a2d300aa775/105380/102724/lore-rizz.jpg?camera_label=back",
+      "https://images.printify.com/mockup/6a9683913e225a2d300aa775/105380/112104/lore-rizz.jpg?camera_label=left"
+    ]
+  },
+  "i-manifested-this-cap": {
+    "printifyId": "6a9683923e225a2d300aa777",
+    "title": "I Manifested This",
+    "images": [
+      "https://images.printify.com/mockup/6a9683923e225a2d300aa777/105372/102307/i-manifested-this.jpg?camera_label=front",
+      "https://images.printify.com/mockup/6a9683923e225a2d300aa777/105372/102724/i-manifested-this.jpg?camera_label=back",
+      "https://images.printify.com/mockup/6a9683923e225a2d300aa777/105372/112104/i-manifested-this.jpg?camera_label=left"
+    ]
+  },
+  "untriggerable-bucket": {
+    "printifyId": "6a96839477419b3da40adecd",
+    "title": "Untriggerable",
+    "images": [
+      "https://images.printify.com/mockup/6a96839477419b3da40adecd/119317/109645/untriggerable.jpg?camera_label=front"
+    ]
+  },
+  "butt-molly-bucket": {
+    "printifyId": "6a96839577419b3da40aded0",
+    "title": "Butt Molly",
+    "images": [
+      "https://images.printify.com/mockup/6a96839577419b3da40aded0/119315/109645/butt-molly.jpg?camera_label=front"
+    ]
+  },
+  "rizz-em-with-the-tism-cap": {
+    "printifyId": "6a968396cbe1b8021a02fb3a",
+    "title": "Rizz ’em With the ’tism",
+    "images": [
+      "https://images.printify.com/mockup/6a968396cbe1b8021a02fb3a/105372/102307/rizz-em-with-the-tism.jpg?camera_label=front",
+      "https://images.printify.com/mockup/6a968396cbe1b8021a02fb3a/105372/102724/rizz-em-with-the-tism.jpg?camera_label=back",
+      "https://images.printify.com/mockup/6a968396cbe1b8021a02fb3a/105372/112104/rizz-em-with-the-tism.jpg?camera_label=left"
+    ]
+  },
+  "join-cults-bucket": {
+    "printifyId": "6a96839877419b3da40aded3",
+    "title": "Join Cults!",
+    "images": [
+      "https://images.printify.com/mockup/6a96839877419b3da40aded3/119317/109645/join-cults.jpg?camera_label=front"
+    ]
+  },
+  "indentured-space-holder-tote": {
+    "printifyId": "6a96839977419b3da40aded5",
+    "title": "Indentured Space Holder",
+    "images": [
+      "https://images.printify.com/mockup/6a96839977419b3da40aded5/101409/93895/indentured-space-holder.jpg?camera_label=front",
+      "https://images.printify.com/mockup/6a96839977419b3da40aded5/101409/94286/indentured-space-holder.jpg?camera_label=person-front",
+      "https://images.printify.com/mockup/6a96839977419b3da40aded5/101409/94287/indentured-space-holder.jpg?camera_label=person-back"
+    ]
+  },
+  "got-lore-tote": {
+    "printifyId": "6a96839a77419b3da40aded6",
+    "title": "Got Lore?",
+    "images": [
+      "https://images.printify.com/mockup/6a96839a77419b3da40aded6/103598/93895/got-lore.jpg?camera_label=front",
+      "https://images.printify.com/mockup/6a96839a77419b3da40aded6/103598/94286/got-lore.jpg?camera_label=person-front",
+      "https://images.printify.com/mockup/6a96839a77419b3da40aded6/103598/94287/got-lore.jpg?camera_label=person-back"
+    ]
+  },
+  "autism-blanket": {
+    "printifyId": "6a96839b77419b3da40aded8",
+    "title": "Autism",
+    "images": [
+      "https://images.printify.com/mockup/6a96839b77419b3da40aded8/41659/3384/autism.jpg?camera_label=front",
+      "https://images.printify.com/mockup/6a96839b77419b3da40aded8/41659/3386/autism.jpg?camera_label=folded",
+      "https://images.printify.com/mockup/6a96839b77419b3da40aded8/41659/71529/autism.jpg?camera_label=context-1"
+    ]
+  }
+}

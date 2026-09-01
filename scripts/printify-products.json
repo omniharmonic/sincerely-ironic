@@ -1,0 +1,350 @@
+{
+  "culture-war-veteran-cap": {
+    "id": "6a967b141545dc678a02339d",
+    "blueprint": 1447,
+    "provider": 99,
+    "style": "wide"
+  },
+  "culture-war-veteran-hoodie": {
+    "id": "6a967b1277419b3da40ad5eb",
+    "blueprint": 1528,
+    "provider": 99,
+    "style": "wide"
+  },
+  "culture-war-veteran-tee": {
+    "id": "6a967b0c3f6450d39204ce4b",
+    "blueprint": 706,
+    "provider": 99,
+    "style": "wide"
+  },
+  "transwoke-tee": {
+    "id": "6a9682f03f6450d39204d691",
+    "blueprint": 706,
+    "provider": 99,
+    "style": "wide"
+  },
+  "nondualer-than-you-tee": {
+    "id": "6a9682f390802d480702ab3e",
+    "blueprint": 706,
+    "provider": 99,
+    "style": "wide"
+  },
+  "two-wolves-tee": {
+    "id": "6a9682f9cbe1b8021a02fac8",
+    "blueprint": 706,
+    "provider": 99,
+    "style": "wide"
+  },
+  "spiritually-bypass-tee": {
+    "id": "6a9682fd77419b3da40ade6a",
+    "blueprint": 706,
+    "provider": 99,
+    "style": "wide"
+  },
+  "got-lore-tee": {
+    "id": "6a968302ee75e02d6f01231c",
+    "blueprint": 706,
+    "provider": 99,
+    "style": "wide"
+  },
+  "have-you-tried-suffering-tee": {
+    "id": "6a9683053f6450d39204d6ae",
+    "blueprint": 706,
+    "provider": 99,
+    "style": "wide"
+  },
+  "immanence-supremacist-tee": {
+    "id": "6a968309ee75e02d6f012324",
+    "blueprint": 706,
+    "provider": 99,
+    "style": "wide"
+  },
+  "quietly-disrespectful-tee": {
+    "id": "6a96830d3f6450d39204d6b2",
+    "blueprint": 706,
+    "provider": 99,
+    "style": "gothic"
+  },
+  "nonattachment-tee": {
+    "id": "6a96831090802d480702ab55",
+    "blueprint": 706,
+    "provider": 99,
+    "style": "wide"
+  },
+  "bdsm-tee": {
+    "id": "6a9683143f6450d39204d6b8",
+    "blueprint": 706,
+    "provider": 99,
+    "style": "wide"
+  },
+  "living-prophecy-tee": {
+    "id": "6a968318ee75e02d6f012332",
+    "blueprint": 706,
+    "provider": 99,
+    "style": "wide"
+  },
+  "embrace-paradox-tee": {
+    "id": "6a96831cee75e02d6f012334",
+    "blueprint": 706,
+    "provider": 99,
+    "style": "wide"
+  },
+  "net-zero-trauma-tee": {
+    "id": "6a968320cbe1b8021a02fade",
+    "blueprint": 706,
+    "provider": 99,
+    "style": "wide"
+  },
+  "bodhisattvas-finish-last-tee": {
+    "id": "6a9683233e225a2d300aa729",
+    "blueprint": 706,
+    "provider": 99,
+    "style": "wide"
+  },
+  "little-bit-enlightened-tee": {
+    "id": "6a9683273e225a2d300aa72e",
+    "blueprint": 706,
+    "provider": 99,
+    "style": "wide"
+  },
+  "ethical-non-monogamy-tee": {
+    "id": "6a96832b3e225a2d300aa730",
+    "blueprint": 706,
+    "provider": 99,
+    "style": "gothic"
+  },
+  "butt-molly-tee": {
+    "id": "6a96832f3f6450d39204d6d2",
+    "blueprint": 706,
+    "provider": 99,
+    "style": "gothic"
+  },
+  "spiritual-narcissist-tee": {
+    "id": "6a96833490802d480702ab7a",
+    "blueprint": 706,
+    "provider": 99,
+    "style": "gothic"
+  },
+  "untriggerable-tee": {
+    "id": "6a96833877419b3da40ade91",
+    "blueprint": 706,
+    "provider": 99,
+    "style": "gothic"
+  },
+  "securely-non-attached-tee": {
+    "id": "6a96833c3f6450d39204d6de",
+    "blueprint": 706,
+    "provider": 99,
+    "style": "gothic"
+  },
+  "spiritual-influencer-tee": {
+    "id": "6a96833f77419b3da40ade97",
+    "blueprint": 706,
+    "provider": 99,
+    "style": "gothic"
+  },
+  "i-manifested-this-tee": {
+    "id": "6a9683433e225a2d300aa73d",
+    "blueprint": 706,
+    "provider": 99,
+    "style": "gothic"
+  },
+  "made-in-china-tee": {
+    "id": "6a9683473f6450d39204d6e8",
+    "blueprint": 706,
+    "provider": 99,
+    "style": "gothic"
+  },
+  "binging-samadhi-tee": {
+    "id": "6a96834b3e225a2d300aa745",
+    "blueprint": 706,
+    "provider": 99,
+    "style": "gothic"
+  },
+  "autism-tee": {
+    "id": "6a968350ee75e02d6f01235f",
+    "blueprint": 706,
+    "provider": 99,
+    "style": "wide"
+  },
+  "having-the-experience-tee": {
+    "id": "6a968353cbe1b8021a02fafd",
+    "blueprint": 706,
+    "provider": 99,
+    "style": "wide"
+  },
+  "wilber-hanzi-gebser-tee": {
+    "id": "6a968358ee75e02d6f012368",
+    "blueprint": 706,
+    "provider": 99,
+    "style": "wide"
+  },
+  "rizz-em-with-the-tism-tee": {
+    "id": "6a96835cee75e02d6f01236a",
+    "blueprint": 706,
+    "provider": 99,
+    "style": "wide"
+  },
+  "trauma-informed-ketamine-shaman-tee": {
+    "id": "6a968360ee75e02d6f01236d",
+    "blueprint": 706,
+    "provider": 99,
+    "style": "wide"
+  },
+  "im-tier-2-tee": {
+    "id": "6a96836390802d480702ab8c",
+    "blueprint": 706,
+    "provider": 99,
+    "style": "wide"
+  },
+  "escaped-samsara-tee": {
+    "id": "6a9683673e225a2d300aa754",
+    "blueprint": 706,
+    "provider": 99,
+    "style": "wide"
+  },
+  "samsara-is-never-tee": {
+    "id": "6a96836bee75e02d6f012372",
+    "blueprint": 706,
+    "provider": 99,
+    "style": "wide"
+  },
+  "your-memeplex-tee": {
+    "id": "6a96836f3f6450d39204d6f6",
+    "blueprint": 706,
+    "provider": 99,
+    "style": "gothic"
+  },
+  "join-cults-tee": {
+    "id": "6a96837377419b3da40adead",
+    "blueprint": 706,
+    "provider": 99,
+    "style": "gothic"
+  },
+  "my-other-shaman-tee": {
+    "id": "6a96837777419b3da40adeb1",
+    "blueprint": 706,
+    "provider": 99,
+    "style": "wide"
+  },
+  "transcended-and-included-longsleeve": {
+    "id": "6a96837bcbe1b8021a02fb17",
+    "blueprint": 710,
+    "provider": 99,
+    "style": "wide"
+  },
+  "untriggerable-longsleeve": {
+    "id": "6a96837eee75e02d6f012386",
+    "blueprint": 710,
+    "provider": 99,
+    "style": "gothic"
+  },
+  "i-manifested-this-longsleeve": {
+    "id": "6a968380cbe1b8021a02fb22",
+    "blueprint": 710,
+    "provider": 99,
+    "style": "gothic"
+  },
+  "vibemancer-hoodie": {
+    "id": "6a968382cbe1b8021a02fb24",
+    "blueprint": 1528,
+    "provider": 99,
+    "style": "wide"
+  },
+  "anthroposophical-af-hoodie": {
+    "id": "6a968384ee75e02d6f012392",
+    "blueprint": 1528,
+    "provider": 99,
+    "style": "wide"
+  },
+  "ethical-non-monogamy-hoodie": {
+    "id": "6a968386cbe1b8021a02fb2a",
+    "blueprint": 1528,
+    "provider": 99,
+    "style": "gothic"
+  },
+  "spiritual-narcissist-hoodie": {
+    "id": "6a968387ee75e02d6f012397",
+    "blueprint": 1528,
+    "provider": 99,
+    "style": "gothic"
+  },
+  "transcontextual-crewneck": {
+    "id": "6a9683893f6450d39204d723",
+    "blueprint": 1405,
+    "provider": 39,
+    "style": "wide"
+  },
+  "spiritual-influencer-crewneck": {
+    "id": "6a96838b77419b3da40adec4",
+    "blueprint": 1405,
+    "provider": 39,
+    "style": "gothic"
+  },
+  "securely-non-attached-sweatpants": {
+    "id": "6a96838dcbe1b8021a02fb2e",
+    "blueprint": 1398,
+    "provider": 39,
+    "style": "gothic"
+  },
+  "spiritual-influencer-sweatpants": {
+    "id": "6a96838f77419b3da40adec9",
+    "blueprint": 1398,
+    "provider": 39,
+    "style": "gothic"
+  },
+  "lore-rizz-cap": {
+    "id": "6a9683913e225a2d300aa775",
+    "blueprint": 1447,
+    "provider": 99,
+    "style": "wide"
+  },
+  "i-manifested-this-cap": {
+    "id": "6a9683923e225a2d300aa777",
+    "blueprint": 1447,
+    "provider": 99,
+    "style": "gothic"
+  },
+  "untriggerable-bucket": {
+    "id": "6a96839477419b3da40adecd",
+    "blueprint": 1910,
+    "provider": 99,
+    "style": "gothic"
+  },
+  "butt-molly-bucket": {
+    "id": "6a96839577419b3da40aded0",
+    "blueprint": 1910,
+    "provider": 99,
+    "style": "gothic"
+  },
+  "rizz-em-with-the-tism-cap": {
+    "id": "6a968396cbe1b8021a02fb3a",
+    "blueprint": 1447,
+    "provider": 99,
+    "style": "wide"
+  },
+  "join-cults-bucket": {
+    "id": "6a96839877419b3da40aded3",
+    "blueprint": 1910,
+    "provider": 99,
+    "style": "gothic"
+  },
+  "indentured-space-holder-tote": {
+    "id": "6a96839977419b3da40aded5",
+    "blueprint": 1313,
+    "provider": 99,
+    "style": "wide"
+  },
+  "got-lore-tote": {
+    "id": "6a96839a77419b3da40aded6",
+    "blueprint": 1313,
+    "provider": 99,
+    "style": "wide"
+  },
+  "autism-blanket": {
+    "id": "6a96839b77419b3da40aded8",
+    "blueprint": 238,
+    "provider": 99,
+    "style": "wide"
+  }
+}
