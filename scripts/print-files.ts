@@ -29,10 +29,22 @@ const run = promisify(execFile);
 const DPI = 300;
 const inches = (n: number) => Math.round(n * DPI);
 
-/** Print areas in inches, by placement. Adjust per vendor template. */
+/**
+ * Print areas in inches, by placement. Sized for Printify's DTG areas.
+ *
+ * These are defaults, not gospel: the authoritative numbers are per blueprint
+ * and per print provider, from
+ *   GET /v1/catalog/blueprints/{id}/print_providers/{pid}/variants.json
+ * which returns the exact printable pixel size for each placeholder. Pull that
+ * once the blanks are chosen and correct anything here that disagrees —
+ * Printify runs a DPI check at product creation and rejects a bad file with
+ * `400 code 8203`.
+ */
 const AREAS: Record<Print['place'], { w: number; h: number; label: string }> = {
-  front: { w: 12, h: 16, label: 'Front' },
-  back: { w: 12, h: 16, label: 'Back' },
+  // 15x18 is the current standard DTG area; 12x16 is the legacy one and
+  // throws away a third of the canvas.
+  front: { w: 15, h: 18, label: 'Front' },
+  back: { w: 15, h: 18, label: 'Back' },
   chest: { w: 4, h: 4, label: 'Left chest' },
   left: { w: 4, h: 4, label: 'Left' },
   right: { w: 4, h: 4, label: 'Right' },
@@ -41,7 +53,10 @@ const AREAS: Record<Print['place'], { w: number; h: number; label: string }> = {
 
 /** Smaller areas for the garments that are not a shirt. */
 const AREA_OVERRIDES: Partial<Record<CatalogItem['garment'], Partial<Record<Print['place'], { w: number; h: number }>>>> = {
-  cap: { front: { w: 5, h: 2.25 } },
+  // Embroidery: 4x2.5in is the maximum on a standard 6-panel front, and the
+  // design may use at most six thread colours. Flat type is well inside that.
+  cap: { front: { w: 4, h: 2.5 } },
+  // Unverified — tote areas vary by blueprint. Check before ordering.
   tote: { front: { w: 12, h: 14 }, back: { w: 12, h: 14 } },
   sock: { left: { w: 3, h: 1.5 }, right: { w: 3, h: 1.5 } },
 };

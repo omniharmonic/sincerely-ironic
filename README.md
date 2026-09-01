@@ -60,8 +60,11 @@ Node 22+, pnpm 10.
 
 `pnpm print-files [handle-filter]` turns every print in the catalogue into the
 artwork a print-on-demand vendor wants: transparent PNG, 300 DPI, sized to the
-placement's print area (12×16in front and back, 5×2.25in cap, 3×1.5in sock,
-and so on — see `AREAS` in `scripts/print-files.ts`). Ink colour follows the
+placement's print area (15×18in front and back, 4×4in left chest, 4×2.5in cap,
+and so on — see `AREAS` in `scripts/print-files.ts`, sized for Printify's DTG
+areas). The authoritative numbers are per blueprint and per print provider,
+from `GET /v1/catalog/blueprints/{id}/print_providers/{pid}/variants.json`;
+pull those once the blanks are chosen and correct `AREAS` where it disagrees. Ink colour follows the
 garment: bone garments print ink, ink garments print bone. A `manifest.json`
 lists every file with its placement, size and colour.
 
