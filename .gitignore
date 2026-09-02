@@ -45,6 +45,9 @@ next-env.d.ts
 # screenshots from verification runs
 .playwright-mcp/
 *.png
+# Supplied print art is source, not output. A knocked-out background needs
+# alpha and so has to be a PNG; everything else here stays ignored.
+!public/art/*.png
 
 # generated print-ready artwork
 print-files/

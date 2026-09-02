@@ -40,8 +40,15 @@ async function main() {
   const manifest = JSON.parse(await readFile(path.join(OUT, 'manifest.json'), 'utf8')) as {
     file: string;
     art: string | null;
+    text: string;
   }[];
-  const isArt = new Set(manifest.filter((m) => m.art).map((m) => m.file));
+  // Art alone is exempt outright. Art with a slogan under it is not: the
+  // picture owns the top and sides, but the bottom edge is the type's, and the
+  // bottom edge is where a descender or a comma shears off. Exempting the
+  // whole file because part of it is a photograph would have quietly retired
+  // the check that has already caught both.
+  const artOnly = new Set(manifest.filter((m) => m.art && !m.text).map((m) => m.file));
+  const artOverType = new Set(manifest.filter((m) => m.art && m.text).map((m) => m.file));
 
   const chrome = await Chrome.launch();
   const bad: string[] = [];
@@ -75,15 +82,16 @@ async function main() {
         console.log(`✗ ${file}  EMPTY`);
         continue;
       }
+      const overType = artOverType.has(file);
       const touches: string[] = [];
-      if (bounds.x0 <= EDGE) touches.push('left');
-      if (bounds.y0 <= EDGE) touches.push('top');
-      if (bounds.x1 >= bounds.w - 1 - EDGE) touches.push('right');
+      if (!overType && bounds.x0 <= EDGE) touches.push('left');
+      if (!overType && bounds.y0 <= EDGE) touches.push('top');
+      if (!overType && bounds.x1 >= bounds.w - 1 - EDGE) touches.push('right');
       if (bounds.y1 >= bounds.h - 1 - EDGE) touches.push('bottom');
 
       const slack = `t${bounds.y0} b${bounds.h - 1 - bounds.y1} l${bounds.x0} r${bounds.w - 1 - bounds.x1}`;
-      if (isArt.has(file)) {
-        console.log(`· ${file.padEnd(52)} ${slack}   art, edges not checked`);
+      if (artOnly.has(file)) {
+        console.log(`· ${file.padEnd(52)} ${slack}   art only, edges not checked`);
       } else if (touches.length) {
         bad.push(`${file} — ink reaches the ${touches.join(' and ')} edge`);
         console.log(`✗ ${file.padEnd(52)} ${slack}   CLIPPED: ${touches.join(', ')}`);

@@ -74,8 +74,13 @@ filtered run leaves a manifest holding only those rows. Run it unfiltered
 before any unfiltered downstream command.
 
 `check-prints` fails on ink touching an edge — it has already caught a lost
-comma and a lost blackletter descender. Supplied art is exempt and prints as
-`art, edges not checked`.
+comma and a lost blackletter descender. Art **alone** is exempt and prints as
+`art only, edges not checked`; art with a slogan under it is still checked on
+the bottom edge, which is the type's.
+
+`placement-proof` composites onto a blank read from
+`scripts/printify-mockups.json`. If that file is missing or stale the step
+fails with no obvious cause — `pnpm printify-mockups` is what writes it.
 
 ### 5–6. Printify
 

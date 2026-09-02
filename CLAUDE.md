@@ -59,8 +59,9 @@ and art-above-a-slogan need no new placement code. **Use `.jpg`** —
 `.gitignore` blanket-ignores `*.png`, so a PNG asset silently never commits.
 Size the box from the file's resolution, not the panel:
 `DPI = source px / (box.w * 15in)`, and a 640px file printed 10in wide is
-64 DPI. `check-prints` exempts art from the tight-to-ink rule, because a
-full-bleed rectangle is meant to reach its edges.
+64 DPI. `check-prints` exempts art *alone* from the tight-to-ink rule, because a
+full-bleed rectangle is meant to reach its edges — but art with a slogan under
+it is still checked on the bottom edge, which belongs to the type.
 
 **Print files are cut tight to the ink**, so a wrong font metric shears a
 glyph instead of hiding in slack. `pnpm check-prints` measures the real alpha
@@ -81,8 +82,9 @@ be a variant; a second one has to be a second product. Do not put the chips
 back without building the products behind them.
 
 **The catalogue is upstream of Shopify for art, downstream for copy.**
-`src/lib/catalog.ts` keys the drawn garments by handle and is the fallback
-when the Storefront token is missing. A Shopify product with no catalogue
+`src/lib/catalog.ts` keys every product by handle and is the fallback when the
+Storefront token is missing. (It no longer draws garments for the site:
+`GarmentArt.tsx` is dead code and the product page shows vendor photographs.) A Shopify product with no catalogue
 entry is filtered out on purpose. Handles must match exactly.
 
 **Printify creates the Shopify listing. Never seed one by hand.** A listing
