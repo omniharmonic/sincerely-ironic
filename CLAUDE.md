@@ -51,6 +51,17 @@ were deliberately left out of the placement redesign**; their boxes reproduce
 the old fill-the-panel-and-centre behaviour, and only the Culture War Veteran
 cap is re-boxed.
 
+**Supplied art is a picture, not the mark.** A `Print`'s `asset` naming a file
+with an extension is raster art in `public/art`; without one it is a brand SVG
+in `public/brand` and gets `{tone}` recoloured. Art is drawn as given and never
+toned. It rides the emblem slot `resolvePrint` already provides, so art alone
+and art-above-a-slogan need no new placement code. **Use `.jpg`** —
+`.gitignore` blanket-ignores `*.png`, so a PNG asset silently never commits.
+Size the box from the file's resolution, not the panel:
+`DPI = source px / (box.w * 15in)`, and a 640px file printed 10in wide is
+64 DPI. `check-prints` exempts art from the tight-to-ink rule, because a
+full-bleed rectangle is meant to reach its edges.
+
 **Print files are cut tight to the ink**, so a wrong font metric shears a
 glyph instead of hiding in slack. `pnpm check-prints` measures the real alpha
 bounds of every PNG and fails on anything touching an edge. Run it after any
@@ -107,6 +118,24 @@ covers *every* variant on the product (437 on a Comfort Colors tee, of which
 ten are enabled). `coverEveryVariant()` spreads the artwork across the full
 list — black garments take the light file, everything else the dark one.
 
+**`PRINTIFY_SHOP_ID` is not in `.env.local`.** Unset, every `printify-*` script
+silently targets the dead dev shop `12124343`. Export `28782180` per shell and
+check the script echoes it back.
+
+**Updating and republishing each need two flags.** `printify-products --update`
+alone is a dry run — `--create` is what writes. `printify-publish` skips any
+already-linked handle, so a changed design needs `--go --force` or it reports
+"Nothing to do" and exits 0. A publish *replaces* the listing's media rather
+than appending to it.
+
+**A big screenshot cannot come back over CDP.** A reply carries the whole PNG
+as one WebSocket message, and Node's built-in WebSocket drops the socket past a
+decompressed-message ceiling ("Max decompressed message size exceeded", close
+1006). Flat type compresses under it; a photograph does not. Raster prints
+capture with `Chrome.capture()`, which has Chrome write the file itself — and
+which waits on the *file*, not the process, because Chrome given its own
+`--user-data-dir` screenshots and then stays running.
+
 **The hero is the serpent.** `src/components/SerpentHero.tsx` repeats one face
 from the mark along a lemniscate, mirrored to face its direction of travel,
 filled with six hue-rotated slicks, blended (`--seg-blend`: multiply on paper,
@@ -121,8 +150,17 @@ interaction.)
 
 **Storefront token cannot be minted by an agent.** Shopify's MCP blocks
 `storefrontAccessTokenCreate`. It comes from the Headless channel in admin and
-goes into Vercel env. Until then `isStorefrontConfigured()` is false and the
-register stays closed by design.
+goes into Vercel env. It **is** set now, in `.env.local` and in Vercel, and the
+store takes orders — so an add-to-cart failure is a real bug, not the register
+being closed by design.
+
+## Skills
+
+Operational workflows live in `.claude/skills/`. Read the relevant one before
+touching the store rather than rediscovering the pipeline:
+`shipping-a-design` (new product, end to end), `changing-live-artwork`
+(a design that is already published), `placing-print-artwork` (PrintBox and
+the DPI budget) and `debugging-the-print-harness` (headless Chrome hangs).
 
 ## Voice
 
