@@ -280,7 +280,34 @@ const DESIGNS = {
     title: 'Inside Me There Are Two Wolves',
     // The punchline used to be on the back, where nobody stood long enough to
     // read it. As an aside under the block it lands in one look.
-    prints: [{ place: 'front', text: 'Inside me there are two wolves', aside: { text: 'one of them is gay' } }],
+    //
+    // The art draws the joke the words make, so it takes the emblem slot and
+    // the two lines hang beneath it. `emblem` is 1 rather than the 0.62
+    // default because here the picture is the design and the type is its
+    // caption: both take the same measure, so the whole thing reads as one
+    // object rather than a slogan set wider than the art above it.
+    prints: [
+      {
+        place: 'front',
+        asset: 'two-wolves.jpg',
+        text: 'Inside me there are two wolves',
+        aside: { text: 'one of them is gay' },
+        box: { w: 0.38, h: 0.1, top: 0.09, emblem: 1, gap: 0.045 },
+      },
+    ],
+  },
+  // Art alone, and small: the source is 1600x1390, which is 300 DPI at 5.3in
+  // across and no more. The box is sized to that ceiling rather than to the
+  // panel — printed to the width the panel would allow it would be 100 DPI.
+  chatreal: {
+    slug: 'chat-is-this-real',
+    title: 'Chat, Is This Real?',
+    prints: [{ place: 'front', asset: 'chat-is-this-real.jpg', box: { w: 0.355, h: 0.3, top: 0.13, x: 0.5 } }],
+  },
+  straight: {
+    slug: 'being-straight-is-gay',
+    title: 'Being Straight Is Gay',
+    prints: front('Being straight is gay'),
   },
   bypass: {
     slug: 'spiritually-bypass',
@@ -544,7 +571,12 @@ export const catalog: readonly CatalogItem[] = [
   /* tees — the spine of the line */
   make(D.transwoke, 'tee', 'bone'),
   make(D.nondualer, 'tee', 'ink'),
-  make(D.wolves, 'tee', 'bone'),
+  make(D.wolves, 'tee', 'ink'),
+  // Both of these carry a rectangular picture with its own background, so the
+  // garment is chosen to meet it: the wolves' ground falls to near-black, the
+  // cave's page is cream. On the wrong colour each prints as a visible patch.
+  make(D.chatreal, 'tee', 'bone'),
+  make(D.straight, 'tee', 'ink'),
   make(D.bypass, 'tee', 'ink'),
   make(D.lore, 'tee', 'ink'),
   make(D.suffering, 'tee', 'bone'),
