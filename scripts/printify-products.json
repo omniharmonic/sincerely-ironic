@@ -703,6 +703,18 @@
       "blueprint": 923,
       "provider": 14,
       "style": "slab"
+    },
+    "chat-is-this-real-tee": {
+      "id": "6a9775095100c415920d2a90",
+      "blueprint": 706,
+      "provider": 99,
+      "style": "wide"
+    },
+    "being-straight-is-gay-tee": {
+      "id": "6a97750d5100c415920d2a94",
+      "blueprint": 706,
+      "provider": 99,
+      "style": "wide"
     }
   }
 }

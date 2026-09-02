@@ -4,6 +4,8 @@
  *   pnpm printify-publish            # dry run
  *   pnpm printify-publish --go       # actually publish
  *   pnpm printify-publish --go tee   # only handles containing "tee"
+ *   pnpm printify-publish --go --force two-wolves   # push a changed design
+ *                                     # to a listing that already exists
  *
  * This is the step that makes the shop a shop.
  *
@@ -60,6 +62,7 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 async function main() {
   const args = process.argv.slice(2);
   const go = args.includes('--go');
+  const force = args.includes('--force');
   const filter = args.find((a) => !a.startsWith('--')) ?? '';
 
   if (!existsSync(LEDGER)) throw new Error('no product ledger — run pnpm printify-products --create first');
@@ -73,7 +76,11 @@ async function main() {
 
   const queue = Object.entries(shop)
     .filter(([h]) => (filter ? h.includes(filter) : true))
-    .filter(([h]) => !done[h]);
+    // A linked product is skipped, because publishing is how a listing gets
+    // made and it only needs making once. But artwork changes: when it does,
+    // the listing still holds the old mockups until it is pushed again, and
+    // without --force there was no way to do that short of deleting the link.
+    .filter(([h]) => force || !done[h]);
 
   console.log(
     `shop ${SHOP_ID} · ${Object.keys(shop).length} products · ${Object.keys(done).length} already linked · ${queue.length} to publish`,
