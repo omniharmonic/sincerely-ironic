@@ -33,6 +33,16 @@ async function main() {
   const files = (await readdir(OUT)).filter((f) => f.endsWith('.png') && f.includes(filter));
   if (files.length === 0) throw new Error('no print files to check');
 
+  // A print built from supplied art is a rectangle that is meant to reach its
+  // own edges, so the tight-to-ink rule cannot apply to it — the rule exists
+  // to catch a sheared glyph, and a photograph has none. These are still
+  // measured and still fail on an empty file; only the edge test is dropped.
+  const manifest = JSON.parse(await readFile(path.join(OUT, 'manifest.json'), 'utf8')) as {
+    file: string;
+    art: string | null;
+  }[];
+  const isArt = new Set(manifest.filter((m) => m.art).map((m) => m.file));
+
   const chrome = await Chrome.launch();
   const bad: string[] = [];
   try {
@@ -72,7 +82,9 @@ async function main() {
       if (bounds.y1 >= bounds.h - 1 - EDGE) touches.push('bottom');
 
       const slack = `t${bounds.y0} b${bounds.h - 1 - bounds.y1} l${bounds.x0} r${bounds.w - 1 - bounds.x1}`;
-      if (touches.length) {
+      if (isArt.has(file)) {
+        console.log(`· ${file.padEnd(52)} ${slack}   art, edges not checked`);
+      } else if (touches.length) {
         bad.push(`${file} — ink reaches the ${touches.join(' and ')} edge`);
         console.log(`✗ ${file.padEnd(52)} ${slack}   CLIPPED: ${touches.join(', ')}`);
       } else {

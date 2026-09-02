@@ -53,6 +53,9 @@ export class Chrome {
         '--no-first-run',
         '--no-default-browser-check',
         '--disable-extensions',
+        // Print pages reference supplied art as a sibling file rather than
+        // inlining it; without this Chrome refuses to read the neighbour.
+        '--allow-file-access-from-files',
         '--disable-background-networking',
         '--force-device-scale-factor=1',
         // 0 means "pick a free port and write it to DevToolsActivePort".
@@ -87,6 +90,18 @@ export class Chrome {
       });
     });
     this.ws.addEventListener('message', (ev) => this.onMessage(String(ev.data)));
+    // Without these a dropped socket strands every pending call forever. It
+    // does drop: Node's built-in WebSocket caps the size of a decompressed
+    // message and closes with 1006 past it, which is what a screenshot of a
+    // photograph used to do. Failing loudly is what made that findable.
+    const fail = (why: string) => {
+      for (const [id, waiting] of this.pending) {
+        this.pending.delete(id);
+        waiting.reject(new Error(why));
+      }
+    };
+    this.ws.addEventListener('error', () => fail('DevTools socket errored'));
+    this.ws.addEventListener('close', (ev) => fail(`DevTools socket closed (${ev.code})`));
 
     // One tab, attached flat so every later command can carry a sessionId.
     const { targetId } = (await this.send('Target.createTarget', { url: 'about:blank' })) as {
@@ -144,7 +159,20 @@ export class Chrome {
     const payload: Record<string, unknown> = { id, method, params };
     if (sessionId) payload.sessionId = sessionId;
     return new Promise((resolve, reject) => {
-      this.pending.set(id, { resolve, reject });
+      const timer = setTimeout(() => {
+        if (this.pending.delete(id)) reject(new Error(`DevTools ${method} never answered`));
+      }, 60_000);
+      timer.unref?.();
+      this.pending.set(id, {
+        resolve: (value) => {
+          clearTimeout(timer);
+          resolve(value);
+        },
+        reject: (err) => {
+          clearTimeout(timer);
+          reject(err);
+        },
+      });
       this.ws.send(JSON.stringify(payload));
     });
   }
@@ -209,6 +237,64 @@ export class Chrome {
     )) as { data: string };
 
     return Buffer.from(shot.data, 'base64');
+  }
+
+  /**
+   * Screenshot straight to a file, in a throwaway browser.
+   *
+   * `shoot` is much faster — it reuses one Chrome over CDP — but a CDP reply
+   * carries the whole PNG as a single WebSocket message, and Node's built-in
+   * WebSocket drops the socket once a decompressed message passes its ceiling.
+   * Flat type compresses far under it; a photograph does not, so a print
+   * carrying supplied art is captured here instead, where Chrome writes the
+   * bytes itself and nothing crosses a socket. Virtual time stands in for the
+   * font wait `shoot` does by hand.
+   */
+  static async capture(file: string, width: number, height: number): Promise<Buffer> {
+    const profile = await mkdtemp(path.join(os.tmpdir(), 'si-shot-'));
+    const out = path.join(profile, 'out.png');
+    const bin = process.env.CHROME_PATH ?? DEFAULT_CHROME;
+    let proc: ChildProcess | undefined;
+    try {
+      proc = spawn(
+        bin,
+        [
+          '--headless=new',
+          '--disable-gpu',
+          '--hide-scrollbars',
+          '--no-first-run',
+          '--no-default-browser-check',
+          '--disable-extensions',
+          '--allow-file-access-from-files',
+          '--force-device-scale-factor=1',
+          // Transparent ground, the flag form of what `shoot` sets over CDP.
+          '--default-background-color=00000000',
+          '--virtual-time-budget=8000',
+          `--window-size=${width},${height}`,
+          `--screenshot=${out}`,
+          `--user-data-dir=${profile}`,
+          `file://${file}`,
+        ],
+        { stdio: ['ignore', 'ignore', 'ignore'] },
+      );
+      // Given its own profile Chrome writes the screenshot and then stays up
+      // rather than exiting, so waiting on the process never returns. Wait for
+      // the file instead, and stop the browser once it is whole — a PNG ends
+      // with IEND, which is a cheaper and surer test than a settled size.
+      const done = (buf: Buffer) =>
+        buf.length > 8 && buf.subarray(buf.length - 8, buf.length - 4).toString('latin1') === 'IEND';
+      for (let i = 0; i < 600; i += 1) {
+        if (existsSync(out)) {
+          const buf = await readFile(out);
+          if (done(buf)) return buf;
+        }
+        await sleep(100);
+      }
+      throw new Error(`Chrome wrote no complete screenshot for ${path.basename(file)}`);
+    } finally {
+      proc?.kill('SIGKILL');
+      await rm(profile, { recursive: true, force: true });
+    }
   }
 
   /** Capture whatever is on screen now, without navigating. `shoot` reloads,

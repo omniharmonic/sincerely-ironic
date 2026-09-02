@@ -31,7 +31,7 @@
  */
 
 import { createHash } from 'node:crypto';
-import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { copyFile, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import zlib from 'node:zlib';
 
@@ -96,15 +96,58 @@ const INK = { bone: '#0D0D0D', ink: '#F3F3F0' } as const;
 
 const OUT = path.resolve('print-files');
 const BRAND = path.resolve('public/brand');
+const ART = path.resolve('public/art');
 
 /**
  * A ready-made brand asset, used where the artwork is the mark rather than a
  * slogan. These are vector with their webfonts already embedded, so they can
  * be dropped straight into the render page and scaled to any print size.
  */
-const assetCache = new Map<string, { svg: string; aspect: number }>();
+type Art =
+  | { kind: 'svg'; svg: string; aspect: number }
+  | { kind: 'raster'; file: string; aspect: number };
 
-async function loadAsset(name: string, ink: string) {
+const assetCache = new Map<string, Art>();
+
+/** Anything with a file extension is supplied art in `public/art`. */
+const RASTER = /\.(png|jpe?g)$/i;
+
+/**
+ * Pixel size straight out of the file header — a PNG's IHDR, or a JPEG's
+ * first SOF. The aspect has to be the real one: `resolvePrint` divides the
+ * emblem's width by it to decide how much headroom the block below needs, so
+ * a guess here is a slogan printed over the artwork.
+ */
+function rasterSize(buf: Buffer): { w: number; h: number } {
+  if (buf.readUInt32BE(0) === 0x89504e47) return { w: buf.readUInt32BE(16), h: buf.readUInt32BE(20) };
+  for (let i = 2; i + 9 < buf.length; ) {
+    if (buf[i] !== 0xff) {
+      i += 1;
+      continue;
+    }
+    const marker = buf[i + 1];
+    // SOF0-SOF15, less the three markers that share the range but are not
+    // frame headers (DHT, JPG, DAC).
+    if (marker >= 0xc0 && marker <= 0xcf && marker !== 0xc4 && marker !== 0xc8 && marker !== 0xcc) {
+      return { h: buf.readUInt16BE(i + 5), w: buf.readUInt16BE(i + 7) };
+    }
+    i += 2 + buf.readUInt16BE(i + 2);
+  }
+  throw new Error('no PNG or JPEG header to read a size from');
+}
+
+async function loadAsset(name: string, ink: string): Promise<Art> {
+  // Supplied art carries its own colour, so unlike a brand asset it is not
+  // toned to the garment and does not vary with the ink.
+  if (RASTER.test(name)) {
+    const hit = assetCache.get(name);
+    if (hit) return hit;
+    const { w, h } = rasterSize(await readFile(path.join(ART, name)));
+    const entry: Art = { kind: 'raster', file: path.join(ART, name), aspect: w / h };
+    assetCache.set(name, entry);
+    return entry;
+  }
+
   const tone = ink === INK.bone ? 'black' : 'white';
   const file = `${name.replace('{tone}', tone)}.svg`;
   const hit = assetCache.get(file);
@@ -112,7 +155,7 @@ async function loadAsset(name: string, ink: string) {
   const svg = await readFile(path.join(BRAND, file), 'utf8');
   const vb = /viewBox="0 0 ([\d.]+) ([\d.]+)"/.exec(svg);
   if (!vb) throw new Error(`${file} has no viewBox to size it by`);
-  const entry = { svg, aspect: Number(vb[1]) / Number(vb[2]) };
+  const entry: Art = { kind: 'svg', svg, aspect: Number(vb[1]) / Number(vb[2]) };
   assetCache.set(file, entry);
   return entry;
 }
@@ -154,8 +197,8 @@ function emblemSvg(which: keyof typeof EMBLEMS, x: number, y: number, size: numb
  * the same call the vendor placement is derived from, so the file and the
  * position it is printed at can never disagree.
  */
-function html(placed: Placed, print: Print, ink: string, asset?: string): string {
-  if (asset) {
+function html(placed: Placed, print: Print, ink: string, art?: Art): string {
+  if (art?.kind === 'svg') {
     // Scale the vector to the canvas by rewriting its own width and height;
     // the viewBox does the rest.
     // A brand asset is measured tight to its own ink, so drawn at the full
@@ -165,7 +208,7 @@ function html(placed: Placed, print: Print, ink: string, asset?: string): string
     const inset = 0.985;
     const w = placed.width * inset;
     const h = placed.height * inset;
-    const sized = asset.replace(
+    const sized = art.svg.replace(
       /^(<svg[^>]*?)\swidth="[^"]*"\sheight="[^"]*"/,
       `$1 width="${w.toFixed(2)}" height="${h.toFixed(2)}"`,
     );
@@ -182,9 +225,18 @@ function html(placed: Placed, print: Print, ink: string, asset?: string): string
   const aside = placed.block?.aside?.style;
   const body: string[] = [];
 
-  if (print.emblem && placed.emblem) {
+  if (placed.emblem) {
     const e = placed.emblem;
-    body.push(emblemSvg(print.emblem, e.x, e.y, e.w, ink));
+    if (art?.kind === 'raster') {
+      // Supplied art rides the emblem slot, so `resolvePrint` has already
+      // sized it and left the block its headroom underneath. Drawn exactly as
+      // given: the artwork is not the mark, so it takes no `{tone}` recolour.
+      body.push(
+        `<image x="${e.x.toFixed(2)}" y="${e.y.toFixed(2)}" width="${e.w.toFixed(2)}" height="${e.h.toFixed(2)}" href="${path.basename(art.file)}" preserveAspectRatio="xMidYMid meet"/>`,
+      );
+    } else if (print.emblem) {
+      body.push(emblemSvg(print.emblem, e.x, e.y, e.w, ink));
+    }
   }
 
   const block = placed.block;
@@ -303,16 +355,20 @@ async function main() {
           const { w, h, label } = area(item, print.place);
           const ink = INK[item.colourway];
           const art = print.asset ? await loadAsset(print.asset, ink) : undefined;
+          // A brand lockup is the entire print and leaves no room for a
+          // slogan. Supplied art is a picture the slogan sits under, so it
+          // takes the emblem slot and the block below it still renders.
+          const solo = art?.kind === 'svg';
           // Lay out in the panel's own pixel units, so the numbers coming
           // back are the file's and the vendor fractions are exact.
           const placed = resolvePrint(
             {
               place: print.place,
-              text: art ? undefined : print.text,
+              text: solo ? undefined : print.text,
               style: effective,
               fill: print.fill,
               box: print.box,
-              aside: art ? undefined : print.aside,
+              aside: solo ? undefined : print.aside,
               emblemAspect: art ? art.aspect : print.emblem ? 1 : undefined,
             },
             px(w),
@@ -323,8 +379,16 @@ async function main() {
           const name = `${item.handle}--${styleKey}--${print.place}.png`;
           const page = path.join(tmp, `${name}.html`);
 
-          await writeFile(page, html(placed, print, ink, art?.svg), 'utf8');
-          const shot = await chrome.shoot(page, wPx, hPx);
+          // The page references the art by name, so it has to sit next to it.
+          if (art?.kind === 'raster') await copyFile(art.file, path.join(tmp, path.basename(art.file)));
+          await writeFile(page, html(placed, print, ink, art), 'utf8');
+          // Supplied art makes a PNG too big to come back over CDP; flat
+          // type does not, and the shared browser is far quicker for the
+          // sixty prints that are only type. See `Chrome.capture`.
+          const shot =
+            art?.kind === 'raster'
+              ? await Chrome.capture(page, wPx, hPx)
+              : await chrome.shoot(page, wPx, hPx);
           const png = stampDpi(shot, DPI);
           await writeFile(path.join(OUT, name), png);
 
@@ -334,8 +398,11 @@ async function main() {
             const altArt = print.asset ? await loadAsset(print.asset, altInk) : undefined;
             const altName = name.replace(/\.png$/, '--alt.png');
             const altPage = path.join(tmp, `${altName}.html`);
-            await writeFile(altPage, html(placed, print, altInk, altArt?.svg), 'utf8');
-            const altShot = await chrome.shoot(altPage, wPx, hPx);
+            await writeFile(altPage, html(placed, print, altInk, altArt), 'utf8');
+            const altShot =
+              altArt?.kind === 'raster'
+                ? await Chrome.capture(altPage, wPx, hPx)
+                : await chrome.shoot(altPage, wPx, hPx);
             const altPng = stampDpi(altShot, DPI);
             await writeFile(path.join(OUT, altName), altPng);
             manifest.push({
@@ -349,6 +416,7 @@ async function main() {
               placement: label,
               text: print.text ?? '',
               emblem: print.emblem ?? null,
+              art: print.asset && RASTER.test(print.asset) ? print.asset : null,
               panelInches: `${w} × ${h}`,
               pixels: `${wPx} × ${hPx}`,
               box: placed.box,
@@ -371,6 +439,7 @@ async function main() {
             placement: label,
             text: print.text ?? '',
             emblem: print.emblem ?? null,
+            art: print.asset && RASTER.test(print.asset) ? print.asset : null,
             panelInches: `${w} × ${h}`,
             pixels: `${wPx} × ${hPx}`,
             box: placed.box,
